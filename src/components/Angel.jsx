@@ -1,7 +1,7 @@
 import { useId } from 'react'
 
-const SKIN = '#FCE1CC'
-const SKIN_SHADE = '#F5CDB2'
+const SKIN = '#FDE6D8'
+const SKIN_SHADE = '#EDC4AE'
 const LEAF = '#5DAA48'
 const SIL = '#E4DAD3'
 const SIL_DARK = '#D6CBC3'
@@ -14,10 +14,10 @@ function BackFeature({ hat, c, a, sil }) {
     case 'longEars':
       return (
         <g>
-          <ellipse cx="45" cy="14" rx="10" ry="25" fill={c} transform="rotate(-14 45 14)" />
-          <ellipse cx="45" cy="16" rx="4.5" ry="17" fill={p} transform="rotate(-14 45 16)" />
-          <ellipse cx="75" cy="14" rx="10" ry="25" fill={c} transform="rotate(14 75 14)" />
-          <ellipse cx="75" cy="16" rx="4.5" ry="17" fill={p} transform="rotate(14 75 16)" />
+          <path d="M36 30 C29 12 33 -4 42 -8 C50 -4 55 12 53 30 Z" fill={c} />
+          <path d="M40 25 C36 12 38 1 43 -2 C48 1 50 12 49 25 Z" fill={p} />
+          <path d="M84 30 C91 12 87 -4 78 -8 C70 -4 65 12 67 30 Z" fill={c} />
+          <path d="M80 25 C84 12 82 1 77 -2 C72 1 70 12 71 25 Z" fill={p} />
         </g>
       )
     case 'roundEars':
@@ -270,57 +270,57 @@ export default function Angel({ figure, silhouette = false, size = 120, classNam
         </radialGradient>
       </defs>
 
-      {/* wings: small, peeking out from behind the shoulders */}
-      <g fill={sil ? SIL : '#FFFFFF'} stroke={sil ? 'none' : '#C9DFF0'} strokeWidth="1.4" strokeLinejoin="round">
-        <path d="M46 106 C40 94 26 90 23 98 C21 104 28 108 34 108 C30 111 34 115 42 113 Z" />
-        <path d="M74 106 C80 94 94 90 97 98 C99 104 92 108 86 108 C90 111 86 115 78 113 Z" />
+      {/* body: long standing toddler — arms angled out with flat little hands */}
+      <g fill={skin} stroke={sil ? 'none' : skinShade} strokeWidth="1" strokeLinejoin="round">
+        <path d="M49 92 C43 99 34 106 25 112 C21 115 23 119 28 118 C35 116 44 110 50 104 Z" />
+        <path d="M71 92 C77 99 86 106 95 112 C99 115 97 119 92 118 C85 116 76 110 70 104 Z" />
+        <path d="M48 117 C47 129 48 141 49 149 C49.5 153 58.5 153 59 149 C59.6 139 59.8 128 60 120 Z" />
+        <path d="M72 117 C73 129 72 141 71 149 C70.5 153 61.5 153 61 149 C60.4 139 60.2 128 60 120 Z" />
+        <path d="M47 88 C43 100 43 113 48 121 C54 126 66 126 72 121 C77 113 77 100 73 88 Z" />
       </g>
-
-      {/* body: standing toddler, legs together, arms down at the sides */}
-      <g fill={skin} stroke={sil ? 'none' : skinShade} strokeWidth="1">
-        <rect x="47.5" y="124" width="12" height="21" rx="6" />
-        <rect x="60.5" y="124" width="12" height="21" rx="6" />
-        <ellipse cx="53" cy="145" rx="7.5" ry="4.5" />
-        <ellipse cx="67" cy="145" rx="7.5" ry="4.5" />
-        <ellipse cx="60" cy="114" rx="18" ry="19" />
-        <rect x="-5.5" y="-13" width="11" height="25" rx="5.5" transform="translate(42.5 111) rotate(9)" />
-        <rect x="-5.5" y="-13" width="11" height="25" rx="5.5" transform="translate(77.5 111) rotate(-9)" />
-        <circle cx="40.6" cy="123" r="6" />
-        <circle cx="79.4" cy="123" r="6" />
-      </g>
-      {!sil && <circle cx="60" cy="118" r="1.3" fill={skinShade} />}
+      {!sil && <ellipse cx="60" cy="110" rx="1.2" ry="1.6" fill={skinShade} />}
 
       {/* halo for secrets */}
       {secret && showHalo && !sil && (
-        <ellipse cx="60" cy="-6" rx="20" ry="5.5" fill="none" stroke="#F4B73B" strokeWidth="3.5" className="angel__halo" />
+        <ellipse cx="60" cy="-8" rx="18" ry="4.5" fill="none" stroke="#F4B73B" strokeWidth="3" className="angel__halo" />
       )}
 
-      {/* headgear */}
-      <BackFeature hat={hat} c={c} a={a} sil={sil} />
-      <circle cx="60" cy="58" r="40" fill={hoodFill} stroke="rgba(60,30,20,0.08)" strokeWidth="1.5" />
-      {!sil && pattern && (
-        <g clipPath={`url(#hood-${uid})`}>
-          <Pattern pattern={pattern} a={a} />
-        </g>
-      )}
-      {!sil && <circle cx="60" cy="58" r="40" fill={`url(#shine-${uid})`} />}
-      <FrontFeature hat={hat} c={c} a={a} sil={sil} />
-      {hat === 'santa' && <circle cx="60" cy="66" r="31" fill={sil ? SIL_DARK : '#FFFFFF'} />}
+      {/* headgear: features are authored on a r=40 circle at (60,58), squeezed into a tall egg */}
+      <g transform="translate(60 48) scale(0.825 0.925) translate(-60 -58)">
+        <BackFeature hat={hat} c={c} a={a} sil={sil} />
+        <circle cx="60" cy="58" r="40" fill={hoodFill} stroke="rgba(60,30,20,0.08)" strokeWidth="1.5" />
+        {!sil && pattern && (
+          <g clipPath={`url(#hood-${uid})`}>
+            <Pattern pattern={pattern} a={a} />
+          </g>
+        )}
+        {!sil && <circle cx="60" cy="58" r="40" fill={`url(#shine-${uid})`} />}
+        <FrontFeature hat={hat} c={c} a={a} sil={sil} />
+      </g>
+      {hat === 'santa' && <ellipse cx="60" cy="61" rx="28.5" ry="31" fill={sil ? SIL_DARK : '#FFFFFF'} />}
 
-      {/* face */}
-      <circle cx="60" cy="66" r="27" fill={skin} />
+      {/* face: big oval, chin at the bottom of the head */}
+      <ellipse cx="60" cy="61" rx="25" ry="28" fill={skin} />
       {!sil ? (
         <g>
-          <ellipse cx="50" cy="66" rx="3.2" ry="4.4" fill="#2B1F1F" />
-          <ellipse cx="70" cy="66" rx="3.2" ry="4.4" fill="#2B1F1F" />
-          <circle cx="51.2" cy="64.4" r="1.1" fill="#fff" />
-          <circle cx="71.2" cy="64.4" r="1.1" fill="#fff" />
-          <ellipse cx="43" cy="75" rx="5.5" ry="3.2" fill="#F7A8B8" opacity="0.75" />
-          <ellipse cx="77" cy="75" rx="5.5" ry="3.2" fill="#F7A8B8" opacity="0.75" />
-          <path d="M56.5 77 Q60 80.5 63.5 77" stroke="#C0636B" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+          {/* tiny eyebrow dots high on the forehead */}
+          <ellipse cx="51.5" cy="48" rx="1.6" ry="1" fill="#A0684A" />
+          <ellipse cx="68.5" cy="48" rx="1.6" ry="1" fill="#A0684A" />
+          {/* big glossy eyes, glancing to the side, with lashes */}
+          <ellipse cx="51" cy="63" rx="4.6" ry="5" fill="#1E1416" />
+          <ellipse cx="69" cy="63" rx="4.6" ry="5" fill="#1E1416" />
+          <circle cx="52.9" cy="61.4" r="1.5" fill="#fff" />
+          <circle cx="70.9" cy="61.4" r="1.5" fill="#fff" />
+          <path d="M46.6 61 L44.4 59.4 M46.4 62.8 L44 62.2" stroke="#1E1416" strokeWidth="0.9" strokeLinecap="round" />
+          <path d="M73.4 61 L75.6 59.4 M73.6 62.8 L76 62.2" stroke="#1E1416" strokeWidth="0.9" strokeLinecap="round" />
+          {/* little nose bump, soft blush and a pink smile */}
+          <ellipse cx="60" cy="71" rx="2.6" ry="1.8" fill={skinShade} opacity="0.55" />
+          <ellipse cx="45" cy="72" rx="4.5" ry="2.6" fill="#F7A8B8" opacity="0.3" />
+          <ellipse cx="75" cy="72" rx="4.5" ry="2.6" fill="#F7A8B8" opacity="0.3" />
+          <path d="M56 77.5 Q60 80.5 64 77.5" stroke="#EB8E9C" strokeWidth="1.7" fill="none" strokeLinecap="round" />
         </g>
       ) : (
-        <text x="60" y="76" textAnchor="middle" fontSize="28" fontFamily="Fredoka, sans-serif" fontWeight="700" fill="#fff">
+        <text x="60" y="71" textAnchor="middle" fontSize="26" fontFamily="Fredoka, sans-serif" fontWeight="700" fill="#fff">
           ?
         </text>
       )}
