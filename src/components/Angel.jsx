@@ -270,19 +270,25 @@ export default function Angel({ figure, silhouette = false, size = 120, classNam
         </radialGradient>
       </defs>
 
-      {/* wings */}
-      <g fill={sil ? SIL : '#FFFFFF'} stroke={sil ? 'none' : '#CFE3F2'} strokeWidth="1.5">
-        <path d="M40 104 C18 92 10 110 18 120 C24 128 36 122 42 114 Z" />
-        <path d="M80 104 C102 92 110 110 102 120 C96 128 84 122 78 114 Z" />
+      {/* wings: small, peeking out from behind the shoulders */}
+      <g fill={sil ? SIL : '#FFFFFF'} stroke={sil ? 'none' : '#C9DFF0'} strokeWidth="1.4" strokeLinejoin="round">
+        <path d="M46 106 C40 94 26 90 23 98 C21 104 28 108 34 108 C30 111 34 115 42 113 Z" />
+        <path d="M74 106 C80 94 94 90 97 98 C99 104 92 108 86 108 C90 111 86 115 78 113 Z" />
       </g>
 
-      {/* body */}
-      <ellipse cx="50" cy="139" rx="9" ry="12" fill={skin} />
-      <ellipse cx="70" cy="139" rx="9" ry="12" fill={skin} />
-      <ellipse cx="60" cy="116" rx="23" ry="23" fill={skin} />
-      <ellipse cx="38" cy="112" rx="7" ry="12" fill={skin} transform="rotate(22 38 112)" />
-      <ellipse cx="82" cy="112" rx="7" ry="12" fill={skin} transform="rotate(-22 82 112)" />
-      {!sil && <circle cx="60" cy="122" r="1.3" fill={skinShade} />}
+      {/* body: standing toddler, legs together, arms down at the sides */}
+      <g fill={skin} stroke={sil ? 'none' : skinShade} strokeWidth="1">
+        <rect x="47.5" y="124" width="12" height="21" rx="6" />
+        <rect x="60.5" y="124" width="12" height="21" rx="6" />
+        <ellipse cx="53" cy="145" rx="7.5" ry="4.5" />
+        <ellipse cx="67" cy="145" rx="7.5" ry="4.5" />
+        <ellipse cx="60" cy="114" rx="18" ry="19" />
+        <rect x="-5.5" y="-13" width="11" height="25" rx="5.5" transform="translate(42.5 111) rotate(9)" />
+        <rect x="-5.5" y="-13" width="11" height="25" rx="5.5" transform="translate(77.5 111) rotate(-9)" />
+        <circle cx="40.6" cy="123" r="6" />
+        <circle cx="79.4" cy="123" r="6" />
+      </g>
+      {!sil && <circle cx="60" cy="118" r="1.3" fill={skinShade} />}
 
       {/* halo for secrets */}
       {secret && showHalo && !sil && (
