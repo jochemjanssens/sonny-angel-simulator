@@ -95,21 +95,30 @@ export function SeriesDetail({ series, inventory, seen = {}, wallet, onBack, onB
       <div className="lineup">
         {series.figures.map((f) => {
           const count = inventory[f.id] || 0
+          const sold = !count && isSeen(f)
           return (
-            <button key={f.id} className={`lineup__item ${count ? 'is-owned' : ''}`} onClick={() => count && onFigure(f.id)}>
+            <button
+              key={f.id}
+              className={`lineup__item ${count ? 'is-owned' : ''} ${sold ? 'is-sold' : ''}`}
+              onClick={() => count && onFigure(f.id)}
+              title={sold ? 'You had this one but sold it' : undefined}
+            >
               {count > 1 && <span className="count">×{count}</span>}
-              <Angel figure={f} silhouette={!count} size={84} />
+              {sold && <span className="sold-tag">Sold</span>}
+              <Angel figure={f} silhouette={!count && !sold} size={84} />
               <span className="lineup__name">{f.name}</span>
               <span className="lineup__value">{isSeen(f) ? euro(f.value) : '€ ?'}</span>
             </button>
           )
         })}
         <button
-          className={`lineup__item lineup__item--secret ${secretOwned ? 'is-owned' : ''}`}
+          className={`lineup__item lineup__item--secret ${secretOwned ? 'is-owned' : ''} ${secretSeen && !secretOwned ? 'is-sold' : ''}`}
           onClick={() => secretOwned && onFigure(series.secret.id)}
+          title={secretSeen && !secretOwned ? 'You had this one but sold it' : undefined}
         >
           {inventory[series.secret.id] > 1 && <span className="count">×{inventory[series.secret.id]}</span>}
-          <Angel figure={series.secret} silhouette={!secretOwned} size={84} />
+          {secretSeen && !secretOwned && <span className="sold-tag">Sold</span>}
+          <Angel figure={series.secret} silhouette={!secretSeen} size={84} />
           <span className="lineup__name">{secretSeen ? series.secret.name : 'Secret'}</span>
           <span className="lineup__value">{secretSeen ? euro(series.secret.value) : '€ ?'}</span>
         </button>

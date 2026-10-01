@@ -565,6 +565,35 @@ h3 {
 .lineup__item.is-owned:hover {
   transform: translateY(-3px);
 }
+.lineup__item.is-sold {
+  border-style: dashed;
+  border-color: #d9c6bc;
+}
+.lineup__item.is-sold .angel {
+  opacity: 0.5;
+  filter: grayscale(0.45);
+}
+.lineup__item.is-sold .lineup__name {
+  color: var(--muted);
+  text-decoration: line-through;
+  text-decoration-color: rgba(228, 0, 43, 0.5);
+}
+.sold-tag {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  background: var(--ink);
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  padding: 2px 8px;
+  transform: rotate(-6deg);
+}
 .lineup__item--secret {
   background: linear-gradient(160deg, #fffaf0, #fff3c9);
   border-color: var(--gold);
