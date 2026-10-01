@@ -1,5 +1,5 @@
 import { useEffect, useReducer } from 'react'
-import { DAILY_ALLOWANCE, FIGURE_BY_ID, STARTING_WALLET, sellPrice } from '../data/collections'
+import { DAILY_ALLOWANCE, FIGURE_BY_ID, STARTING_WALLET } from '../data/collections'
 
 const STORAGE_KEY = 'sonny-angel-sim-v1'
 
@@ -57,7 +57,7 @@ function reducer(state, action) {
       const count = state.inventory[figureId] || 0
       const n = Math.min(qty, includeLast ? count : count - 1)
       if (n <= 0) return state
-      const earned = round(sellPrice(FIGURE_BY_ID[figureId]) * n)
+      const earned = round(FIGURE_BY_ID[figureId].value * n)
       return {
         ...state,
         wallet: round(state.wallet + earned),
@@ -70,7 +70,7 @@ function reducer(state, action) {
       const inventory = { ...state.inventory }
       for (const [id, count] of Object.entries(inventory)) {
         if (count > 1) {
-          earned += sellPrice(FIGURE_BY_ID[id]) * (count - 1)
+          earned += FIGURE_BY_ID[id].value * (count - 1)
           inventory[id] = 1
         }
       }

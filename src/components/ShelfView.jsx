@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import Angel from './Angel'
-import { FIGURE_BY_ID, SERIES, euro, sellPrice } from '../data/collections'
+import { FIGURE_BY_ID, SERIES, euro } from '../data/collections'
 
 export default function ShelfView({ inventory, stats, onFigure, onSell, onSellAll, onGoShop }) {
   const [confirming, setConfirming] = useState(false)
@@ -10,7 +10,7 @@ export default function ShelfView({ inventory, stats, onFigure, onSell, onSellAl
   const collectionValue = entries.reduce((s, [id, n]) => s + FIGURE_BY_ID[id].value * n, 0)
   const dupes = entries.filter(([, n]) => n > 1)
   const dupeCount = dupes.reduce((s, [, n]) => s + n - 1, 0)
-  const dupePayout = dupes.reduce((s, [id, n]) => s + sellPrice(FIGURE_BY_ID[id]) * (n - 1), 0)
+  const dupePayout = dupes.reduce((s, [id, n]) => s + FIGURE_BY_ID[id].value * (n - 1), 0)
 
   if (!entries.length) {
     return (
@@ -41,7 +41,7 @@ export default function ShelfView({ inventory, stats, onFigure, onSell, onSellAl
           {dupeCount ? (
             <>
               You have <strong>{dupeCount}</strong> duplicate{dupeCount > 1 ? 's' : ''} worth{' '}
-              <strong>{euro(dupePayout)}</strong> after fees.
+              <strong>{euro(dupePayout)}</strong> at market value.
             </>
           ) : (
             'No duplicates to sell — nice luck!'
@@ -86,7 +86,7 @@ export default function ShelfView({ inventory, stats, onFigure, onSell, onSellAl
                   </button>
                   {inventory[f.id] > 1 ? (
                     <button className="shelf__sell" onClick={() => onSell(f.id)} title="Sell one duplicate">
-                      Sell {euro(sellPrice(f))}
+                      Sell {euro(f.value)}
                     </button>
                   ) : (
                     <button className="shelf__sell shelf__sell--muted" onClick={() => onFigure(f.id)}>

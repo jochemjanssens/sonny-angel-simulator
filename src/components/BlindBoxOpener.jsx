@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import Angel from './Angel'
 import BoxArt from './BoxArt'
 import Confetti from './Confetti'
-import { euro, sellPrice } from '../data/collections'
+import { euro } from '../data/collections'
 
 // box -> shake -> lid -> foil (tap) -> tear -> reveal
 const TIMINGS = { shake: 1000, lid: 900, tear: 750 }
@@ -87,7 +87,6 @@ export default function BlindBoxOpener({ series, figure, isNew, canAffordAnother
             <p className="reveal__series">{series.name}</p>
             <p className="reveal__value">
               Market value <strong>{euro(figure.value)}</strong>
-              {!isNew && <> · sells for {euro(sellPrice(figure))}</>}
             </p>
             <div className="reveal__actions">
               <button className="btn btn--ghost" onClick={onClose}>

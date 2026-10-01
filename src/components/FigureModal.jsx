@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import Angel from './Angel'
-import { SELL_RATE, SERIES_BY_ID, euro, sellPrice } from '../data/collections'
+import { SERIES_BY_ID, euro } from '../data/collections'
 
 export default function FigureModal({ figure, count, onSell, onClose }) {
   const series = SERIES_BY_ID[figure.seriesId]
@@ -34,19 +34,15 @@ export default function FigureModal({ figure, count, onSell, onClose }) {
             <dt>You own</dt>
             <dd>{count}</dd>
           </div>
-          <div>
-            <dt>Sell price</dt>
-            <dd>{euro(sellPrice(figure))}</dd>
-          </div>
         </dl>
         {dupes > 0 ? (
           <div className="modal__actions">
             <button className="btn btn--ghost" onClick={() => onSell(1)}>
-              Sell 1 · {euro(sellPrice(figure))}
+              Sell 1 · {euro(figure.value)}
             </button>
             {dupes > 1 && (
               <button className="btn btn--primary" onClick={() => onSell(dupes)}>
-                Sell {dupes} duplicates · {euro(sellPrice(figure) * dupes)}
+                Sell {dupes} duplicates · {euro(figure.value * dupes)}
               </button>
             )}
           </div>
@@ -57,17 +53,16 @@ export default function FigureModal({ figure, count, onSell, onClose }) {
               Keep it
             </button>
             <button className="btn btn--primary" onClick={() => onSell(1, true)}>
-              Sell · {euro(sellPrice(figure))}
+              Sell · {euro(figure.value)}
             </button>
           </div>
         ) : (
           <div className="modal__actions">
             <button className="btn btn--ghost" onClick={() => setConfirmLast(true)}>
-              Sell my only one · {euro(sellPrice(figure))}
+              Sell my only one · {euro(figure.value)}
             </button>
           </div>
         )}
-        <p className="modal__fine">You receive {Math.round(SELL_RATE * 100)}% of market value after marketplace fees.</p>
       </div>
     </div>
   )

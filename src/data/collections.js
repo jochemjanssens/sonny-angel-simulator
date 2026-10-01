@@ -6,7 +6,6 @@
 
 export const DAILY_ALLOWANCE = 40.5
 export const STARTING_WALLET = 60
-export const SELL_RATE = 0.7 // you receive 70% of market value after marketplace fees
 export const SECRET_ODDS = 144 // regular series: 1 in 144
 export const LIMITED_SECRET_ODDS = 72 // limited 6-figure series: 1 in 72
 
@@ -350,8 +349,6 @@ export function drawFigure(series) {
   if (Math.random() < 1 / series.odds) return series.secret
   return series.figures[Math.floor(Math.random() * series.figures.length)]
 }
-
-export const sellPrice = (fig) => Math.round(fig.value * SELL_RATE * 100) / 100
 
 const fmt = new Intl.NumberFormat('en-IE', { style: 'currency', currency: 'EUR' })
 export const euro = (n) => fmt.format(n)

@@ -4,7 +4,7 @@ import { SeriesDetail, SeriesGrid } from './components/CollectionsView'
 import ShelfView from './components/ShelfView'
 import BlindBoxOpener from './components/BlindBoxOpener'
 import FigureModal from './components/FigureModal'
-import { DAILY_ALLOWANCE, FIGURES, FIGURE_BY_ID, SERIES_BY_ID, drawFigure, euro, sellPrice } from './data/collections'
+import { DAILY_ALLOWANCE, FIGURES, FIGURE_BY_ID, SERIES_BY_ID, drawFigure, euro } from './data/collections'
 import { todayKey, useGame } from './hooks/useGame'
 
 export default function App() {
@@ -40,7 +40,7 @@ export default function App() {
     const n = Math.min(qty, includeLast ? count : count - 1)
     if (n <= 0) return
     dispatch({ type: 'SELL', figureId: id, qty, includeLast })
-    notify(`Sold ${n}× ${fig.name} for ${euro(sellPrice(fig) * n)}`)
+    notify(`Sold ${n}× ${fig.name} for ${euro(fig.value * n)}`)
     if (count - n <= 0) setFigureId(null)
   }
 
