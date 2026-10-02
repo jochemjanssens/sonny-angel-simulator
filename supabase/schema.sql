@@ -232,6 +232,18 @@ begin
   return w;
 end $$;
 
+-- Recreates a player's profile and budget rows if they are missing (e.g. the
+-- account existed before this schema was installed, or the rows were deleted).
+create or replace function public.ensure_player() returns void
+language plpgsql security definer set search_path = public as $$
+declare u uuid := public._uid();
+begin
+  insert into public.profiles (id) values (u) on conflict do nothing;
+  insert into public.players (id, wallet)
+    select u, starting_wallet from public.game_config
+    on conflict do nothing;
+end $$;
+
 -- One-time welcome gift, claimed on the player's first login.
 create or replace function public.claim_welcome_bonus() returns numeric
 language plpgsql security definer set search_path = public as $$
@@ -405,6 +417,7 @@ revoke insert, update, delete on all tables in schema public from anon, authenti
 revoke execute on all functions in schema public from public, anon, authenticated;
 grant execute on function
   public.set_username(text),
+  public.ensure_player(),
   public.claim_daily(),
   public.claim_welcome_bonus(),
   public.open_box(text),

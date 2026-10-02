@@ -38,7 +38,8 @@ export function useOnlineGame(userId) {
   }, [userId])
 
   useEffect(() => {
-    refresh()
+    // make sure this account has its player rows, then load
+    supabase.rpc('ensure_player').then(refresh)
     // trades by other players change our budget and shelf, so listen for them
     const channel = supabase
       .channel(`player-${userId}`)
