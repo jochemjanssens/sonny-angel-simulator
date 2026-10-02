@@ -1,17 +1,18 @@
 import { useEffect, useState } from 'react'
 import { DAILY_ALLOWANCE, euro } from '../data/collections'
 
+// The allowance resets at midnight UTC, the same clock the server uses.
 function untilMidnight() {
   const now = new Date()
   const next = new Date(now)
-  next.setHours(24, 0, 0, 0)
+  next.setUTCHours(24, 0, 0, 0)
   const s = Math.max(0, Math.floor((next - now) / 1000))
   const h = Math.floor(s / 3600)
   const m = Math.floor((s % 3600) / 60)
   return `${h}h ${String(m).padStart(2, '0')}m`
 }
 
-export default function Header({ tab, setTab, wallet, canClaim, onClaim, ownedUnique, totalUnique }) {
+export default function Header({ tab, setTab, wallet, canClaim, onClaim, ownedUnique, totalUnique, marketBadge, username, onLogout }) {
   const [countdown, setCountdown] = useState(untilMidnight)
 
   useEffect(() => {
@@ -38,6 +39,9 @@ export default function Header({ tab, setTab, wallet, canClaim, onClaim, ownedUn
           <button className={`tabs__tab ${tab === 'shelf' ? 'is-active' : ''}`} onClick={() => setTab('shelf')}>
             My Shelf <span className="tabs__count">{ownedUnique}/{totalUnique}</span>
           </button>
+          <button className={`tabs__tab ${tab === 'market' ? 'is-active' : ''}`} onClick={() => setTab('market')}>
+            Market {marketBadge > 0 && <span className="dot-badge">{marketBadge}</span>}
+          </button>
         </nav>
 
         <div className="wallet">
@@ -54,6 +58,12 @@ export default function Header({ tab, setTab, wallet, canClaim, onClaim, ownedUn
               Next allowance in {countdown}
             </span>
           )}
+          <div className="user">
+            <span className="user__name">@{username}</span>
+            <button className="user__logout" onClick={onLogout}>
+              Log out
+            </button>
+          </div>
         </div>
       </div>
     </header>

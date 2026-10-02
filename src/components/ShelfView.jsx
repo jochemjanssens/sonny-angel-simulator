@@ -1,9 +1,7 @@
-import { useState } from 'react'
 import Angel from './Angel'
 import { FIGURE_BY_ID, SERIES, euro } from '../data/collections'
 
-export default function ShelfView({ inventory, stats, onFigure, onSell, onSellAll, onGoShop }) {
-  const [confirming, setConfirming] = useState(false)
+export default function ShelfView({ inventory, stats, onFigure, onGoShop, onGoMarket }) {
 
   const entries = Object.entries(inventory).filter(([, n]) => n > 0)
   const totalFigures = entries.reduce((s, [, n]) => s + n, 0)
@@ -40,29 +38,16 @@ export default function ShelfView({ inventory, stats, onFigure, onSell, onSellAl
         <p>
           {dupeCount ? (
             <>
-              You have <strong>{dupeCount}</strong> duplicate{dupeCount > 1 ? 's' : ''} worth{' '}
-              <strong>{euro(dupePayout)}</strong> at market value.
+              You have <strong>{dupeCount}</strong> duplicate{dupeCount > 1 ? 's' : ''} (market value{' '}
+              <strong>{euro(dupePayout)}</strong>). Put them on the market to trade with other players.
             </>
           ) : (
-            'No duplicates to sell — nice luck!'
+            'No duplicates — nice luck! You can still put any figure on the market.'
           )}
         </p>
-        {dupeCount > 0 &&
-          (confirming ? (
-            <span className="confirm">
-              Sell all {dupeCount}?
-              <button className="btn btn--primary btn--sm" onClick={() => { onSellAll(); setConfirming(false) }}>
-                Yes, sell
-              </button>
-              <button className="btn btn--ghost btn--sm" onClick={() => setConfirming(false)}>
-                Cancel
-              </button>
-            </span>
-          ) : (
-            <button className="btn btn--primary btn--sm" onClick={() => setConfirming(true)}>
-              Sell all duplicates
-            </button>
-          ))}
+        <button className="btn btn--primary btn--sm" onClick={onGoMarket}>
+          Go to market
+        </button>
       </div>
 
       {SERIES.map((s) => {
@@ -84,15 +69,13 @@ export default function ShelfView({ inventory, stats, onFigure, onSell, onSellAl
                     <Angel figure={f} size={78} />
                     <span className="shelf__name">{f.name}</span>
                   </button>
-                  {inventory[f.id] > 1 ? (
-                    <button className="shelf__sell" onClick={() => onSell(f.id)} title="Sell one duplicate">
-                      Sell {euro(f.value)}
-                    </button>
-                  ) : (
-                    <button className="shelf__sell shelf__sell--muted" onClick={() => onFigure(f.id)}>
-                      {euro(f.value)}
-                    </button>
-                  )}
+                  <button
+                    className={`shelf__sell ${inventory[f.id] > 1 ? '' : 'shelf__sell--muted'}`}
+                    onClick={() => onFigure(f.id)}
+                    title="Put on the market"
+                  >
+                    {inventory[f.id] > 1 ? 'Sell' : euro(f.value)}
+                  </button>
                 </div>
               ))}
             </div>

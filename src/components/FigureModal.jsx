@@ -1,11 +1,18 @@
 import { useEffect, useState } from 'react'
 import Angel from './Angel'
+import PriceInput, { parsePrice } from './PriceInput'
 import { SERIES_BY_ID, euro } from '../data/collections'
 
-export default function FigureModal({ figure, count, onSell, onClose }) {
+export default function FigureModal({ figure, count, onList, onClose }) {
   const series = SERIES_BY_ID[figure.seriesId]
-  const dupes = count - 1
-  const [confirmLast, setConfirmLast] = useState(false)
+  const [price, setPrice] = useState(String(figure.value))
+  const [busy, setBusy] = useState(false)
+
+  const list = async () => {
+    setBusy(true)
+    await onList(parsePrice(price))
+    setBusy(false)
+  }
 
   useEffect(() => {
     const onKey = (e) => e.key === 'Escape' && onClose()
@@ -35,32 +42,16 @@ export default function FigureModal({ figure, count, onSell, onClose }) {
             <dd>{count}</dd>
           </div>
         </dl>
-        {dupes > 0 ? (
-          <div className="modal__actions">
-            <button className="btn btn--ghost" onClick={() => onSell(1)}>
-              Sell 1 · {euro(figure.value)}
-            </button>
-            {dupes > 1 && (
-              <button className="btn btn--primary" onClick={() => onSell(dupes)}>
-                Sell {dupes} duplicates · {euro(figure.value * dupes)}
+        {count > 0 && (
+          <div className="modal__sell">
+            <p className="modal__sell-title">Sell to other players</p>
+            <div className="modal__actions">
+              <PriceInput value={price} onChange={setPrice} label="Asking price" />
+              <button className="btn btn--primary" disabled={!parsePrice(price) || busy} onClick={list}>
+                Put on market
               </button>
-            )}
-          </div>
-        ) : confirmLast ? (
-          <div className="modal__actions">
-            <p className="modal__note">This is your only {figure.name}. Sell it anyway?</p>
-            <button className="btn btn--ghost" onClick={() => setConfirmLast(false)}>
-              Keep it
-            </button>
-            <button className="btn btn--primary" onClick={() => onSell(1, true)}>
-              Sell · {euro(figure.value)}
-            </button>
-          </div>
-        ) : (
-          <div className="modal__actions">
-            <button className="btn btn--ghost" onClick={() => setConfirmLast(true)}>
-              Sell my only one · {euro(figure.value)}
-            </button>
+            </div>
+            {count === 1 && <p className="modal__note">This is your only one: it leaves your shelf while it's listed.</p>}
           </div>
         )}
       </div>

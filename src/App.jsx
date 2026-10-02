@@ -1,52 +1,89 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Header from './components/Header'
 import { SeriesDetail, SeriesGrid } from './components/CollectionsView'
 import ShelfView from './components/ShelfView'
+import MarketView from './components/MarketView'
 import BlindBoxOpener from './components/BlindBoxOpener'
 import FigureModal from './components/FigureModal'
-import { DAILY_ALLOWANCE, FIGURES, FIGURE_BY_ID, SERIES_BY_ID, drawFigure, euro } from './data/collections'
-import { todayKey, useGame } from './hooks/useGame'
+import { LoginScreen, SetupNeeded, UsernameScreen } from './components/AuthScreens'
+import { DAILY_ALLOWANCE, FIGURES, FIGURE_BY_ID, SERIES_BY_ID, euro } from './data/collections'
+import { rpc, supabase } from './lib/supabase'
+import { readLocalSave } from './lib/localSave'
+import { useOnlineGame, utcTodayKey } from './hooks/useOnlineGame'
+import { useMarket } from './hooks/useMarket'
 
 export default function App() {
-  const [state, dispatch] = useGame()
+  const [session, setSession] = useState(undefined)
+
+  useEffect(() => {
+    if (!supabase) return
+    supabase.auth.getSession().then(({ data }) => setSession(data.session))
+    const { data } = supabase.auth.onAuthStateChange((_event, s) => setSession(s))
+    return () => data.subscription.unsubscribe()
+  }, [])
+
+  if (!supabase) return <SetupNeeded />
+  if (session === undefined) return <div className="boot">Loading…</div>
+  if (!session) return <LoginScreen />
+  return <Game key={session.user.id} userId={session.user.id} />
+}
+
+function Game({ userId }) {
+  const game = useOnlineGame(userId)
+  const market = useMarket(userId)
   const [tab, setTab] = useState('collections')
   const [seriesId, setSeriesId] = useState(null)
   const [opening, setOpening] = useState(null)
   const [figureId, setFigureId] = useState(null)
   const [toast, setToast] = useState(null)
+  const [localSave] = useState(readLocalSave)
 
   const notify = useCallback((msg) => {
     const id = Date.now()
     setToast({ msg, id })
-    setTimeout(() => setToast((t) => (t?.id === id ? null : t)), 2800)
+    setTimeout(() => setToast((t) => (t?.id === id ? null : t)), 3200)
   }, [])
 
-  const buy = (series) => {
+  // Runs a database action, then refreshes everything; returns true on success.
+  const act = useCallback(
+    async (fn, args, successMsg) => {
+      try {
+        await rpc(fn, args)
+        if (successMsg) notify(successMsg)
+        await Promise.all([game.refresh(), market.refresh()])
+        return true
+      } catch (err) {
+        notify(err.message)
+        return false
+      }
+    },
+    [game, market, notify],
+  )
+
+  const state = game.state
+  if (!state) return <div className="boot">{game.error ? `Couldn't load your game: ${game.error}` : 'Loading your shelf…'}</div>
+  if (!state.username) {
+    return <UsernameScreen localSave={localSave} canImport={!state.imported && state.stats.opened === 0} onDone={game.refresh} />
+  }
+
+  const buy = async (series) => {
     if (state.wallet < series.price) return notify('Not enough budget for this box.')
-    const figure = drawFigure(series)
-    const isNew = !state.inventory[figure.id]
-    dispatch({ type: 'BUY', figure, price: series.price })
-    setOpening({ seriesId: series.id, figureId: figure.id, isNew, key: Date.now() })
+    try {
+      const data = await rpc('open_box', { p_series: series.id })
+      const row = Array.isArray(data) ? data[0] : data
+      setOpening({ seriesId: series.id, figureId: row.fig_id, isNew: row.is_new, key: Date.now() })
+      game.refresh()
+    } catch (err) {
+      notify(err.message)
+    }
   }
 
-  const claim = () => {
-    dispatch({ type: 'CLAIM_DAILY' })
-    notify(`+${euro(DAILY_ALLOWANCE)} daily allowance added!`)
-  }
+  const claim = () => act('claim_daily', {}, `+${euro(DAILY_ALLOWANCE)} daily allowance added!`)
 
-  const sell = (id, qty, includeLast = false) => {
-    const fig = FIGURE_BY_ID[id]
-    const count = state.inventory[id] || 0
-    const n = Math.min(qty, includeLast ? count : count - 1)
-    if (n <= 0) return
-    dispatch({ type: 'SELL', figureId: id, qty, includeLast })
-    notify(`Sold ${n}× ${fig.name} for ${euro(fig.value * n)}`)
-    if (count - n <= 0) setFigureId(null)
-  }
-
-  const sellAll = () => {
-    dispatch({ type: 'SELL_ALL_DUPES' })
-    notify('All duplicates sold!')
+  const list = async (id, price) => {
+    if (!price) return
+    const ok = await act('create_listing', { p_fig: id, p_price: price }, `${FIGURE_BY_ID[id].name} is on the market for ${euro(price)}`)
+    if (ok && (state.inventory[id] || 0) <= 1) setFigureId(null)
   }
 
   const ownedUnique = FIGURES.filter((f) => !f.secret && state.inventory[f.id]).length
@@ -62,10 +99,13 @@ export default function App() {
           setSeriesId(null)
         }}
         wallet={state.wallet}
-        canClaim={state.lastClaim !== todayKey()}
+        canClaim={state.lastClaim !== utcTodayKey()}
         onClaim={claim}
         ownedUnique={ownedUnique}
         totalUnique={totalUnique}
+        marketBadge={market.actionCount}
+        username={state.username}
+        onLogout={() => supabase.auth.signOut()}
       />
 
       <main className="main">
@@ -75,6 +115,7 @@ export default function App() {
               series={series}
               inventory={state.inventory}
               seen={state.firstSeen}
+              listed={market.listedFigureIds}
               wallet={state.wallet}
               onBack={() => setSeriesId(null)}
               onBuy={() => buy(series)}
@@ -88,21 +129,15 @@ export default function App() {
             inventory={state.inventory}
             stats={state.stats}
             onFigure={setFigureId}
-            onSell={(id) => sell(id, 1)}
-            onSellAll={sellAll}
             onGoShop={() => setTab('collections')}
+            onGoMarket={() => setTab('market')}
           />
         )}
+        {tab === 'market' && <MarketView market={market} wallet={state.wallet} act={act} />}
       </main>
 
       <footer className="footer">
         A fan-made simulator for fun · Not affiliated with Sonny Angel or Dreams Inc. · Values are approximate resale prices
-        <button
-          className="footer__reset"
-          onClick={() => window.confirm('Reset your budget and shelf? This cannot be undone.') && dispatch({ type: 'RESET' })}
-        >
-          Reset game
-        </button>
       </footer>
 
       {opening && (
@@ -121,7 +156,7 @@ export default function App() {
         <FigureModal
           figure={FIGURE_BY_ID[figureId]}
           count={state.inventory[figureId] || 0}
-          onSell={(qty, includeLast) => sell(figureId, qty, includeLast)}
+          onList={(price) => list(figureId, price)}
           onClose={() => setFigureId(null)}
         />
       )}
