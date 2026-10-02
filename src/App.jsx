@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Header from './components/Header'
 import { SeriesDetail, SeriesGrid } from './components/CollectionsView'
 import ShelfView from './components/ShelfView'
@@ -37,6 +37,8 @@ function Game({ userId }) {
   const [figureId, setFigureId] = useState(null)
   const [toast, setToast] = useState(null)
   const [localSave] = useState(readLocalSave)
+  const [gift, setGift] = useState(null)
+  const giftAsked = useRef(false)
 
   const notify = useCallback((msg) => {
     const id = Date.now()
@@ -59,6 +61,19 @@ function Game({ userId }) {
     },
     [game, market, notify],
   )
+
+  // One-time welcome gift: claimed on the first login once a username is set.
+  const needsGift = game.state?.username && !game.state.welcomeBonus
+  useEffect(() => {
+    if (!needsGift || giftAsked.current) return
+    giftAsked.current = true
+    rpc('claim_welcome_bonus')
+      .then((amount) => {
+        if (amount) setGift(Number(amount))
+        game.refresh()
+      })
+      .catch(() => {})
+  }, [needsGift, game])
 
   const state = game.state
   if (!state) return <div className="boot">{game.error ? `Couldn't load your game: ${game.error}` : 'Loading your shelf…'}</div>
@@ -159,6 +174,23 @@ function Game({ userId }) {
           onList={(price) => list(figureId, price)}
           onClose={() => setFigureId(null)}
         />
+      )}
+
+      {gift && (
+        <div className="modal" role="dialog" aria-modal="true" onClick={() => setGift(null)}>
+          <div className="modal__card gift" onClick={(e) => e.stopPropagation()}>
+            <span className="gift__icon" aria-hidden>
+              🎁
+            </span>
+            <h2>Welcome gift!</h2>
+            <p>
+              <strong>{euro(gift)}</strong> has been added to your budget. Have fun unboxing and trading!
+            </p>
+            <button className="btn btn--primary" onClick={() => setGift(null)}>
+              Thanks!
+            </button>
+          </div>
+        </div>
       )}
 
       {toast && (

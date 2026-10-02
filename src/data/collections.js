@@ -6,6 +6,7 @@
 
 export const DAILY_ALLOWANCE = 40.5
 export const STARTING_WALLET = 60
+export const WELCOME_BONUS = 20 // one-time gift, given on a player's first login
 export const SECRET_ODDS = 144 // regular series: 1 in 144
 export const LIMITED_SECRET_ODDS = 72 // limited 6-figure series: 1 in 72
 

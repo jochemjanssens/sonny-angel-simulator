@@ -10,7 +10,8 @@
 create table if not exists public.game_config (
   id int primary key default 1 check (id = 1),
   starting_wallet numeric(10, 2) not null,
-  daily_allowance numeric(10, 2) not null
+  daily_allowance numeric(10, 2) not null,
+  welcome_bonus numeric(10, 2) not null default 20
 );
 
 create table if not exists public.series (
@@ -41,6 +42,7 @@ create table if not exists public.players (
   wallet numeric(10, 2) not null check (wallet >= 0),
   last_claim date,
   imported boolean not null default false,
+  welcome_bonus boolean not null default false, -- one-time gift claimed?
   opened int not null default 0,
   spent numeric(10, 2) not null default 0,
   earned numeric(10, 2) not null default 0,
@@ -230,6 +232,16 @@ begin
   return w;
 end $$;
 
+-- One-time welcome gift, claimed on the player's first login.
+create or replace function public.claim_welcome_bonus() returns numeric
+language plpgsql security definer set search_path = public as $$
+declare bonus numeric := (select welcome_bonus from public.game_config);
+begin
+  update public.players set wallet = wallet + bonus, welcome_bonus = true
+    where id = public._uid() and not welcome_bonus;
+  return case when found then bonus end; -- null when it was already claimed
+end $$;
+
 -- The server draws the figure, so boxes can't be rigged from the browser.
 create or replace function public.open_box(p_series text, out fig_id text, out is_new boolean)
 language plpgsql security definer set search_path = public as $$
@@ -394,6 +406,7 @@ revoke execute on all functions in schema public from public, anon, authenticate
 grant execute on function
   public.set_username(text),
   public.claim_daily(),
+  public.claim_welcome_bonus(),
   public.open_box(text),
   public.import_local_save(numeric, jsonb, jsonb),
   public.create_listing(text, numeric),

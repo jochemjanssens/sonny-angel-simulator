@@ -30,6 +30,7 @@ export function useOnlineGame(userId) {
       wallet: Number(p.wallet),
       lastClaim: p.last_claim,
       imported: p.imported,
+      welcomeBonus: p.welcome_bonus,
       inventory,
       firstSeen,
       stats: { opened: p.opened, spent: Number(p.spent), earned: Number(p.earned), secrets: p.secrets },

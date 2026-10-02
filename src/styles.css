@@ -1858,3 +1858,20 @@ h3 {
     align-items: baseline;
   }
 }
+
+.gift {
+  text-align: center;
+}
+.gift__icon {
+  font-size: 3.2rem;
+  display: inline-block;
+  animation: wiggle 1.2s ease-in-out infinite;
+}
+.gift h2 {
+  color: var(--red);
+  margin: 6px 0;
+}
+.gift p {
+  color: var(--muted);
+  margin: 0 0 18px;
+}
