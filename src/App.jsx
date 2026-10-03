@@ -3,6 +3,7 @@ import Header from './components/Header'
 import { SeriesDetail, SeriesGrid } from './components/CollectionsView'
 import ShelfView from './components/ShelfView'
 import MarketView from './components/MarketView'
+import PuzzlesView from './components/puzzles/PuzzlesView'
 import BlindBoxOpener from './components/BlindBoxOpener'
 import FigureModal from './components/FigureModal'
 import { LoginScreen, SetupNeeded, UsernameScreen } from './components/AuthScreens'
@@ -101,6 +102,12 @@ function Game({ userId }) {
     if (ok && (state.inventory[id] || 0) <= 1) setFigureId(null)
   }
 
+  const sellToBank = async (id) => {
+    const fig = FIGURE_BY_ID[id]
+    const ok = await act('sell_to_bank', { p_fig: id }, `Sold ${fig.name} to the bank`)
+    if (ok && (state.inventory[id] || 0) <= 1) setFigureId(null)
+  }
+
   const ownedUnique = FIGURES.filter((f) => !f.secret && state.inventory[f.id]).length
   const totalUnique = FIGURES.filter((f) => !f.secret).length
   const series = seriesId && SERIES_BY_ID[seriesId]
@@ -149,6 +156,7 @@ function Game({ userId }) {
           />
         )}
         {tab === 'market' && <MarketView market={market} wallet={state.wallet} act={act} />}
+        {tab === 'puzzles' && <PuzzlesView userId={userId} notify={notify} onEarned={game.refresh} />}
       </main>
 
       <footer className="footer">
@@ -172,6 +180,7 @@ function Game({ userId }) {
           figure={FIGURE_BY_ID[figureId]}
           count={state.inventory[figureId] || 0}
           onList={(price) => list(figureId, price)}
+          onBank={() => sellToBank(figureId)}
           onClose={() => setFigureId(null)}
         />
       )}

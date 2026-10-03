@@ -7,6 +7,9 @@
 export const DAILY_ALLOWANCE = 40.5
 export const STARTING_WALLET = 60
 export const WELCOME_BONUS = 20 // one-time gift, given on a player's first login
+export const BANK_RATE = 0.7 // the bank buys figures for 70% of their market value
+export const PUZZLE_REWARDS = { small: 5, medium: 10, large: 15 }
+export const PUZZLE_DAILY_LIMIT = 20 // paid puzzles per player per day (UTC)
 export const SECRET_ODDS = 144 // regular series: 1 in 144
 export const LIMITED_SECRET_ODDS = 72 // limited 6-figure series: 1 in 72
 
@@ -121,6 +124,7 @@ const RAW_SERIES = [
       f('Pomeranian', '#F5B060', '#F5B060', 'fluffy', 12, { extras: ['bow:#7FD0EC'] }),
       f('Schnauzer', '#8E8E8E', '#D9D9D9', 'floppyEars', 8, { extras: ['scarf:#2E8B57', 'nose'] }),
       f('Bernese', '#2B2B2B', '#C47A3A', 'floppyEars', 9, { pattern: 'blaze', extras: ['collar:#E5343A'] }),
+      f('Cockapoo', '#E3B07E', '#E3B07E', 'fluffy', 13, { hoodFace: true, extras: ['bow:#7FD0EC'] }),
     ],
     secret: f('Robby Angel · Puppy', '#FFE08A', '#C47A3A', 'floppyEars', 190, { secret: true }),
   },

@@ -33,7 +33,14 @@ export function useOnlineGame(userId) {
       welcomeBonus: p.welcome_bonus,
       inventory,
       firstSeen,
-      stats: { opened: p.opened, spent: Number(p.spent), earned: Number(p.earned), secrets: p.secrets },
+      stats: {
+        opened: p.opened,
+        spent: Number(p.spent),
+        earned: Number(p.earned),
+        secrets: p.secrets,
+        puzzles: p.puzzles ?? 0,
+        puzzleEarned: Number(p.puzzle_earned ?? 0),
+      },
     })
   }, [userId])
 

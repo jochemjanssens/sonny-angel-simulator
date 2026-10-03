@@ -42,6 +42,9 @@ export default function Header({ tab, setTab, wallet, canClaim, onClaim, ownedUn
           <button className={`tabs__tab ${tab === 'market' ? 'is-active' : ''}`} onClick={() => setTab('market')}>
             Market {marketBadge > 0 && <span className="dot-badge">{marketBadge}</span>}
           </button>
+          <button className={`tabs__tab ${tab === 'puzzles' ? 'is-active' : ''}`} onClick={() => setTab('puzzles')}>
+            Puzzles
+          </button>
         </nav>
 
         <div className="wallet">

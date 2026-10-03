@@ -1,12 +1,21 @@
 import { useEffect, useState } from 'react'
 import Angel from './Angel'
 import PriceInput, { parsePrice } from './PriceInput'
-import { SERIES_BY_ID, euro } from '../data/collections'
+import { BANK_RATE, SERIES_BY_ID, euro } from '../data/collections'
 
-export default function FigureModal({ figure, count, onList, onClose }) {
+export default function FigureModal({ figure, count, onList, onBank, onClose }) {
   const series = SERIES_BY_ID[figure.seriesId]
   const [price, setPrice] = useState(String(figure.value))
   const [busy, setBusy] = useState(false)
+  const [confirmBank, setConfirmBank] = useState(false)
+  const bankPrice = Math.round(figure.value * BANK_RATE * 100) / 100
+
+  const bank = async () => {
+    setBusy(true)
+    await onBank()
+    setBusy(false)
+    setConfirmBank(false)
+  }
 
   const list = async () => {
     setBusy(true)
@@ -52,6 +61,29 @@ export default function FigureModal({ figure, count, onList, onClose }) {
               </button>
             </div>
             {count === 1 && <p className="modal__note">This is your only one: it leaves your shelf while it's listed.</p>}
+          </div>
+        )}
+        {count > 0 && (
+          <div className="modal__sell">
+            <p className="modal__sell-title">Or sell to the bank right away</p>
+            {confirmBank ? (
+              <div className="modal__actions">
+                <span className="modal__note">Sell your {count === 1 ? 'only' : ''} {figure.name} for {euro(bankPrice)}?</span>
+                <button className="btn btn--ghost btn--sm" onClick={() => setConfirmBank(false)}>
+                  Keep it
+                </button>
+                <button className="btn btn--primary btn--sm" disabled={busy} onClick={bank}>
+                  Sell
+                </button>
+              </div>
+            ) : (
+              <div className="modal__actions">
+                <button className="btn btn--ghost" onClick={() => setConfirmBank(true)}>
+                  Sell to bank · {euro(bankPrice)}
+                </button>
+              </div>
+            )}
+            <p className="modal__fine">The bank always buys, for {Math.round(BANK_RATE * 100)}% of the market value.</p>
           </div>
         )}
       </div>

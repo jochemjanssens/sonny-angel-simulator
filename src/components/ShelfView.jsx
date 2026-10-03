@@ -32,6 +32,7 @@ export default function ShelfView({ inventory, stats, onFigure, onGoShop, onGoMa
         <Stat label="Boxes opened" value={stats.opened} />
         <Stat label="Total spent" value={euro(stats.spent)} />
         <Stat label="Earned from sales" value={euro(stats.earned)} />
+        <Stat label="Earned from puzzles" value={euro(stats.puzzleEarned || 0)} />
       </div>
 
       <div className="shelf-actions">
