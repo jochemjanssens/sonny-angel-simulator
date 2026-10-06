@@ -155,7 +155,7 @@ function Game({ userId }) {
             onGoMarket={() => setTab('market')}
           />
         )}
-        {tab === 'market' && <MarketView market={market} wallet={state.wallet} act={act} />}
+        {tab === 'market' && <MarketView market={market} wallet={state.wallet} inventory={state.inventory} act={act} />}
         {tab === 'puzzles' && <PuzzlesView userId={userId} notify={notify} onEarned={game.refresh} />}
       </main>
 

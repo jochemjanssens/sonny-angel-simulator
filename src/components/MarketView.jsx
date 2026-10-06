@@ -11,7 +11,7 @@ const STATUS_TEXT = {
   closed: 'closed',
 }
 
-export default function MarketView({ market, wallet, act }) {
+export default function MarketView({ market, wallet, inventory, act }) {
   const [view, setView] = useState('browse')
   const sellingTurns = market.selling.filter((t) => t.myTurn).length
   const buyingTurns = market.buying.filter((t) => t.myTurn).length
@@ -39,7 +39,7 @@ export default function MarketView({ market, wallet, act }) {
       {!market.loaded ? (
         <p className="market__empty">Loading the market…</p>
       ) : view === 'browse' ? (
-        <Browse market={market} wallet={wallet} act={act} onGoOffers={() => setView('buying')} />
+        <Browse market={market} wallet={wallet} inventory={inventory} act={act} onGoOffers={() => setView('buying')} />
       ) : view === 'selling' ? (
         <Selling market={market} act={act} />
       ) : (
@@ -66,13 +66,19 @@ function FigureCell({ figureId, size = 64 }) {
 
 // ---------------------------------------------------------------- browse
 
-function Browse({ market, wallet, act, onGoOffers }) {
+function Browse({ market, wallet, inventory, act, onGoOffers }) {
   const [seriesFilter, setSeriesFilter] = useState('all')
+  const [missingOnly, setMissingOnly] = useState(false)
   const [offerFor, setOfferFor] = useState(null)
   const [amount, setAmount] = useState('')
 
   const myThreadByListing = useMemo(() => new Map(market.buying.filter((t) => t.open).map((t) => [t.listing.id, t])), [market.buying])
-  const listings = market.active.filter((l) => seriesFilter === 'all' || FIGURE_BY_ID[l.figure_id].seriesId === seriesFilter)
+  const listings = market.active.filter(
+    (l) =>
+      (seriesFilter === 'all' || FIGURE_BY_ID[l.figure_id].seriesId === seriesFilter) &&
+      // "missing" = not on your shelf right now (figures you sold count as missing)
+      (!missingOnly || !(inventory[l.figure_id] > 0)),
+  )
 
   const sendOffer = async (l) => {
     const p = parsePrice(amount)
@@ -92,11 +98,17 @@ function Browse({ market, wallet, act, onGoOffers }) {
             </option>
           ))}
         </select>
+        <label className="toggle">
+          <input type="checkbox" checked={missingOnly} onChange={(e) => setMissingOnly(e.target.checked)} />
+          <span>Only figures I don't have</span>
+        </label>
         <span className="market__count">{listings.length} for sale</span>
       </div>
 
       {!listings.length ? (
-        <p className="market__empty">Nothing for sale here yet. List a figure from your shelf to get trading!</p>
+        <p className="market__empty">
+          {missingOnly ? "Nothing for sale that's missing from your shelf right now." : 'Nothing for sale here yet. List a figure from your shelf to get trading!'}
+        </p>
       ) : (
         <div className="listing-grid">
           {listings.map((l) => {

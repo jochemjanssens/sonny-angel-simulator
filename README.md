@@ -12,7 +12,7 @@ npm run dev
 - **Blind boxes:** regular series cost €12.95, limited series cost €14.95. Opening a box goes through these steps: tap the box, it shakes, the lid flies off, you tear the foil, and the figure is revealed.
 - **Secrets:** a 1 in 144 chance per box (1 in 72 for limited 6-figure series), just like the real odds.
 - **Shelf:** every figure you own, grouped per series, with your collection value and stats.
-- **Puzzles:** earn money with a word search, Swedish puzzle or binary puzzle (Dutch words around the blind-box themes, pick a category). Small pays €5, medium €10, large €15, up to 20 paid puzzles a day.
+- **Puzzles:** earn money with a word search, Swedish puzzle or binary puzzle (Dutch words around the blind-box themes, pick a category). Small pays €5, medium €10, large €15. No daily limit.
 - **Bank:** sell any figure to the bank instantly for 70% of its market value.
 - **Market:** sell only to other real players. List a figure at your own price (it leaves your shelf while listed), buy now, or make an offer and counter back and forth until someone accepts.
 

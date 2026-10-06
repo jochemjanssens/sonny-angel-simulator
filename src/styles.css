@@ -2231,3 +2231,24 @@ h3 {
     grid-template-columns: 1fr;
   }
 }
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-weight: 800;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.toggle input {
+  accent-color: var(--red);
+  width: 16px;
+  height: 16px;
+}
+.market__filters {
+  flex-wrap: wrap;
+}

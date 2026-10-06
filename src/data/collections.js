@@ -9,7 +9,6 @@ export const STARTING_WALLET = 60
 export const WELCOME_BONUS = 20 // one-time gift, given on a player's first login
 export const BANK_RATE = 0.7 // the bank buys figures for 70% of their market value
 export const PUZZLE_REWARDS = { small: 5, medium: 10, large: 15 }
-export const PUZZLE_DAILY_LIMIT = 20 // paid puzzles per player per day (UTC)
 export const SECRET_ODDS = 144 // regular series: 1 in 144
 export const LIMITED_SECRET_ODDS = 72 // limited 6-figure series: 1 in 72
 

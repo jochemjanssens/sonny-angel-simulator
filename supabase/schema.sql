@@ -15,8 +15,7 @@ create table if not exists public.game_config (
   bank_rate numeric(4, 2) not null default 0.70,
   puzzle_small numeric(10, 2) not null default 5,
   puzzle_medium numeric(10, 2) not null default 10,
-  puzzle_large numeric(10, 2) not null default 15,
-  puzzle_daily_limit int not null default 20
+  puzzle_large numeric(10, 2) not null default 15
 );
 
 create table if not exists public.series (
@@ -416,7 +415,7 @@ begin
 end $$;
 
 -- Puzzles pay out from the server. A session starts when the puzzle opens;
--- finishing it pays only after a minimum solving time, up to a daily limit.
+-- finishing it pays only after a minimum solving time.
 create table if not exists public.puzzle_sessions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users (id) on delete cascade,
@@ -446,7 +445,6 @@ declare u uuid := public._uid();
   cfg public.game_config;
   pay numeric;
   min_secs int;
-  done_today int;
 begin
   select * into cfg from public.game_config;
   select * into s from public.puzzle_sessions where id = p_session and user_id = u for update;
@@ -456,11 +454,6 @@ begin
   min_secs := case s.size when 'small' then 20 when 'medium' then 40 else 60 end;
   if now() - s.started_at < make_interval(secs => min_secs) then
     raise exception 'That was suspiciously fast — try solving it for real';
-  end if;
-  select count(*) into done_today from public.puzzle_sessions
-    where user_id = u and finished_at >= date_trunc('day', now() at time zone 'utc') at time zone 'utc';
-  if done_today >= cfg.puzzle_daily_limit then
-    raise exception 'Daily puzzle limit reached — come back tomorrow';
   end if;
 
   pay := case s.size when 'small' then cfg.puzzle_small when 'medium' then cfg.puzzle_medium else cfg.puzzle_large end;

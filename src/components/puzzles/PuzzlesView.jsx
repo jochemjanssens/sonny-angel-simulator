@@ -6,7 +6,7 @@ import { WORD_CATEGORIES, CATEGORY_BY_ID } from '../../puzzles/words.js'
 import { makeWordSearch } from '../../puzzles/wordsearch.js'
 import { makeBinary, BINARY_SIZES } from '../../puzzles/binary.js'
 import { makeSwedish } from '../../puzzles/swedish.js'
-import { PUZZLE_DAILY_LIMIT, PUZZLE_REWARDS, euro } from '../../data/collections'
+import { PUZZLE_REWARDS, euro } from '../../data/collections'
 import { rpc, supabase } from '../../lib/supabase'
 
 const KINDS = [
@@ -141,11 +141,8 @@ export default function PuzzlesView({ userId, notify, onEarned }) {
           <h1 className="hero__title">Puzzle for pocket money</h1>
           <p className="hero__text">
             Solve a puzzle to earn money for blind boxes: {euro(PUZZLE_REWARDS.small)} for small, {euro(PUZZLE_REWARDS.medium)} for
-            medium and {euro(PUZZLE_REWARDS.large)} for large. You've been paid for{' '}
-            <strong>
-              {today}/{PUZZLE_DAILY_LIMIT}
-            </strong>{' '}
-            puzzles today.
+            medium and {euro(PUZZLE_REWARDS.large)} for large. You've solved <strong>{today}</strong>{' '}
+            {today === 1 ? 'puzzle' : 'puzzles'} today.
           </p>
         </div>
       </div>
@@ -186,8 +183,8 @@ export default function PuzzlesView({ userId, notify, onEarned }) {
       </div>
 
       <div className="puzzles__start">
-        <button className="btn btn--primary btn--lg" onClick={start} disabled={busy || today >= PUZZLE_DAILY_LIMIT}>
-          {today >= PUZZLE_DAILY_LIMIT ? 'Daily limit reached' : `Start puzzle · earn ${euro(PUZZLE_REWARDS[size])}`}
+        <button className="btn btn--primary btn--lg" onClick={start} disabled={busy}>
+          {`Start puzzle · earn ${euro(PUZZLE_REWARDS[size])}`}
         </button>
       </div>
     </section>
