@@ -70,17 +70,40 @@ export default function PuzzlesView({ userId, notify, onEarned }) {
     setBusy(false)
   }
 
-  const solved = async () => {
+  const paid = (amount) => {
+    setResult({ amount })
+    notify(`Puzzle solved! +${euro(amount)}`)
+    onEarned()
+    loadToday()
+  }
+
+  // Claims the reward, retrying when the request doesn't get through (e.g. the
+  // phone paused the page or the connection dropped). The puzzle stays unpaid on
+  // the server until a claim succeeds, so the player never loses the reward.
+  const claimReward = async (attempt = 0) => {
+    setResult({ claiming: true })
     try {
-      const amount = Number(await rpc('finish_puzzle', { p_session: session.id }))
-      setResult({ amount })
-      notify(`Puzzle solved! +${euro(amount)}`)
-      onEarned()
-      loadToday()
+      await supabase.auth.getSession() // refreshes the login if it expired while the phone slept
+      paid(Number(await rpc('finish_puzzle', { p_session: session.id })))
     } catch (err) {
-      setResult({ error: err.message })
+      if (/already paid/i.test(err.message)) {
+        // an earlier try reached the server but its answer got lost: it was paid
+        const { data } = await supabase.from('puzzle_sessions').select('reward').eq('id', session.id).maybeSingle()
+        return paid(Number(data?.reward ?? PUZZLE_REWARDS[session.size]))
+      }
+      const network = /load failed|failed to fetch|networkerror|network request failed/i.test(err.message)
+      if (network && attempt < 3) {
+        await new Promise((r) => setTimeout(r, 800 * 2 ** attempt))
+        return claimReward(attempt + 1)
+      }
+      setResult(
+        network
+          ? { error: "Couldn't reach the server to pay your reward. Check your connection and try again — your puzzle is saved.", retry: true }
+          : { error: err.message },
+      )
     }
   }
+  const solved = () => claimReward()
 
   if (session) {
     const k = KINDS.find((x) => x.id === session.kind)
@@ -108,7 +131,23 @@ export default function PuzzlesView({ userId, notify, onEarned }) {
           </p>
         </div>
 
-        {result ? (
+        {result?.claiming ? (
+          <div className="puzzle__done">
+            <span className="puzzle__done-icon">⏳</span>
+            <h2>Solved! Collecting your reward…</h2>
+          </div>
+        ) : result?.retry ? (
+          <div className="puzzle__done is-error">
+            <span className="puzzle__done-icon">📡</span>
+            <h2>Your reward is waiting</h2>
+            <p>{result.error}</p>
+            <div className="modal__actions">
+              <button className="btn btn--primary" onClick={() => claimReward()}>
+                Try again
+              </button>
+            </div>
+          </div>
+        ) : result ? (
           <div className={`puzzle__done ${result.error ? 'is-error' : ''}`}>
             <span className="puzzle__done-icon">{result.error ? '🙈' : '🎉'}</span>
             <h2>{result.error ? 'No reward this time' : `You earned ${euro(result.amount)}!`}</h2>

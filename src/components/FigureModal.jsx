@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import Angel from './Angel'
-import PriceInput, { parsePrice } from './PriceInput'
+import PriceInput, { formatPrice, parsePrice } from './PriceInput'
 import { BANK_RATE, SERIES_BY_ID, euro } from '../data/collections'
 
 export default function FigureModal({ figure, count, onList, onBank, onClose }) {
   const series = SERIES_BY_ID[figure.seriesId]
-  const [price, setPrice] = useState(String(figure.value))
+  const [price, setPrice] = useState(formatPrice(figure.value))
   const [busy, setBusy] = useState(false)
   const [confirmBank, setConfirmBank] = useState(false)
   const bankPrice = Math.round(figure.value * BANK_RATE * 100) / 100

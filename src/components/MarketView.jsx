@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import Angel from './Angel'
-import PriceInput, { parsePrice } from './PriceInput'
+import PriceInput, { formatPrice, parsePrice } from './PriceInput'
 import { FIGURE_BY_ID, SERIES, SERIES_BY_ID, euro } from '../data/collections'
 
 const STATUS_TEXT = {
@@ -151,7 +151,7 @@ function Browse({ market, wallet, inventory, act, onGoOffers }) {
                       className="btn btn--ghost btn--sm"
                       onClick={() => {
                         setOfferFor(l.id)
-                        setAmount(String(Math.max(0.5, Math.round(l.price * 0.8 * 2) / 2)))
+                        setAmount(formatPrice(Math.max(0.01, Math.round(l.price * 80) / 100)))
                       }}
                     >
                       Make offer
@@ -209,7 +209,7 @@ function Selling({ market, act }) {
                         className="btn btn--ghost btn--sm"
                         onClick={() => {
                           setEditing(l.id)
-                          setPrice(String(l.price))
+                          setPrice(formatPrice(l.price))
                         }}
                       >
                         Change price
@@ -357,7 +357,7 @@ function Thread({ thread, act }) {
               className="btn btn--ghost btn--sm"
               onClick={() => {
                 setCountering(true)
-                setAmount(String(latest.amount))
+                setAmount(formatPrice(latest.amount))
               }}
             >
               Counter
