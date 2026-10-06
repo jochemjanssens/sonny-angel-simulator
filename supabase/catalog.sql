@@ -380,4 +380,15 @@ insert into public.figures (id, series_id, value, secret) values ('easter-5', 'e
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret;
 insert into public.figures (id, series_id, value, secret) values ('easter-secret', 'easter', 190, true)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret;
+delete from public.wheel_prizes;
+insert into public.wheel_prizes (key, kind, amount, count, weight, sort) values ('cash5', 'cash', 5, null, 300, 0);
+insert into public.wheel_prizes (key, kind, amount, count, weight, sort) values ('fig1', 'figures', null, 1, 200, 1);
+insert into public.wheel_prizes (key, kind, amount, count, weight, sort) values ('cash10', 'cash', 10, null, 220, 2);
+insert into public.wheel_prizes (key, kind, amount, count, weight, sort) values ('cash20', 'cash', 20, null, 120, 3);
+insert into public.wheel_prizes (key, kind, amount, count, weight, sort) values ('fig2', 'figures', null, 2, 50, 4);
+insert into public.wheel_prizes (key, kind, amount, count, weight, sort) values ('cash15', 'cash', 15, null, 55, 5);
+insert into public.wheel_prizes (key, kind, amount, count, weight, sort) values ('cash50', 'cash', 50, null, 30, 6);
+insert into public.wheel_prizes (key, kind, amount, count, weight, sort) values ('fig3', 'figures', null, 3, 15, 7);
+insert into public.wheel_prizes (key, kind, amount, count, weight, sort) values ('cash100', 'cash', 100, null, 8, 8);
+insert into public.wheel_prizes (key, kind, amount, count, weight, sort) values ('secret', 'secret', null, 1, 2, 9);
 commit;

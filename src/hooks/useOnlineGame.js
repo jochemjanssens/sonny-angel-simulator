@@ -29,6 +29,7 @@ export function useOnlineGame(userId) {
       username: profile.data.username,
       wallet: Number(p.wallet),
       lastClaim: p.last_claim,
+      lastSpin: p.last_spin,
       imported: p.imported,
       welcomeBonus: p.welcome_bonus,
       inventory,

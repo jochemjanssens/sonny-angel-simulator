@@ -12,7 +12,7 @@ function untilMidnight() {
   return `${h}h ${String(m).padStart(2, '0')}m`
 }
 
-export default function Header({ tab, setTab, wallet, canClaim, onClaim, ownedUnique, totalUnique, marketBadge, username, onLogout }) {
+export default function Header({ tab, setTab, wallet, canClaim, onClaim, canSpin, onWheel, ownedUnique, totalUnique, marketBadge, username, onLogout }) {
   const [countdown, setCountdown] = useState(untilMidnight)
 
   useEffect(() => {
@@ -61,6 +61,9 @@ export default function Header({ tab, setTab, wallet, canClaim, onClaim, ownedUn
               Next allowance in {countdown}
             </span>
           )}
+          <button className={`wheel-btn ${canSpin ? 'is-ready' : ''}`} onClick={onWheel} title={canSpin ? 'Spin the lucky wheel!' : 'Lucky wheel'}>
+            🎡 {canSpin && <span>Spin</span>}
+          </button>
           <div className="user">
             <span className="user__name">@{username}</span>
             <button className="user__logout" onClick={onLogout}>

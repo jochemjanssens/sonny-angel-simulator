@@ -6,6 +6,7 @@ import MarketView from './components/MarketView'
 import PuzzlesView from './components/puzzles/PuzzlesView'
 import BlindBoxOpener from './components/BlindBoxOpener'
 import FigureModal from './components/FigureModal'
+import LuckyWheel from './components/LuckyWheel'
 import { LoginScreen, SetupNeeded, UsernameScreen } from './components/AuthScreens'
 import { DAILY_ALLOWANCE, FIGURES, FIGURE_BY_ID, SERIES_BY_ID, euro } from './data/collections'
 import { rpc, supabase } from './lib/supabase'
@@ -39,6 +40,7 @@ function Game({ userId }) {
   const [toast, setToast] = useState(null)
   const [localSave] = useState(readLocalSave)
   const [gift, setGift] = useState(null)
+  const [wheelOpen, setWheelOpen] = useState(false)
   const giftAsked = useRef(false)
 
   const notify = useCallback((msg) => {
@@ -123,6 +125,8 @@ function Game({ userId }) {
         wallet={state.wallet}
         canClaim={state.lastClaim !== utcTodayKey()}
         onClaim={claim}
+        canSpin={state.lastSpin !== utcTodayKey()}
+        onWheel={() => setWheelOpen(true)}
         ownedUnique={ownedUnique}
         totalUnique={totalUnique}
         marketBadge={market.actionCount}
@@ -182,6 +186,22 @@ function Game({ userId }) {
           onList={(price) => list(figureId, price)}
           onBank={() => sellToBank(figureId)}
           onClose={() => setFigureId(null)}
+        />
+      )}
+
+      {wheelOpen && (
+        <LuckyWheel
+          canSpin={state.lastSpin !== utcTodayKey()}
+          onSpin={async () => {
+            try {
+              return await rpc('spin_wheel')
+            } catch (err) {
+              notify(err.message)
+              return null
+            }
+          }}
+          onDone={game.refresh}
+          onClose={() => setWheelOpen(false)}
         />
       )}
 

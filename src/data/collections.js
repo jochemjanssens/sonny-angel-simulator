@@ -9,6 +9,21 @@ export const STARTING_WALLET = 60
 export const WELCOME_BONUS = 20 // one-time gift, given on a player's first login
 export const BANK_RATE = 0.7 // the bank buys figures for 70% of their market value
 export const PUZZLE_REWARDS = { small: 5, medium: 10, large: 15 }
+
+// Daily lucky wheel. Every slice looks the same size on the wheel, but the
+// server draws with these weights (out of 1000), so the big prizes are rare.
+export const WHEEL_PRIZES = [
+  { key: 'cash5', label: '€5', kind: 'cash', amount: 5, weight: 300, color: '#FDE3EA' },
+  { key: 'fig1', label: '1 figure', kind: 'figures', count: 1, weight: 200, color: '#DFF1FA' },
+  { key: 'cash10', label: '€10', kind: 'cash', amount: 10, weight: 220, color: '#FFF1C9' },
+  { key: 'cash20', label: '€20', kind: 'cash', amount: 20, weight: 120, color: '#E3F5D6' },
+  { key: 'fig2', label: '2 figures', kind: 'figures', count: 2, weight: 50, color: '#EDE3FF' },
+  { key: 'cash15', label: '€15', kind: 'cash', amount: 15, weight: 55, color: '#FFE3D3' },
+  { key: 'cash50', label: '€50', kind: 'cash', amount: 50, weight: 30, color: '#FDE3EA' },
+  { key: 'fig3', label: '3 figures', kind: 'figures', count: 3, weight: 15, color: '#DFF1FA' },
+  { key: 'cash100', label: '€100', kind: 'cash', amount: 100, weight: 8, color: '#FFF1C9' },
+  { key: 'secret', label: 'Secret!', kind: 'secret', count: 1, weight: 2, color: '#FFE08A' },
+]
 export const SECRET_ODDS = 144 // regular series: 1 in 144
 export const LIMITED_SECRET_ODDS = 72 // limited 6-figure series: 1 in 72
 

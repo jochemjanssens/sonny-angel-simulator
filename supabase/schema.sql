@@ -52,7 +52,8 @@ create table if not exists public.players (
   earned numeric(10, 2) not null default 0,
   secrets int not null default 0,
   puzzles int not null default 0,
-  puzzle_earned numeric(10, 2) not null default 0
+  puzzle_earned numeric(10, 2) not null default 0,
+  last_spin date
 );
 
 -- A row with count 0 means "had it once" (shown as Sold in the line-up).
@@ -476,6 +477,56 @@ begin
   return pay;
 end $$;
 
+-- Daily lucky wheel: one spin per player per UTC day, drawn on the server.
+create table if not exists public.wheel_prizes (
+  key text primary key,
+  kind text not null check (kind in ('cash', 'figures', 'secret')),
+  amount numeric(10, 2),
+  count int,
+  weight int not null check (weight > 0),
+  sort int not null
+);
+alter table public.wheel_prizes enable row level security;
+drop policy if exists "catalog readable" on public.wheel_prizes;
+create policy "catalog readable" on public.wheel_prizes for select using (true);
+
+create or replace function public.spin_wheel() returns jsonb
+language plpgsql security definer set search_path = public as $$
+declare u uuid := public._uid();
+  today date := (now() at time zone 'utc')::date;
+  roll int;
+  p_key text;
+  p_kind text;
+  p_amount numeric;
+  p_count int;
+  figs text[] := '{}';
+  news boolean[] := '{}';
+  f text;
+begin
+  update public.players set last_spin = today
+    where id = u and (last_spin is null or last_spin < today);
+  if not found then raise exception 'You already spun the wheel today — come back tomorrow'; end if;
+
+  -- weighted draw: walk the running total until it passes a random roll
+  roll := floor(random() * (select sum(weight) from public.wheel_prizes))::int;
+  select key, kind, amount, count into p_key, p_kind, p_amount, p_count
+    from (select *, sum(weight) over (order by sort) as upto from public.wheel_prizes) w
+    where upto > roll order by sort limit 1;
+
+  if p_kind = 'cash' then
+    update public.players set wallet = wallet + p_amount where id = u;
+  else
+    for i in 1 .. coalesce(p_count, 1) loop
+      select id into f from public.figures where secret = (p_kind = 'secret') order by random() limit 1;
+      figs := figs || f;
+      news := news || public._give(u, f);
+    end loop;
+    if p_kind = 'secret' then update public.players set secrets = secrets + 1 where id = u; end if;
+  end if;
+
+  return jsonb_build_object('prize', p_key, 'amount', p_amount, 'figures', to_jsonb(figs), 'new', to_jsonb(news));
+end $$;
+
 -- ---------------------------------------------------------------- permissions
 
 -- Supabase grants table access to its roles by default; RLS above limits reads,
@@ -491,6 +542,7 @@ grant execute on function
   public.start_puzzle(text, text),
   public.finish_puzzle(uuid),
   public.sell_to_bank(text),
+  public.spin_wheel(),
   public.open_box(text),
   public.import_local_save(numeric, jsonb, jsonb),
   public.create_listing(text, numeric),

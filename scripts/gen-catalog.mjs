@@ -1,7 +1,7 @@
 // Generates supabase/catalog.sql from src/data/collections.js so the server
 // knows every series, figure, price and value. Run: npm run gen:catalog
 import { writeFileSync } from 'node:fs'
-import { SERIES, DAILY_ALLOWANCE, STARTING_WALLET, WELCOME_BONUS, BANK_RATE, PUZZLE_REWARDS } from '../src/data/collections.js'
+import { SERIES, DAILY_ALLOWANCE, STARTING_WALLET, WELCOME_BONUS, BANK_RATE, PUZZLE_REWARDS, WHEEL_PRIZES } from '../src/data/collections.js'
 
 const q = (s) => `'${String(s).replace(/'/g, "''")}'`
 const lines = [
@@ -26,6 +26,12 @@ for (const s of SERIES) {
     )
   }
 }
+lines.push('delete from public.wheel_prizes;')
+WHEEL_PRIZES.forEach((p, i) => {
+  lines.push(
+    `insert into public.wheel_prizes (key, kind, amount, count, weight, sort) values (${q(p.key)}, ${q(p.kind)}, ${p.amount ?? 'null'}, ${p.count ?? 'null'}, ${p.weight}, ${i});`,
+  )
+})
 lines.push('commit;', '')
 writeFileSync(new URL('../supabase/catalog.sql', import.meta.url), lines.join('\n'))
 console.log(`Wrote catalog for ${SERIES.length} series`)
