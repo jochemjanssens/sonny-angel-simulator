@@ -2,10 +2,14 @@ import { useCallback, useEffect, useState } from 'react'
 import WordSearchGame from './WordSearchGame'
 import BinaryGame from './BinaryGame'
 import SwedishGame from './SwedishGame'
+import MemoryGame from './MemoryGame'
+import DifferencesGame from './DifferencesGame'
 import { WORD_CATEGORIES, CATEGORY_BY_ID } from '../../puzzles/words.js'
 import { makeWordSearch } from '../../puzzles/wordsearch.js'
 import { makeBinary, BINARY_SIZES } from '../../puzzles/binary.js'
 import { makeSwedish } from '../../puzzles/swedish.js'
+import { makeMemory, MEMORY_SIZES } from '../../puzzles/memory.js'
+import { makeDifferences, DIFF_SIZES } from '../../puzzles/differences.js'
 import { PUZZLE_REWARDS, euro } from '../../data/collections'
 import { rpc, supabase } from '../../lib/supabase'
 
@@ -13,17 +17,23 @@ const KINDS = [
   { id: 'wordsearch', name: 'Word search', icon: '🔎', text: 'Find the hidden Dutch words in the letter grid.', words: true },
   { id: 'swedish', name: 'Swedish puzzle', icon: '✏️', text: 'An arrow-word crossword with Dutch clues.', words: true },
   { id: 'binary', name: 'Binary puzzle', icon: '🔢', text: 'Fill the grid with 0s and 1s by the rules.', words: false },
+  { id: 'memory', name: 'Memory', icon: '🃏', text: 'Turn over the cards and find the pairs.', words: false },
+  { id: 'differences', name: 'Spot the difference', icon: '🔍', text: 'Find what changed between two shelves.', words: false },
 ]
 const SIZE_LABEL = { small: 'Small', medium: 'Medium', large: 'Large' }
 const GRID = {
   wordsearch: { small: '8×8', medium: '11×11', large: '14×14' },
   swedish: { small: '7×7', medium: '9×9', large: '11×11' },
   binary: Object.fromEntries(Object.entries(BINARY_SIZES).map(([k, n]) => [k, `${n}×${n}`])),
+  memory: Object.fromEntries(Object.entries(MEMORY_SIZES).map(([k, m]) => [k, `${m.pairs} pairs`])),
+  differences: Object.fromEntries(Object.entries(DIFF_SIZES).map(([k, d]) => [k, `${d.diffs} differences`])),
 }
 
 function build(kind, category, size, seed) {
   if (kind === 'wordsearch') return makeWordSearch(CATEGORY_BY_ID[category], size, seed)
   if (kind === 'swedish') return makeSwedish(CATEGORY_BY_ID[category], size, seed)
+  if (kind === 'memory') return makeMemory(size, seed)
+  if (kind === 'differences') return makeDifferences(size, seed)
   return makeBinary(size, seed)
 }
 
@@ -165,6 +175,10 @@ export default function PuzzlesView({ userId, notify, onEarned }) {
           <WordSearchGame key={session.id} puzzle={session.puzzle} onSolved={solved} />
         ) : session.kind === 'swedish' ? (
           <SwedishGame key={session.id} puzzle={session.puzzle} onSolved={solved} />
+        ) : session.kind === 'memory' ? (
+          <MemoryGame key={session.id} puzzle={session.puzzle} onSolved={solved} />
+        ) : session.kind === 'differences' ? (
+          <DifferencesGame key={session.id} puzzle={session.puzzle} onSolved={solved} />
         ) : (
           <BinaryGame key={session.id} puzzle={session.puzzle} onSolved={solved} />
         )}
