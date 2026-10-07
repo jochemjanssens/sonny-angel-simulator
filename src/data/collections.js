@@ -369,5 +369,8 @@ export function drawFigure(series) {
   return series.figures[Math.floor(Math.random() * series.figures.length)]
 }
 
-const fmt = new Intl.NumberFormat('en-IE', { style: 'currency', currency: 'EUR' })
+let fmt = new Intl.NumberFormat('en-IE', { style: 'currency', currency: 'EUR' })
+export const setMoneyLocale = (lang) => {
+  fmt = new Intl.NumberFormat(lang === 'nl' ? 'nl-NL' : 'en-IE', { style: 'currency', currency: 'EUR' })
+}
 export const euro = (n) => fmt.format(n)

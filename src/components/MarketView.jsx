@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import Angel from './Angel'
 import PriceInput, { formatPrice, parsePrice } from './PriceInput'
 import { FIGURE_BY_ID, SERIES, SERIES_BY_ID, euro } from '../data/collections'
+import { useT } from '../i18n'
 
 const STATUS_TEXT = {
   countered: 'countered',
@@ -12,6 +13,7 @@ const STATUS_TEXT = {
 }
 
 export default function MarketView({ market, wallet, inventory, act }) {
+  const { t } = useT()
   const [view, setView] = useState('browse')
   const sellingTurns = market.selling.filter((t) => t.myTurn).length
   const buyingTurns = market.buying.filter((t) => t.myTurn).length
@@ -20,24 +22,24 @@ export default function MarketView({ market, wallet, inventory, act }) {
     <section className="market">
       <div className="market__head">
         <div>
-          <h1 className="hero__title">Market</h1>
-          <p className="hero__text">Buy, sell and negotiate with real players. Listed figures leave your shelf until they sell or you cancel.</p>
+          <h1 className="hero__title">{t('Market')}</h1>
+          <p className="hero__text">{t('Buy, sell and negotiate with real players. Listed figures leave your shelf until they sell or you cancel.')}</p>
         </div>
         <nav className="subtabs">
           <button className={view === 'browse' ? 'is-active' : ''} onClick={() => setView('browse')}>
-            Browse
+            {t('Browse')}
           </button>
           <button className={view === 'selling' ? 'is-active' : ''} onClick={() => setView('selling')}>
-            My listings {sellingTurns > 0 && <span className="dot-badge">{sellingTurns}</span>}
+            {t('My listings')} {sellingTurns > 0 && <span className="dot-badge">{sellingTurns}</span>}
           </button>
           <button className={view === 'buying' ? 'is-active' : ''} onClick={() => setView('buying')}>
-            My offers {buyingTurns > 0 && <span className="dot-badge">{buyingTurns}</span>}
+            {t('My offers')} {buyingTurns > 0 && <span className="dot-badge">{buyingTurns}</span>}
           </button>
         </nav>
       </div>
 
       {!market.loaded ? (
-        <p className="market__empty">Loading the market…</p>
+        <p className="market__empty">{t('Loading the market…')}</p>
       ) : view === 'browse' ? (
         <Browse market={market} wallet={wallet} inventory={inventory} act={act} onGoOffers={() => setView('buying')} />
       ) : view === 'selling' ? (
@@ -54,6 +56,7 @@ const threadRank = (t) => (t.myTurn ? 0 : t.open ? 1 : 2)
 const byUrgency = (a, b) => threadRank(a) - threadRank(b) || b.latest.created_at.localeCompare(a.latest.created_at)
 
 function FigureCell({ figureId, size = 64 }) {
+  const { t } = useT()
   const fig = FIGURE_BY_ID[figureId]
   const series = SERIES_BY_ID[fig.seriesId]
   return (
@@ -62,7 +65,7 @@ function FigureCell({ figureId, size = 64 }) {
       <div>
         <strong>{fig.name}</strong>
         <span>{series.name}</span>
-        <span className="listing__value">Market value {euro(fig.value)}</span>
+        <span className="listing__value">{t('Market value {value}', { value: euro(fig.value) })}</span>
       </div>
     </div>
   )
@@ -71,6 +74,7 @@ function FigureCell({ figureId, size = 64 }) {
 // ---------------------------------------------------------------- browse
 
 function Browse({ market, wallet, inventory, act, onGoOffers }) {
+  const { t } = useT()
   const [seriesFilter, setSeriesFilter] = useState('all')
   const [missingOnly, setMissingOnly] = useState(false)
   const [offerFor, setOfferFor] = useState(null)
@@ -87,15 +91,15 @@ function Browse({ market, wallet, inventory, act, onGoOffers }) {
   const sendOffer = async (l) => {
     const p = parsePrice(amount)
     if (!p) return
-    const done = await act('make_offer', { p_listing: l.id, p_amount: p }, `Offer of ${euro(p)} sent to @${l.seller?.username}`)
+    const done = await act('make_offer', { p_listing: l.id, p_amount: p }, t('Offer of {amount} sent to @{user}', { amount: euro(p), user: l.seller?.username }))
     if (done) setOfferFor(null)
   }
 
   return (
     <>
       <div className="market__filters">
-        <select className="text-input" value={seriesFilter} onChange={(e) => setSeriesFilter(e.target.value)} aria-label="Filter by series">
-          <option value="all">All series</option>
+        <select className="text-input" value={seriesFilter} onChange={(e) => setSeriesFilter(e.target.value)} aria-label={t('Filter by series')}>
+          <option value="all">{t('All series')}</option>
           {SERIES.map((s) => (
             <option key={s.id} value={s.id}>
               {s.name}
@@ -104,14 +108,14 @@ function Browse({ market, wallet, inventory, act, onGoOffers }) {
         </select>
         <label className="toggle">
           <input type="checkbox" checked={missingOnly} onChange={(e) => setMissingOnly(e.target.checked)} />
-          <span>Only figures I don't have</span>
+          <span>{t("Only figures I don't have")}</span>
         </label>
         <span className="market__count">{listings.length} for sale</span>
       </div>
 
       {!listings.length ? (
         <p className="market__empty">
-          {missingOnly ? "Nothing for sale that's missing from your shelf right now." : 'Nothing for sale here yet. List a figure from your shelf to get trading!'}
+          {missingOnly ? t("Nothing for sale that's missing from your shelf right now.") : t('Nothing for sale here yet. List a figure from your shelf to get trading!')}
         </p>
       ) : (
         <div className="listing-grid">
@@ -122,23 +126,23 @@ function Browse({ market, wallet, inventory, act, onGoOffers }) {
               <article key={l.id} className={`listing ${own ? 'listing--own' : ''}`}>
                 <FigureCell figureId={l.figure_id} />
                 <div className="listing__meta">
-                  <span className="listing__seller">{own ? 'Your listing' : `by @${l.seller?.username}`}</span>
+                  <span className="listing__seller">{own ? t('Your listing') : t('by @{user}', { user: l.seller?.username })}</span>
                   <span className="listing__price">{euro(l.price)}</span>
                 </div>
                 {own ? null : thread ? (
                   <button className="listing__thread" onClick={onGoOffers}>
                     {thread.myTurn
-                      ? `@${l.seller?.username} countered: ${euro(thread.latest.amount)} — respond`
-                      : `Your offer ${euro(thread.latest.amount)} is waiting`}
+                      ? t('@{user} countered: {amount} — respond', { user: l.seller?.username, amount: euro(thread.latest.amount) })
+                      : t('Your offer {amount} is waiting', { amount: euro(thread.latest.amount) })}
                   </button>
                 ) : offerFor === l.id ? (
                   <div className="listing__actions">
-                    <PriceInput value={amount} onChange={setAmount} autoFocus label="Your offer" />
+                    <PriceInput value={amount} onChange={setAmount} autoFocus label={t('Your offer')} />
                     <button className="btn btn--primary btn--sm" onClick={() => sendOffer(l)} disabled={!parsePrice(amount)}>
-                      Send offer
+                      {t('Send offer')}
                     </button>
                     <button className="btn btn--ghost btn--sm" onClick={() => setOfferFor(null)}>
-                      Cancel
+                      {t('Cancel')}
                     </button>
                   </div>
                 ) : (
@@ -146,10 +150,10 @@ function Browse({ market, wallet, inventory, act, onGoOffers }) {
                     <button
                       className="btn btn--primary btn--sm"
                       disabled={wallet < l.price}
-                      title={wallet < l.price ? 'Not enough budget' : undefined}
-                      onClick={() => act('buy_now', { p_listing: l.id }, `You bought ${FIGURE_BY_ID[l.figure_id].name} for ${euro(l.price)}!`)}
+                      title={wallet < l.price ? t('Not enough budget') : undefined}
+                      onClick={() => act('buy_now', { p_listing: l.id }, t('You bought {name} for {price}!', { name: FIGURE_BY_ID[l.figure_id].name, price: euro(l.price) }))}
                     >
-                      Buy now
+                      {t('Buy now')}
                     </button>
                     <button
                       className="btn btn--ghost btn--sm"
@@ -158,7 +162,7 @@ function Browse({ market, wallet, inventory, act, onGoOffers }) {
                         setAmount(formatPrice(Math.max(0.01, Math.round(l.price * 80) / 100)))
                       }}
                     >
-                      Make offer
+                      {t('Make offer')}
                     </button>
                   </div>
                 )}
@@ -174,6 +178,7 @@ function Browse({ market, wallet, inventory, act, onGoOffers }) {
 // ---------------------------------------------------------------- my listings
 
 function Selling({ market, act }) {
+  const { t } = useT()
   const [editing, setEditing] = useState(null)
   const [price, setPrice] = useState('')
   // listings with a fresh offer for you float to the top, newest offer first
@@ -196,12 +201,12 @@ function Selling({ market, act }) {
   const savePrice = async (l) => {
     const p = parsePrice(price)
     if (!p) return
-    if (await act('update_listing_price', { p_listing: l.id, p_price: p }, `Price changed to ${euro(p)}`)) setEditing(null)
+    if (await act('update_listing_price', { p_listing: l.id, p_price: p }, t('Price changed to {price}', { price: euro(p) }))) setEditing(null)
   }
 
   return (
     <>
-      {!active.length && <p className="market__empty">You have nothing listed. Open a figure on your shelf and choose "Put on market".</p>}
+      {!active.length && <p className="market__empty">{t('You have nothing listed. Open a figure on your shelf and choose "Put on market".')}</p>}
       {active.map(({ l, threads }) => {
         return (
           <article key={l.id} className="listing listing--wide">
@@ -210,12 +215,12 @@ function Selling({ market, act }) {
               <div className="listing__side">
                 {editing === l.id ? (
                   <div className="listing__actions">
-                    <PriceInput value={price} onChange={setPrice} autoFocus label="New price" />
+                    <PriceInput value={price} onChange={setPrice} autoFocus label={t('New price')} />
                     <button className="btn btn--primary btn--sm" onClick={() => savePrice(l)} disabled={!parsePrice(price)}>
-                      Save
+                      {t('Save')}
                     </button>
                     <button className="btn btn--ghost btn--sm" onClick={() => setEditing(null)}>
-                      Cancel
+                      {t('Cancel')}
                     </button>
                   </div>
                 ) : (
@@ -229,13 +234,13 @@ function Selling({ market, act }) {
                           setPrice(formatPrice(l.price))
                         }}
                       >
-                        Change price
+                        {t('Change price')}
                       </button>
                       <button
                         className="btn btn--ghost btn--sm"
-                        onClick={() => act('cancel_listing', { p_listing: l.id }, `${FIGURE_BY_ID[l.figure_id].name} is back on your shelf`)}
+                        onClick={() => act('cancel_listing', { p_listing: l.id }, t('{name} is back on your shelf', { name: FIGURE_BY_ID[l.figure_id].name }))}
                       >
-                        Take off market
+                        {t('Take off market')}
                       </button>
                     </div>
                   </>
@@ -245,7 +250,7 @@ function Selling({ market, act }) {
             {threads.length ? (
               threads.map((t) => <Thread key={t.key} thread={t} act={act} />)
             ) : (
-              <p className="listing__none">No offers yet.</p>
+              <p className="listing__none">{t('No offers yet.')}</p>
             )}
           </article>
         )
@@ -253,13 +258,13 @@ function Selling({ market, act }) {
 
       {history.length > 0 && (
         <>
-          <h2 className="section-title">History</h2>
+          <h2 className="section-title">{t('History')}</h2>
           <ul className="history">
             {history.map((l) => (
               <li key={l.id}>
                 <span>{FIGURE_BY_ID[l.figure_id].name}</span>
                 <span className={`history__status history__status--${l.status}`}>
-                  {l.status === 'sold' ? `Sold for ${euro(l.sold_price)}` : 'Taken off market'}
+                  {l.status === 'sold' ? t('Sold for {price}', { price: euro(l.sold_price) }) : t('Taken off market')}
                 </span>
               </li>
             ))}
@@ -273,32 +278,33 @@ function Selling({ market, act }) {
 // ---------------------------------------------------------------- my offers
 
 function Buying({ market, act }) {
-  const open = market.buying.filter((t) => t.open).sort(byUrgency)
-  const closed = market.buying.filter((t) => !t.open).reverse()
-  if (!market.buying.length) return <p className="market__empty">You haven't made any offers yet. Find a figure in Browse and make an offer.</p>
+  const { t } = useT()
+  const open = market.buying.filter((th) => th.open).sort(byUrgency)
+  const closed = market.buying.filter((th) => !th.open).reverse()
+  if (!market.buying.length) return <p className="market__empty">{t("You haven't made any offers yet. Find a figure in Browse and make an offer.")}</p>
   return (
     <>
-      {open.map((t) => (
-        <article key={t.key} className="listing listing--wide">
+      {open.map((th) => (
+        <article key={th.key} className="listing listing--wide">
           <div className="listing__row">
-            <FigureCell figureId={t.listing.figure_id} />
+            <FigureCell figureId={th.listing.figure_id} />
             <div className="listing__side">
-              <span className="listing__seller">by @{t.listing.seller?.username}</span>
-              <span className="listing__price">Asking {euro(t.listing.price)}</span>
+              <span className="listing__seller">{t('by @{user}', { user: th.listing.seller?.username })}</span>
+              <span className="listing__price">{t('Asking {price}', { price: euro(th.listing.price) })}</span>
             </div>
           </div>
-          <Thread thread={t} act={act} />
+          <Thread thread={th} act={act} />
         </article>
       ))}
       {closed.length > 0 && (
         <>
-          <h2 className="section-title">Past negotiations</h2>
-          {closed.map((t) => (
-            <article key={t.key} className="listing listing--wide listing--closed">
+          <h2 className="section-title">{t('Past negotiations')}</h2>
+          {closed.map((th) => (
+            <article key={th.key} className="listing listing--wide listing--closed">
               <div className="listing__row">
-                <FigureCell figureId={t.listing.figure_id} size={48} />
+                <FigureCell figureId={th.listing.figure_id} size={48} />
               </div>
-              <Thread thread={t} act={act} />
+              <Thread thread={th} act={act} />
             </article>
           ))}
         </>
@@ -310,36 +316,37 @@ function Buying({ market, act }) {
 // ---------------------------------------------------------------- negotiation thread
 
 function Thread({ thread, act }) {
+  const { t } = useT()
   const [countering, setCountering] = useState(false)
   const [amount, setAmount] = useState('')
   const { latest, role, myTurn, open, listing } = thread
   const other = role === 'buyer' ? listing.seller?.username : thread.buyer
   const fig = FIGURE_BY_ID[listing.figure_id]
-  const who = (o) => (o.proposed_by === role ? 'You' : `@${other}`)
+  const who = (o) => (o.proposed_by === role ? t('You') : `@${other}`)
 
   const sendCounter = async () => {
     const p = parsePrice(amount)
     if (!p) return
-    if (await act('counter_offer', { p_offer: latest.id, p_amount: p }, `Counter-offer of ${euro(p)} sent`)) setCountering(false)
+    if (await act('counter_offer', { p_offer: latest.id, p_amount: p }, t('Counter-offer of {amount} sent', { amount: euro(p) }))) setCountering(false)
   }
 
   let outcome = null
   if (!open) {
-    if (latest.status === 'accepted') outcome = `Deal! ${fig.name} sold for ${euro(latest.amount)}`
-    else if (latest.status === 'rejected') outcome = `${who(latest) === 'You' ? `@${other} declined` : 'You declined'} ${euro(latest.amount)}`
-    else if (latest.status === 'withdrawn') outcome = 'Offer withdrawn'
-    else outcome = listing.status === 'sold' ? 'Sold to someone else' : 'Listing closed'
+    if (latest.status === 'accepted') outcome = t('Deal! {name} sold for {amount}', { name: fig.name, amount: euro(latest.amount) })
+    else if (latest.status === 'rejected') outcome = latest.proposed_by === role ? t('@{user} declined {amount}', { user: other, amount: euro(latest.amount) }) : t('You declined {amount}', { amount: euro(latest.amount) })
+    else if (latest.status === 'withdrawn') outcome = t('Offer withdrawn')
+    else outcome = listing.status === 'sold' ? t('Sold to someone else') : t('Listing closed')
   }
 
   return (
     <div className={`thread ${myTurn ? 'thread--turn' : ''}`}>
-      <div className="thread__title">{role === 'seller' ? `Negotiation with @${other}` : `Your negotiation with @${other}`}</div>
+      <div className="thread__title">{role === 'seller' ? t('Negotiation with @{user}', { user: other }) : t('Your negotiation with @{user}', { user: other })}</div>
       <ol className="thread__offers">
         {thread.offers.map((o) => (
           <li key={o.id} className={o.proposed_by === role ? 'is-mine' : ''}>
             <span className="thread__who">{who(o)}</span>
             <span className="thread__amount">{euro(o.amount)}</span>
-            {o.status !== 'pending' && <span className="thread__status">{STATUS_TEXT[o.status]}</span>}
+            {o.status !== 'pending' && <span className="thread__status">{t(STATUS_TEXT[o.status])}</span>}
           </li>
         ))}
       </ol>
@@ -348,12 +355,12 @@ function Thread({ thread, act }) {
       ) : myTurn ? (
         countering ? (
           <div className="listing__actions">
-            <PriceInput value={amount} onChange={setAmount} autoFocus label="Your counter-offer" />
+            <PriceInput value={amount} onChange={setAmount} autoFocus label={t('Your counter-offer')} />
             <button className="btn btn--primary btn--sm" onClick={sendCounter} disabled={!parsePrice(amount)}>
-              Send
+              {t('Send')}
             </button>
             <button className="btn btn--ghost btn--sm" onClick={() => setCountering(false)}>
-              Cancel
+              {t('Cancel')}
             </button>
           </div>
         ) : (
@@ -364,11 +371,11 @@ function Thread({ thread, act }) {
                 act(
                   'accept_offer',
                   { p_offer: latest.id },
-                  role === 'seller' ? `Sold to @${other} for ${euro(latest.amount)}!` : `You bought ${fig.name} for ${euro(latest.amount)}!`,
+                  role === 'seller' ? t('Sold to @{user} for {amount}!', { user: other, amount: euro(latest.amount) }) : t('You bought {name} for {price}!', { name: fig.name, price: euro(latest.amount) }),
                 )
               }
             >
-              Accept {euro(latest.amount)}
+              {t('Accept {amount}', { amount: euro(latest.amount) })}
             </button>
             <button
               className="btn btn--ghost btn--sm"
@@ -377,18 +384,18 @@ function Thread({ thread, act }) {
                 setAmount(formatPrice(latest.amount))
               }}
             >
-              Counter
+              {t('Counter')}
             </button>
-            <button className="btn btn--ghost btn--sm" onClick={() => act('reject_offer', { p_offer: latest.id }, 'Offer declined')}>
-              Decline
+            <button className="btn btn--ghost btn--sm" onClick={() => act('reject_offer', { p_offer: latest.id }, t('Offer declined'))}>
+              {t('Decline')}
             </button>
           </div>
         )
       ) : (
         <div className="listing__actions">
-          <span className="thread__waiting">Waiting for @{other}…</span>
-          <button className="btn btn--ghost btn--sm" onClick={() => act('withdraw_offer', { p_offer: latest.id }, 'Offer withdrawn')}>
-            Withdraw
+          <span className="thread__waiting">{t('Waiting for @{user}…', { user: other })}</span>
+          <button className="btn btn--ghost btn--sm" onClick={() => act('withdraw_offer', { p_offer: latest.id }, t('Offer withdrawn'))}>
+            {t('Withdraw')}
           </button>
         </div>
       )}

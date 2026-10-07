@@ -16,6 +16,7 @@ import { TETRIS_TARGETS } from '../../puzzles/tetris.js'
 import { COLORING_PAGES } from '../../puzzles/coloring.js'
 import { PUZZLE_REWARDS, euro } from '../../data/collections'
 import { rpc, supabase } from '../../lib/supabase'
+import { useT } from '../../i18n'
 
 const KINDS = [
   { id: 'wordsearch', name: 'Word search', icon: '🔎', text: 'Find the hidden Dutch words in the letter grid.', words: true },
@@ -27,14 +28,17 @@ const KINDS = [
   { id: 'coloring', name: 'Colouring page', icon: '🖍️', text: 'Colour in a Sonny Angel picture.', words: false },
 ]
 const SIZE_LABEL = { small: 'Small', medium: 'Medium', large: 'Large' }
-const GRID = {
+const STATIC_GRID = {
   wordsearch: { small: '8×8', medium: '11×11', large: '14×14' },
   swedish: { small: '7×7', medium: '9×9', large: '11×11' },
   binary: Object.fromEntries(Object.entries(BINARY_SIZES).map(([k, n]) => [k, `${n}×${n}`])),
-  memory: Object.fromEntries(Object.entries(MEMORY_SIZES).map(([k, m]) => [k, `${m.pairs} pairs`])),
-  differences: Object.fromEntries(Object.entries(DIFF_SIZES).map(([k, d]) => [k, `${d.diffs} differences`])),
-  tetris: Object.fromEntries(Object.entries(TETRIS_TARGETS).map(([k, n]) => [k, `${n} lines`])),
-  coloring: Object.fromEntries(Object.entries(COLORING_PAGES).map(([k, page]) => [k, page().name])),
+}
+const gridLabel = (t, kind, size) => {
+  if (kind === 'memory') return t('{n} pairs', { n: MEMORY_SIZES[size].pairs })
+  if (kind === 'differences') return t('{n} differences', { n: DIFF_SIZES[size].diffs })
+  if (kind === 'tetris') return t('{n} lines', { n: TETRIS_TARGETS[size] })
+  if (kind === 'coloring') return t(COLORING_PAGES[size]().name)
+  return STATIC_GRID[kind][size]
 }
 
 function build(kind, category, size, seed) {
@@ -49,6 +53,8 @@ function build(kind, category, size, seed) {
 
 export default function PuzzlesView({ userId, notify, onEarned }) {
   const [kind, setKind] = useState('wordsearch')
+  const { t, lang } = useT()
+  const catName = (c) => (lang === 'nl' ? c.name : c.en)
   const [category, setCategory] = useState(WORD_CATEGORIES[0].id)
   const [size, setSize] = useState('small')
   const [session, setSession] = useState(null) // { id, kind, category, size, puzzle, startedAt }
@@ -92,7 +98,7 @@ export default function PuzzlesView({ userId, notify, onEarned }) {
 
   const paid = (amount) => {
     setResult({ amount })
-    notify(`Puzzle solved! +${euro(amount)}`)
+    notify(t('Puzzle solved! +{amount}', { amount: euro(amount) }))
     onEarned()
     loadToday()
   }
@@ -118,8 +124,8 @@ export default function PuzzlesView({ userId, notify, onEarned }) {
       }
       setResult(
         network
-          ? { error: "Couldn't reach the server to pay your reward. Check your connection and try again — your puzzle is saved.", retry: true }
-          : { error: err.message },
+          ? { error: t("Couldn't reach the server to pay your reward. Check your connection and try again — your puzzle is saved."), retry: true }
+          : { error: t(err.message) },
       )
     }
   }
@@ -132,15 +138,15 @@ export default function PuzzlesView({ userId, notify, onEarned }) {
       <section className="puzzle">
         <div className="puzzle__head">
           <button className="link-back" onClick={() => setSession(null)}>
-            ← All puzzles
+            {t('← All puzzles')}
           </button>
           <h1>
-            {k.icon} {k.name}
+            {k.icon} {t(k.name)}
           </h1>
           <p className="puzzle__meta">
-            {k.words && <span>{CATEGORY_BY_ID[session.category].name}</span>}
+            {k.words && <span>{catName(CATEGORY_BY_ID[session.category])}</span>}
             <span>
-              {SIZE_LABEL[session.size]} · {GRID[session.kind][session.size]}
+              {t(SIZE_LABEL[session.size])} · {gridLabel(t, session.kind, session.size)}
             </span>
             <span className="puzzle__reward">{euro(PUZZLE_REWARDS[session.size])}</span>
             {!result && (
@@ -154,30 +160,30 @@ export default function PuzzlesView({ userId, notify, onEarned }) {
         {result?.claiming ? (
           <div className="puzzle__done">
             <span className="puzzle__done-icon">⏳</span>
-            <h2>Solved! Collecting your reward…</h2>
+            <h2>{t('Solved! Collecting your reward…')}</h2>
           </div>
         ) : result?.retry ? (
           <div className="puzzle__done is-error">
             <span className="puzzle__done-icon">📡</span>
-            <h2>Your reward is waiting</h2>
+            <h2>{t('Your reward is waiting')}</h2>
             <p>{result.error}</p>
             <div className="modal__actions">
               <button className="btn btn--primary" onClick={() => claimReward()}>
-                Try again
+                {t('Try again')}
               </button>
             </div>
           </div>
         ) : result ? (
           <div className={`puzzle__done ${result.error ? 'is-error' : ''}`}>
             <span className="puzzle__done-icon">{result.error ? '🙈' : '🎉'}</span>
-            <h2>{result.error ? 'No reward this time' : `You earned ${euro(result.amount)}!`}</h2>
-            <p>{result.error || 'The money is in your budget. Up for another one?'}</p>
+            <h2>{result.error ? t('No reward this time') : t('You earned {amount}!', { amount: euro(result.amount) })}</h2>
+            <p>{result.error || t('The money is in your budget. Up for another one?')}</p>
             <div className="modal__actions">
               <button className="btn btn--ghost" onClick={() => setSession(null)}>
-                Choose another
+                {t('Choose another')}
               </button>
               <button className="btn btn--primary" onClick={start} disabled={busy}>
-                Same again
+                {t('Same again')}
               </button>
             </div>
           </div>
@@ -205,45 +211,44 @@ export default function PuzzlesView({ userId, notify, onEarned }) {
     <section className="puzzles">
       <div className="hero">
         <div>
-          <h1 className="hero__title">Puzzle for pocket money</h1>
+          <h1 className="hero__title">{t('Puzzle for pocket money')}</h1>
           <p className="hero__text">
-            Solve a puzzle to earn money for blind boxes: {euro(PUZZLE_REWARDS.small)} for small, {euro(PUZZLE_REWARDS.medium)} for
-            medium and {euro(PUZZLE_REWARDS.large)} for large. You've solved <strong>{today}</strong>{' '}
-            {today === 1 ? 'puzzle' : 'puzzles'} today.
+            {t('Solve a puzzle to earn money for blind boxes: {small} for small, {medium} for medium and {large} for large.', { small: euro(PUZZLE_REWARDS.small), medium: euro(PUZZLE_REWARDS.medium), large: euro(PUZZLE_REWARDS.large) })}{' '}
+            {t(today === 1 ? "You've solved {n} puzzle today." : "You've solved {n} puzzles today.", { n: today })}
           </p>
         </div>
       </div>
 
-      <h2 className="section-title">1. Pick a puzzle</h2>
+      <h2 className="section-title">{t('1. Pick a puzzle')}</h2>
       <div className="choice-grid">
         {KINDS.map((k) => (
           <button key={k.id} className={`choice ${kind === k.id ? 'is-active' : ''}`} onClick={() => setKind(k.id)}>
             <span className="choice__icon">{k.icon}</span>
-            <strong>{k.name}</strong>
-            <span>{k.text}</span>
+            <strong>{t(k.name)}</strong>
+            <span>{t(k.text)}</span>
           </button>
         ))}
       </div>
 
       {current.words && (
         <>
-          <h2 className="section-title">2. Pick a category</h2>
+          <h2 className="section-title">{t('2. Pick a category')}</h2>
           <div className="chips">
             {WORD_CATEGORIES.map((c) => (
               <button key={c.id} className={`chip ${category === c.id ? 'is-active' : ''}`} onClick={() => setCategory(c.id)}>
-                {c.icon} {c.name}
+                {c.icon} {catName(c)}
               </button>
             ))}
           </div>
         </>
       )}
 
-      <h2 className="section-title">{current.words ? '3' : '2'}. Pick a size</h2>
+      <h2 className="section-title">{current.words ? '3' : '2'}. {t('Pick a size')}</h2>
       <div className="choice-grid choice-grid--sizes">
         {Object.keys(PUZZLE_REWARDS).map((s) => (
           <button key={s} className={`choice ${size === s ? 'is-active' : ''}`} onClick={() => setSize(s)}>
-            <strong>{SIZE_LABEL[s]}</strong>
-            <span>{GRID[kind][s]}</span>
+            <strong>{t(SIZE_LABEL[s])}</strong>
+            <span>{gridLabel(t, kind, s)}</span>
             <span className="choice__reward">{euro(PUZZLE_REWARDS[s])}</span>
           </button>
         ))}
@@ -251,7 +256,7 @@ export default function PuzzlesView({ userId, notify, onEarned }) {
 
       <div className="puzzles__start">
         <button className="btn btn--primary btn--lg" onClick={start} disabled={busy}>
-          {`Start puzzle · earn ${euro(PUZZLE_REWARDS[size])}`}
+          {t('Start puzzle · earn {amount}', { amount: euro(PUZZLE_REWARDS[size]) })}
         </button>
       </div>
     </section>

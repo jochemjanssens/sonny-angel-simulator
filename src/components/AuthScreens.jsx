@@ -4,11 +4,15 @@ import BoxArt from './BoxArt'
 import { SERIES, euro } from '../data/collections'
 import { rpc, supabase } from '../lib/supabase'
 import { clearLocalSave } from '../lib/localSave'
+import { LanguageSwitch, useT } from '../i18n'
 
 function AuthCard({ children }) {
   return (
     <div className="auth">
       <div className="auth__card">
+        <div className="auth__lang">
+          <LanguageSwitch />
+        </div>
         <div className="auth__logo">
           <span className="logo__name">Sonny Angel</span>
           <span className="logo__sub">simulator</span>
@@ -23,9 +27,10 @@ function AuthCard({ children }) {
 }
 
 export function SetupNeeded() {
+  const { t } = useT()
   return (
     <AuthCard>
-      <h1>Almost there</h1>
+      <h1>{t('Almost there')}</h1>
       <p>
         This copy isn't connected to a Supabase project yet. Add <code>VITE_SUPABASE_URL</code> and{' '}
         <code>VITE_SUPABASE_ANON_KEY</code> to <code>.env.local</code> and restart the dev server.
@@ -47,6 +52,7 @@ const PARADE = SERIES.map((x, i) => x.figures[(i * 5) % x.figures.length])
 
 export function LoginScreen() {
   const [email, setEmail] = useState('')
+  const { t } = useT()
   const [sent, setSent] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
@@ -73,22 +79,24 @@ export function LoginScreen() {
           <span className="logo__name">Sonny Angel</span>
           <span className="logo__sub">simulator</span>
         </span>
-        <a className="landing__navlink" href="#how">
-          How it works
-        </a>
+        <span className="landing__navright">
+          <a className="landing__navlink" href="#how">
+            {t('How it works')}
+          </a>
+          <LanguageSwitch />
+        </span>
       </header>
 
       <section className="landing__hero">
         <div className="landing__copy">
-          <span className="landing__eyebrow">✦ Blind boxes · Collecting · Trading</span>
+          <span className="landing__eyebrow">{t('✦ Blind boxes · Collecting · Trading')}</span>
           <h1 className="landing__title">
-            Open. Collect.
+            {t('Open. Collect.')}
             <br />
-            <span>Trade.</span>
+            <span>{t('Trade.')}</span>
           </h1>
           <p className="landing__lead">
-            Unbox {figureCount} angels across {SERIES.length} series, chase the 1-in-144 secrets, and trade with real
-            players. Make offers, counter, and haggle until it's a deal.
+            {t("Unbox {figures} angels across {series} series, chase the 1-in-144 secrets, and trade with real players. Make offers, counter, and haggle until it's a deal.", { figures: figureCount, series: SERIES.length })}
           </p>
 
           <div className="landing__card">
@@ -97,17 +105,15 @@ export function LoginScreen() {
                 <span className="landing__mail" aria-hidden>
                   ✉
                 </span>
-                <h2>Check your inbox</h2>
-                <p>
-                  We sent a magic link to <strong>{email}</strong>. Open it on this device and you're in.
-                </p>
+                <h2>{t('Check your inbox')}</h2>
+                <p>{t("We sent a magic link to {email}. Open it on this device and you're in.", { email })}</p>
                 <button className="btn btn--ghost btn--sm" onClick={() => setSent(false)}>
-                  Use another email
+                  {t('Use another email')}
                 </button>
               </div>
             ) : (
               <form onSubmit={submit} className="landing__form">
-                <label htmlFor="login-email">Start collecting, it's free</label>
+                <label htmlFor="login-email">{t("Start collecting, it's free")}</label>
                 <div className="landing__row">
                   <input
                     id="login-email"
@@ -115,15 +121,15 @@ export function LoginScreen() {
                     type="email"
                     required
                     autoComplete="email"
-                    placeholder="you@example.com"
+                    placeholder={t('you@example.com')}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
                   <button className="btn btn--primary" disabled={busy}>
-                    {busy ? 'Sending…' : 'Get my link'}
+                    {busy ? t('Sending…') : t('Get my link')}
                   </button>
                 </div>
-                <p className="landing__fine">No password needed. We email you a one-tap sign-in link.</p>
+                <p className="landing__fine">{t('No password needed. We email you a one-tap sign-in link.')}</p>
                 {error && <p className="auth__error">{error}</p>}
               </form>
             )}
@@ -161,24 +167,22 @@ export function LoginScreen() {
       <section className="landing__features" id="how">
         <article>
           <span className="landing__icon">🎁</span>
-          <h3>Open blind boxes</h3>
-          <p>
-            Every box hides a surprise. A daily allowance keeps you unboxing, and secrets turn up only once in 144 boxes.
-          </p>
+          <h3>{t('Open blind boxes')}</h3>
+          <p>{t('Every box hides a surprise. A daily allowance keeps you unboxing, and secrets turn up only once in 144 boxes.')}</p>
         </article>
         <article>
           <span className="landing__icon">🧸</span>
-          <h3>Build your shelf</h3>
-          <p>Line up every series, track your collection's value, and see which angels you're still missing.</p>
+          <h3>{t('Build your shelf')}</h3>
+          <p>{t("Line up every series, track your collection's value, and see which angels you're still missing.")}</p>
         </article>
         <article>
           <span className="landing__icon">🤝</span>
-          <h3>Trade with real players</h3>
-          <p>List your duplicates at your own price, make offers on others' figures, and counter until you agree.</p>
+          <h3>{t('Trade with real players')}</h3>
+          <p>{t("List your duplicates at your own price, make offers on others' figures, and counter until you agree.")}</p>
         </article>
       </section>
 
-      <footer className="footer">A fan-made simulator for fun · Not affiliated with Sonny Angel or Dreams Inc.</footer>
+      <footer className="footer">{t('A fan-made simulator for fun · Not affiliated with Sonny Angel or Dreams Inc.')}</footer>
     </div>
   )
 }
@@ -189,6 +193,7 @@ export function UsernameScreen({ localSave, canImport, onDone }) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
   const offerImport = canImport && localSave
+  const { t } = useT()
 
   const submit = async (e) => {
     e.preventDefault()
@@ -206,7 +211,7 @@ export function UsernameScreen({ localSave, canImport, onDone }) {
       }
       onDone()
     } catch (err) {
-      setError(err.message)
+      setError(t(err.message))
       setBusy(false)
     }
   }
@@ -214,15 +219,15 @@ export function UsernameScreen({ localSave, canImport, onDone }) {
   return (
     <AuthCard>
       <form onSubmit={submit} className="auth__form">
-        <h1>Pick a username</h1>
-        <p>Other players see this name on your listings and offers.</p>
+        <h1>{t('Pick a username')}</h1>
+        <p>{t('Other players see this name on your listings and offers.')}</p>
         <input
           className="text-input"
           required
           minLength={3}
           maxLength={20}
           pattern="[A-Za-z0-9_]{3,20}"
-          title="3–20 letters, numbers or underscores"
+          title={t('3–20 letters, numbers or underscores')}
           placeholder="angel_collector"
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -231,13 +236,12 @@ export function UsernameScreen({ localSave, canImport, onDone }) {
           <label className="auth__import">
             <input type="checkbox" checked={importSave} onChange={(e) => setImportSave(e.target.checked)} />
             <span>
-              Bring my current shelf from this browser: <strong>{localSave.figures} figures</strong> and{' '}
-              <strong>{euro(localSave.wallet)}</strong>. This can only be done once.
+              {t('Bring my current shelf from this browser: {figures} figures and {amount}. This can only be done once.', { figures: localSave.figures, amount: euro(localSave.wallet) })}
             </span>
           </label>
         )}
         <button className="btn btn--primary btn--lg" disabled={busy}>
-          {busy ? 'Saving…' : 'Start playing'}
+          {busy ? t('Saving…') : t('Start playing')}
         </button>
         {error && <p className="auth__error">{error}</p>}
       </form>

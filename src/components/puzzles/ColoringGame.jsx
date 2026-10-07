@@ -1,10 +1,12 @@
 import { useRef, useState } from 'react'
 import { COLORS } from '../../puzzles/coloring.js'
+import { useT } from '../../i18n'
 
 const ERASER = 'eraser'
 
 // Colouring page: pick a colour, tap an area. "Done" unlocks once every area has a colour.
 export default function ColoringGame({ puzzle, onSolved }) {
+  const { t } = useT()
   const { page } = puzzle
   const [fills, setFills] = useState({})
   const [color, setColor] = useState(COLORS[1])
@@ -40,7 +42,7 @@ export default function ColoringGame({ puzzle, onSolved }) {
       canvas.toBlob((blob) => {
         const a = document.createElement('a')
         a.href = URL.createObjectURL(blob)
-        a.download = `${page.name.toLowerCase().replace(/\s+/g, '-')}.png`
+        a.download = `${t(page.name).toLowerCase().replace(/\s+/g, '-')}.png`
         a.click()
         setTimeout(() => URL.revokeObjectURL(a.href), 2000)
       })
@@ -56,7 +58,7 @@ export default function ColoringGame({ puzzle, onSolved }) {
         viewBox={`0 0 ${page.width} ${page.height}`}
         xmlns="http://www.w3.org/2000/svg"
         role="img"
-        aria-label={page.name}
+        aria-label={t(page.name)}
       >
         {page.regions.map((r) => (
           <path
@@ -87,7 +89,7 @@ export default function ColoringGame({ puzzle, onSolved }) {
         ))}
       </svg>
 
-      <div className="color__palette" role="radiogroup" aria-label="Colours">
+      <div className="color__palette" role="radiogroup" aria-label={t('Colours')}>
         {COLORS.map((c) => (
           <button
             key={c}
@@ -104,7 +106,7 @@ export default function ColoringGame({ puzzle, onSolved }) {
           onClick={() => setColor(ERASER)}
           role="radio"
           aria-checked={color === ERASER}
-          aria-label="Eraser"
+          aria-label={t('Eraser')}
         >
           🧽
         </button>
@@ -112,14 +114,14 @@ export default function ColoringGame({ puzzle, onSolved }) {
 
       <div className="puzzle__bar">
         <span className="puzzle__hint">
-          {colored}/{page.regions.length} areas coloured
+          {t('{colored}/{total} areas coloured', { colored, total: page.regions.length })}
         </span>
         <span className="color__actions">
           <button className="btn btn--ghost btn--sm" onClick={save}>
-            Save picture
+            {t('Save picture')}
           </button>
           <button className="btn btn--primary btn--sm" onClick={finish} disabled={!complete || done}>
-            Done!
+            {t('Done!')}
           </button>
         </span>
       </div>

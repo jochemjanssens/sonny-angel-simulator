@@ -1,10 +1,12 @@
 import { useMemo, useRef, useState } from 'react'
 import { lineCells, matchWord } from '../../puzzles/wordsearch.js'
+import { useT } from '../../i18n'
 
 const COLORS = ['#FFD3E0', '#CDE8F6', '#D9F2C4', '#FFE7A8', '#E5D6FF', '#FFD9C2', '#C9F0E8', '#F9D0F0']
 
 // Find the words: drag across the letters (or tap the first and last letter).
 export default function WordSearchGame({ puzzle, onSolved }) {
+  const { t } = useT()
   const { n, grid, words } = puzzle
   const [found, setFound] = useState([])
   const [sel, setSel] = useState(null) // { anchor, current }
@@ -105,7 +107,7 @@ export default function WordSearchGame({ puzzle, onSolved }) {
           </li>
         ))}
       </ul>
-      <p className="puzzle__hint">Drag across a word, or tap its first and last letter. {found.length}/{words.length} found.</p>
+      <p className="puzzle__hint">{t('Drag across a word, or tap its first and last letter. {found}/{total} found.', { found: found.length, total: words.length })}</p>
     </div>
   )
 }

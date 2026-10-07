@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import Angel from './Angel'
 import Confetti from './Confetti'
 import { FIGURE_BY_ID, WHEEL_PRIZES, euro } from '../data/collections'
+import { useT } from '../i18n'
 
 const SLICE = 360 / WHEEL_PRIZES.length
 const R = 140
@@ -29,6 +30,7 @@ function untilMidnightUtc() {
 // Daily lucky wheel: the server picks the prize, the wheel spins to it.
 export default function LuckyWheel({ canSpin, onSpin, onDone, onClose }) {
   const [rotation, setRotation] = useState(0)
+  const { t } = useT()
   const [spinning, setSpinning] = useState(false)
   const [result, setResult] = useState(null)
   const [showOdds, setShowOdds] = useState(false)
@@ -64,14 +66,14 @@ export default function LuckyWheel({ canSpin, onSpin, onDone, onClose }) {
   const total = WHEEL_PRIZES.reduce((s, p) => s + p.weight, 0)
 
   return (
-    <div className="modal" role="dialog" aria-modal="true" aria-label="Lucky wheel" onClick={() => !spinning && onClose()}>
+    <div className="modal" role="dialog" aria-modal="true" aria-label={t('Lucky wheel')} onClick={() => !spinning && onClose()}>
       <div className="modal__card wheel" onClick={(e) => e.stopPropagation()}>
         {result && (prize.kind !== 'cash' || prize.amount >= 50) && <Confetti gold={prize.kind === 'secret'} count={70} />}
-        <button className="modal__close" onClick={onClose} disabled={spinning} aria-label="Close">
+        <button className="modal__close" onClick={onClose} disabled={spinning} aria-label={t('Close')}>
           ×
         </button>
-        <h2>Lucky wheel</h2>
-        <p className="wheel__sub">One free spin every day: money or figures, with a small chance of a big win.</p>
+        <h2>{t('Lucky wheel')}</h2>
+        <p className="wheel__sub">{t('One free spin every day: money or figures, with a small chance of a big win.')}</p>
 
         <div className="wheel__stage">
           <div className="wheel__pointer" aria-hidden />
@@ -91,7 +93,7 @@ export default function LuckyWheel({ canSpin, onSpin, onDone, onClose }) {
                     {icon(p)}
                   </text>
                   <text x={C} y={C - R + 52} textAnchor="middle" className={`wheel__label ${p.kind === 'secret' ? 'is-secret' : ''}`}>
-                    {p.kind === 'cash' ? `€${p.amount}` : p.kind === 'secret' ? 'Secret' : `×${p.count}`}
+                    {p.kind === 'cash' ? `€${p.amount}` : p.kind === 'secret' ? t('Secret') : `×${p.count}`}
                   </text>
                 </g>
               </g>
@@ -113,11 +115,11 @@ export default function LuckyWheel({ canSpin, onSpin, onDone, onClose }) {
               <p className="wheel__win">+{euro(result.amount)}</p>
             ) : (
               <>
-                <p className="wheel__win">{prize.kind === 'secret' ? '★ A secret figure! ★' : `${result.figures.length} figure${result.figures.length > 1 ? 's' : ''}!`}</p>
+                <p className="wheel__win">{prize.kind === 'secret' ? t('★ A secret figure! ★') : t(result.figures.length > 1 ? '{n} figures!' : '{n} figure!', { n: result.figures.length })}</p>
                 <div className="wheel__figures">
                   {result.figures.map((id, i) => (
                     <div key={i} className="wheel__fig">
-                      {result.new[i] && <span className="badge badge--new">New!</span>}
+                      {result.new[i] && <span className="badge badge--new">{t('New!')}</span>}
                       <Angel figure={FIGURE_BY_ID[id]} size={70} />
                       <span>{FIGURE_BY_ID[id].name}</span>
                     </div>
@@ -125,25 +127,25 @@ export default function LuckyWheel({ canSpin, onSpin, onDone, onClose }) {
                 </div>
               </>
             )}
-            <p className="wheel__note">Come back tomorrow for another spin.</p>
+            <p className="wheel__note">{t('Come back tomorrow for another spin.')}</p>
           </div>
         ) : canSpin ? (
           <button className="btn btn--primary btn--lg wheel__spin" onClick={spin} disabled={spinning}>
-            {spinning ? 'Spinning…' : 'Spin the wheel!'}
+            {spinning ? t('Spinning…') : t('Spin the wheel!')}
           </button>
         ) : (
-          <p className="wheel__note">You already spun today. Next spin in {untilMidnightUtc()}.</p>
+          <p className="wheel__note">{t('You already spun today. Next spin in {time}.', { time: untilMidnightUtc() })}</p>
         )}
 
         <button className="wheel__odds-toggle" onClick={() => setShowOdds((v) => !v)}>
-          {showOdds ? 'Hide odds' : 'Show odds'}
+          {showOdds ? t('Hide odds') : t('Show odds')}
         </button>
         {showOdds && (
           <ul className="wheel__odds">
             {WHEEL_PRIZES.map((p) => (
               <li key={p.key}>
                 <span>
-                  {icon(p)} {p.kind === 'cash' ? euro(p.amount) : p.kind === 'secret' ? 'Secret figure' : `${p.count} random figure${p.count > 1 ? 's' : ''}`}
+                  {icon(p)} {p.kind === 'cash' ? euro(p.amount) : p.kind === 'secret' ? t('Secret figure') : t(p.count > 1 ? '{n} random figures' : '{n} random figure', { n: p.count })}
                 </span>
                 <span>{((p.weight / total) * 100).toLocaleString('en', { maximumFractionDigits: 1 })}%</span>
               </li>

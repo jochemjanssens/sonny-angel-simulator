@@ -1,18 +1,22 @@
 import { useRef, useState } from 'react'
 import Angel from '../Angel'
-import { FIGURE_BY_ID } from '../../data/collections'
+import { figureFor } from '../../puzzles/differences.js'
+import { useT } from '../../i18n'
 
-// Spot the differences: tap a spot on either shelf where the two don't match.
+// Spot the differences: tap a figure on either shelf that isn't the same on the other.
 export default function DifferencesGame({ puzzle, onSolved }) {
+  const { t } = useT()
   const { cols, left, right, spots } = puzzle
   const [found, setFound] = useState(() => new Set())
   const [miss, setMiss] = useState(null)
+  const [misses, setMisses] = useState(0)
   const solvedSent = useRef(false)
 
   const tap = (i) => {
     if (found.has(i)) return
     if (!spots.includes(i)) {
       setMiss(i)
+      setMisses((m) => m + 1)
       setTimeout(() => setMiss((m) => (m === i ? null : m)), 500)
       return
     }
@@ -24,16 +28,16 @@ export default function DifferencesGame({ puzzle, onSolved }) {
     }
   }
 
-  const shelf = (items, side) => (
-    <div className="diff__shelf" style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }} aria-label={`${side} shelf`}>
-      {items.map((id, i) => (
+  const shelf = (items, label) => (
+    <div className="diff__shelf" style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }} aria-label={label}>
+      {items.map((item, i) => (
         <button
           key={i}
           className={`diff__spot ${found.has(i) ? 'is-found' : ''} ${miss === i ? 'is-miss' : ''}`}
           onClick={() => tap(i)}
-          aria-label={id ? FIGURE_BY_ID[id].name : 'Empty spot'}
+          aria-label={figureFor(item).name}
         >
-          {id ? <Angel figure={FIGURE_BY_ID[id]} size={52} /> : <span className="diff__empty" />}
+          <Angel figure={figureFor(item)} size={52} />
         </button>
       ))}
     </div>
@@ -42,11 +46,15 @@ export default function DifferencesGame({ puzzle, onSolved }) {
   return (
     <div className="diff">
       <div className="diff__pair">
-        {shelf(left, 'Left')}
-        {shelf(right, 'Right')}
+        {shelf(left, t('Left shelf'))}
+        {shelf(right, t('Right shelf'))}
       </div>
       <p className="puzzle__hint">
-        Tap where the two shelves are different. {found.size}/{spots.length} found.
+        {t('Look closely: colours, accessories and patterns can differ. {found}/{total} found · {misses} misses.', {
+          found: found.size,
+          total: spots.length,
+          misses,
+        })}
       </p>
     </div>
   )

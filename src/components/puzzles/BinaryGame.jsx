@@ -1,8 +1,10 @@
 import { useRef, useState } from 'react'
 import { binaryErrors, binarySolved } from '../../puzzles/binary.js'
+import { useT } from '../../i18n'
 
 // Tap a cell to cycle empty → 0 → 1. Grey digits are given.
 export default function BinaryGame({ puzzle, onSolved }) {
+  const { t } = useT()
   const { n } = puzzle
   const [grid, setGrid] = useState(() => puzzle.puzzle.map((row) => [...row]))
   const solvedSent = useRef(false)
@@ -31,7 +33,7 @@ export default function BinaryGame({ puzzle, onSolved }) {
                 key={`${r},${c}`}
                 className={`bin__cell ${given ? 'is-given' : ''} ${errors.has(`${r},${c}`) ? 'is-error' : ''} ${v !== null ? `is-${v}` : ''}`}
                 onClick={() => tap(r, c)}
-                aria-label={`Row ${r + 1}, column ${c + 1}: ${v ?? 'empty'}`}
+                aria-label={t('Row {r}, column {c}: {v}', { r: r + 1, c: c + 1, v: v ?? t('empty') })}
               >
                 {v ?? ''}
               </button>
@@ -40,16 +42,16 @@ export default function BinaryGame({ puzzle, onSolved }) {
         )}
       </div>
       <ul className="puzzle__rules">
-        <li>No three equal digits next to each other</li>
-        <li>Every row and column has as many 0s as 1s</li>
-        <li>No two rows or columns are the same</li>
+        <li>{t('No three equal digits next to each other')}</li>
+        <li>{t('Every row and column has as many 0s as 1s')}</li>
+        <li>{t('No two rows or columns are the same')}</li>
       </ul>
       <div className="puzzle__bar">
         <span className="puzzle__hint">
-          {filled}/{n * n} filled{filled === n * n && !binarySolved(grid) ? ' — something is not right yet' : ''}
+          {t('{filled}/{total} filled', { filled, total: n * n })}{filled === n * n && !binarySolved(grid) ? t(' — something is not right yet') : ''}
         </span>
         <button className="btn btn--ghost btn--sm" onClick={() => setGrid(puzzle.puzzle.map((row) => [...row]))}>
-          Clear
+          {t('Clear')}
         </button>
       </div>
     </div>

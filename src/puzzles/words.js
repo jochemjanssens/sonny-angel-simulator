@@ -5,6 +5,7 @@ export const WORD_CATEGORIES = [
   {
     id: 'dieren',
     name: 'Dieren',
+    en: 'Animals',
     icon: '🐰',
     words: [
       ['KAT', 'Miauwt'], ['HOND', 'Blaft'], ['KONIJN', 'Lange oren'], ['OLIFANT', 'Heeft een slurf'],
@@ -18,6 +19,7 @@ export const WORD_CATEGORIES = [
   {
     id: 'fruit',
     name: 'Fruit',
+    en: 'Fruit',
     icon: '🍓',
     words: [
       ['APPEL', 'Valt niet ver van de boom'], ['PEER', 'Fruit en lamp'], ['BANAAN', 'Krom en geel'],
@@ -31,6 +33,7 @@ export const WORD_CATEGORIES = [
   {
     id: 'groenten',
     name: 'Groenten',
+    en: 'Vegetables',
     icon: '🥕',
     words: [
       ['WORTEL', 'Konijnen smullen ervan'], ['TOMAAT', 'Rood, in ketchup'], ['KOOL', 'Groeit in kroppen'],
@@ -43,6 +46,7 @@ export const WORD_CATEGORIES = [
   {
     id: 'zee',
     name: 'Zee',
+    en: 'Sea',
     icon: '🐬',
     words: [
       ['VIS', 'Zwemt met kieuwen'], ['WALVIS', 'Grootste zoogdier'], ['DOLFIJN', 'Slim zeezoogdier'],
@@ -55,6 +59,7 @@ export const WORD_CATEGORIES = [
   {
     id: 'bloemen',
     name: 'Bloemen',
+    en: 'Flowers',
     icon: '🌸',
     words: [
       ['ROOS', 'Heeft doornen'], ['TULP', 'Hollandse bloem'], ['MADELIEF', 'Kleine witte bloem'],
@@ -67,6 +72,7 @@ export const WORD_CATEGORIES = [
   {
     id: 'snoep',
     name: 'Snoep',
+    en: 'Sweets',
     icon: '🧁',
     words: [
       ['SNOEP', 'Zoetigheid'], ['TAART', 'Voor je verjaardag'], ['KOEKJE', 'Bij de thee'], ['DONUT', 'Rond met gat'],
@@ -79,6 +85,7 @@ export const WORD_CATEGORIES = [
   {
     id: 'huisdieren',
     name: 'Katten & honden',
+    en: 'Cats & dogs',
     icon: '🐶',
     words: [
       ['POES', 'Vrouwtjeskat'], ['KITTEN', 'Jong katje'], ['PUP', 'Jong hondje'], ['POEDEL', 'Gekrulde hond'],
@@ -91,6 +98,7 @@ export const WORD_CATEGORIES = [
   {
     id: 'insecten',
     name: 'Insecten',
+    en: 'Insects',
     icon: '🐞',
     words: [
       ['BIJ', 'Maakt honing'], ['MIER', 'Harde werker'], ['VLINDER', 'Kleurrijke vleugels'],
@@ -103,6 +111,7 @@ export const WORD_CATEGORIES = [
   {
     id: 'feest',
     name: 'Feestdagen',
+    en: 'Holidays',
     icon: '🎃',
     words: [
       ['KERST', '25 december'], ['PASEN', 'Eieren zoeken'], ['HALLOWEEN', 'Griezelfeest'], ['CADEAU', 'Pakje'],
@@ -115,6 +124,7 @@ export const WORD_CATEGORIES = [
   {
     id: 'blindbox',
     name: 'Blind box',
+    en: 'Blind box',
     icon: '🎁',
     words: [
       ['ENGELTJE', 'Kleine engel'], ['VLEUGELS', 'Om mee te vliegen'], ['DOOSJE', 'Klein pakje'],

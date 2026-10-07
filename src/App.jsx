@@ -13,6 +13,7 @@ import { rpc, supabase } from './lib/supabase'
 import { readLocalSave } from './lib/localSave'
 import { useOnlineGame, utcTodayKey } from './hooks/useOnlineGame'
 import { useMarket } from './hooks/useMarket'
+import { useT } from './i18n'
 
 export default function App() {
   const [session, setSession] = useState(undefined)
@@ -25,12 +26,18 @@ export default function App() {
   }, [])
 
   if (!supabase) return <SetupNeeded />
-  if (session === undefined) return <div className="boot">Loading…</div>
+  if (session === undefined) return <Boot />
   if (!session) return <LoginScreen />
   return <Game key={session.user.id} userId={session.user.id} />
 }
 
+function Boot() {
+  const { t } = useT()
+  return <div className="boot">{t('Loading…')}</div>
+}
+
 function Game({ userId }) {
+  const { t } = useT()
   const game = useOnlineGame(userId)
   const market = useMarket(userId)
   const [tab, setTab] = useState('collections')
@@ -58,11 +65,11 @@ function Game({ userId }) {
         await Promise.all([game.refresh(), market.refresh()])
         return true
       } catch (err) {
-        notify(err.message)
+        notify(t(err.message))
         return false
       }
     },
-    [game, market, notify],
+    [game, market, notify, t],
   )
 
   // One-time welcome gift: claimed on the first login once a username is set.
@@ -79,34 +86,34 @@ function Game({ userId }) {
   }, [needsGift, game])
 
   const state = game.state
-  if (!state) return <div className="boot">{game.error ? `Couldn't load your game: ${game.error}` : 'Loading your shelf…'}</div>
+  if (!state) return <div className="boot">{game.error ? t("Couldn't load your game: {error}", { error: game.error }) : t('Loading your shelf…')}</div>
   if (!state.username) {
     return <UsernameScreen localSave={localSave} canImport={!state.imported && state.stats.opened === 0} onDone={game.refresh} />
   }
 
   const buy = async (series) => {
-    if (state.wallet < series.price) return notify('Not enough budget for this box.')
+    if (state.wallet < series.price) return notify(t('Not enough budget for this box.'))
     try {
       const data = await rpc('open_box', { p_series: series.id })
       const row = Array.isArray(data) ? data[0] : data
       setOpening({ seriesId: series.id, figureId: row.fig_id, isNew: row.is_new, key: Date.now() })
       game.refresh()
     } catch (err) {
-      notify(err.message)
+      notify(t(err.message))
     }
   }
 
-  const claim = () => act('claim_daily', {}, `+${euro(DAILY_ALLOWANCE)} daily allowance added!`)
+  const claim = () => act('claim_daily', {}, t('+{amount} daily allowance added!', { amount: euro(DAILY_ALLOWANCE) }))
 
   const list = async (id, price) => {
     if (!price) return
-    const ok = await act('create_listing', { p_fig: id, p_price: price }, `${FIGURE_BY_ID[id].name} is on the market for ${euro(price)}`)
+    const ok = await act('create_listing', { p_fig: id, p_price: price }, t('{name} is on the market for {price}', { name: FIGURE_BY_ID[id].name, price: euro(price) }))
     if (ok && (state.inventory[id] || 0) <= 1) setFigureId(null)
   }
 
   const sellToBank = async (id) => {
     const fig = FIGURE_BY_ID[id]
-    const ok = await act('sell_to_bank', { p_fig: id }, `Sold ${fig.name} to the bank`)
+    const ok = await act('sell_to_bank', { p_fig: id }, t('Sold {name} to the bank', { name: fig.name }))
     if (ok && (state.inventory[id] || 0) <= 1) setFigureId(null)
   }
 
@@ -164,7 +171,7 @@ function Game({ userId }) {
       </main>
 
       <footer className="footer">
-        A fan-made simulator for fun · Not affiliated with Sonny Angel or Dreams Inc. · Values are approximate resale prices
+        {t('A fan-made simulator for fun · Not affiliated with Sonny Angel or Dreams Inc. · Values are approximate resale prices')}
       </footer>
 
       {opening && (
@@ -196,7 +203,7 @@ function Game({ userId }) {
             try {
               return await rpc('spin_wheel')
             } catch (err) {
-              notify(err.message)
+              notify(t(err.message))
               return null
             }
           }}
@@ -211,12 +218,12 @@ function Game({ userId }) {
             <span className="gift__icon" aria-hidden>
               🎁
             </span>
-            <h2>Welcome gift!</h2>
+            <h2>{t('Welcome gift!')}</h2>
             <p>
-              <strong>{euro(gift)}</strong> has been added to your budget. Have fun unboxing and trading!
+              {t('{amount} has been added to your budget. Have fun unboxing and trading!', { amount: euro(gift) })}
             </p>
             <button className="btn btn--primary" onClick={() => setGift(null)}>
-              Thanks!
+              {t('Thanks!')}
             </button>
           </div>
         </div>

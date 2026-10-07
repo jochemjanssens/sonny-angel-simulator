@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { DAILY_ALLOWANCE, euro } from '../data/collections'
+import { LanguageSwitch, useT } from '../i18n'
 
 // The allowance resets at midnight UTC, the same clock the server uses.
 function untilMidnight() {
@@ -14,6 +15,7 @@ function untilMidnight() {
 
 export default function Header({ tab, setTab, wallet, canClaim, onClaim, canSpin, onWheel, ownedUnique, totalUnique, marketBadge, username, onLogout }) {
   const [countdown, setCountdown] = useState(untilMidnight)
+  const { t } = useT()
 
   useEffect(() => {
     const t = setInterval(() => setCountdown(untilMidnight()), 30_000)
@@ -34,42 +36,43 @@ export default function Header({ tab, setTab, wallet, canClaim, onClaim, canSpin
 
         <nav className="tabs">
           <button className={`tabs__tab ${tab === 'collections' ? 'is-active' : ''}`} onClick={() => setTab('collections')}>
-            Collections
+            {t('Collections')}
           </button>
           <button className={`tabs__tab ${tab === 'shelf' ? 'is-active' : ''}`} onClick={() => setTab('shelf')}>
-            My Shelf <span className="tabs__count">{ownedUnique}/{totalUnique}</span>
+            {t('My Shelf')} <span className="tabs__count">{ownedUnique}/{totalUnique}</span>
           </button>
           <button className={`tabs__tab ${tab === 'market' ? 'is-active' : ''}`} onClick={() => setTab('market')}>
-            Market {marketBadge > 0 && <span className="dot-badge">{marketBadge}</span>}
+            {t('Market')} {marketBadge > 0 && <span className="dot-badge">{marketBadge}</span>}
           </button>
           <button className={`tabs__tab ${tab === 'puzzles' ? 'is-active' : ''}`} onClick={() => setTab('puzzles')}>
-            Puzzles
+            {t('Puzzles')}
           </button>
         </nav>
 
         <div className="wallet">
-          <div className="wallet__balance" title="Your budget">
-            <span className="wallet__label">Budget</span>
+          <div className="wallet__balance" title={t('Your budget')}>
+            <span className="wallet__label">{t('Budget')}</span>
             <span className="wallet__amount">{euro(wallet)}</span>
           </div>
           {canClaim ? (
             <button className="btn btn--primary btn--sm wallet__claim" onClick={onClaim}>
-              + {euro(DAILY_ALLOWANCE)} daily
+              {t('+ {amount} daily', { amount: euro(DAILY_ALLOWANCE) })}
             </button>
           ) : (
-            <span className="wallet__next" title="Next daily allowance">
-              Next allowance in {countdown}
+            <span className="wallet__next" title={t('Next daily allowance')}>
+              {t('Next allowance in {time}', { time: countdown })}
             </span>
           )}
-          <button className={`wheel-btn ${canSpin ? 'is-ready' : ''}`} onClick={onWheel} title={canSpin ? 'Spin the lucky wheel!' : 'Lucky wheel'}>
-            🎡 {canSpin && <span>Spin</span>}
+          <button className={`wheel-btn ${canSpin ? 'is-ready' : ''}`} onClick={onWheel} title={canSpin ? t('Spin the lucky wheel!') : t('Lucky wheel')}>
+            🎡 {canSpin && <span>{t('Spin')}</span>}
           </button>
           <div className="user">
             <span className="user__name">@{username}</span>
             <button className="user__logout" onClick={onLogout}>
-              Log out
+              {t('Log out')}
             </button>
           </div>
+          <LanguageSwitch />
         </div>
       </div>
     </header>

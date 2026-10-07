@@ -5,6 +5,7 @@ const cellsOf = (w) => [...w.word].map((_, i) => [w.row + STEP[w.dir][0] * i, w.
 
 // Swedish puzzle: tap a white cell and type. The clue sits in the cell before each word.
 export default function SwedishGame({ puzzle, onSolved }) {
+  const { t } = useT()
   const { n, cells, words } = puzzle
   const [letters, setLetters] = useState({})
   const [active, setActive] = useState(null) // { word: index, pos: index within word }
@@ -93,7 +94,7 @@ export default function SwedishGame({ puzzle, onSolved }) {
 
   return (
     <div className="sw">
-      <p className="sw__active">{active ? `${active.word + 1}. ${words[active.word].clue} (${words[active.word].word.length})` : 'Tap a white cell to start'}</p>
+      <p className="sw__active">{active ? `${active.word + 1}. ${words[active.word].clue} (${words[active.word].word.length})` : t('Tap a white cell to start')}</p>
       <div className="sw__grid" style={{ gridTemplateColumns: `repeat(${n}, 1fr)`, '--n': n }}>
         {cells.map((row, r) =>
           row.map((cell, c) => {
@@ -126,16 +127,16 @@ export default function SwedishGame({ puzzle, onSolved }) {
           }),
         )}
       </div>
-      <input ref={inputRef} className="sw__input" aria-label="Type a letter" autoCapitalize="characters" autoComplete="off" onKeyDown={onKeyDown} onInput={onInput} />
+      <input ref={inputRef} className="sw__input" aria-label={t('Type a letter')} autoCapitalize="characters" autoComplete="off" onKeyDown={onKeyDown} onInput={onInput} />
       <div className="puzzle__bar">
-        <span className="puzzle__hint">Tap a cell twice to switch between across and down.</span>
+        <span className="puzzle__hint">{t('Tap a cell twice to switch between across and down.')}</span>
         <button className="btn btn--ghost btn--sm" onClick={() => setChecked(true)}>
-          Check
+          {t('Check')}
         </button>
       </div>
       <div className="sw__lists">
         <div>
-          <h4>Across →</h4>
+          <h4>{t('Across →')}</h4>
           <ol>
             {across.map((w) => (
               <li key={w.i} className={active?.word === w.i ? 'is-active' : ''} onClick={() => pickWord(w.i)}>
@@ -145,7 +146,7 @@ export default function SwedishGame({ puzzle, onSolved }) {
           </ol>
         </div>
         <div>
-          <h4>Down ↓</h4>
+          <h4>{t('Down ↓')}</h4>
           <ol>
             {down.map((w) => (
               <li key={w.i} className={active?.word === w.i ? 'is-active' : ''} onClick={() => pickWord(w.i)}>

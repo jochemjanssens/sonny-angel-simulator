@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { COLS, ROWS, cellsOf, emptyBoard, fits, lock, makeBag, rotate } from '../../puzzles/tetris.js'
+import { useT } from '../../i18n'
 
 // Tetris: clear the target number of lines. Arrow keys on a computer,
 // big buttons on a phone. Game over just starts a new round.
 export default function TetrisGame({ puzzle, onSolved }) {
+  const { t } = useT()
   const { target, seed } = puzzle
   const game = useRef(null)
   const [, redraw] = useState(0)
@@ -94,10 +96,10 @@ export default function TetrisGame({ puzzle, onSolved }) {
     <div className="tet">
       <div className="tet__stats">
         <span>
-          Lines <strong>{Math.min(g.lines, target)}</strong>/{target}
+          {t('Lines')} <strong>{Math.min(g.lines, target)}</strong>/{target}
         </span>
         <span>
-          Score <strong>{g.score}</strong>
+          {t('Score')} <strong>{g.score}</strong>
         </span>
       </div>
       <div className="tet__board" style={{ gridTemplateColumns: `repeat(${COLS}, 1fr)` }}>
@@ -116,33 +118,33 @@ export default function TetrisGame({ puzzle, onSolved }) {
         )}
         {(g.over || g.won) && (
           <div className="tet__overlay">
-            <strong>{g.won ? 'You did it! 🎉' : 'Game over'}</strong>
+            <strong>{g.won ? t('You did it! 🎉') : t('Game over')}</strong>
             {!g.won && (
               <button className="btn btn--primary btn--sm" onClick={newGame}>
-                Play again
+                {t('Play again')}
               </button>
             )}
           </div>
         )}
       </div>
       <div className="tet__controls">
-        <button className="tet__btn" onClick={() => act('left')} aria-label="Move left">
+        <button className="tet__btn" onClick={() => act('left')} aria-label={t('Move left')}>
           ◀
         </button>
-        <button className="tet__btn" onClick={() => act('rotate')} aria-label="Rotate">
+        <button className="tet__btn" onClick={() => act('rotate')} aria-label={t('Rotate')}>
           ⟳
         </button>
-        <button className="tet__btn" onClick={() => act('right')} aria-label="Move right">
+        <button className="tet__btn" onClick={() => act('right')} aria-label={t('Move right')}>
           ▶
         </button>
-        <button className="tet__btn" onClick={() => act('down')} aria-label="Move down">
+        <button className="tet__btn" onClick={() => act('down')} aria-label={t('Move down')}>
           ▼
         </button>
-        <button className="tet__btn tet__btn--drop" onClick={() => act('drop')} aria-label="Drop">
+        <button className="tet__btn tet__btn--drop" onClick={() => act('drop')} aria-label={t('Drop')}>
           ⤓
         </button>
       </div>
-      <p className="puzzle__hint">Arrow keys to move, ↑ to rotate, space to drop — or use the buttons.</p>
+      <p className="puzzle__hint">{t('Arrow keys to move, ↑ to rotate, space to drop — or use the buttons.')}</p>
     </div>
   )
 }

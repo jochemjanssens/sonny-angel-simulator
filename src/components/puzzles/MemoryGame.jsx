@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import Angel from '../Angel'
 import { FIGURE_BY_ID } from '../../data/collections'
+import { useT } from '../../i18n'
 
 // Memory: turn over two cards; matching Sonny Angels stay face up.
 export default function MemoryGame({ puzzle, onSolved }) {
+  const { t } = useT()
   const { cols, cards } = puzzle
   const [open, setOpen] = useState([]) // up to two card ids being looked at
   const [matched, setMatched] = useState(() => new Set())
@@ -43,7 +45,7 @@ export default function MemoryGame({ puzzle, onSolved }) {
               key={card.id}
               className={`mem__card ${faceUp ? 'is-up' : ''} ${matched.has(card.figureId) ? 'is-matched' : ''}`}
               onClick={() => flip(card)}
-              aria-label={faceUp ? FIGURE_BY_ID[card.figureId].name : 'Hidden card'}
+              aria-label={faceUp ? FIGURE_BY_ID[card.figureId].name : t('Hidden card')}
             >
               <span className="mem__inner">
                 <span className="mem__back">
@@ -58,7 +60,7 @@ export default function MemoryGame({ puzzle, onSolved }) {
         })}
       </div>
       <p className="puzzle__hint">
-        {matched.size}/{cards.length / 2} pairs found · {moves} {moves === 1 ? 'try' : 'tries'}
+        {t(moves === 1 ? '{found}/{total} pairs found · {moves} try' : '{found}/{total} pairs found · {moves} tries', { found: matched.size, total: cards.length / 2, moves })}
       </p>
     </div>
   )

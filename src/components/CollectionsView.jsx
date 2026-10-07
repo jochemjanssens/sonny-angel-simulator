@@ -1,16 +1,17 @@
 import Angel from './Angel'
 import BoxArt from './BoxArt'
 import { SERIES, euro } from '../data/collections'
+import { useT } from '../i18n'
 
 export function SeriesGrid({ inventory, onSelect }) {
+  const { t } = useT()
   return (
     <section>
       <div className="hero">
         <div>
-          <h1 className="hero__title">Who will you meet today?</h1>
+          <h1 className="hero__title">{t('Who will you meet today?')}</h1>
           <p className="hero__text">
-            Every blind box hides one of the figures in a series — and with a little luck, a rare secret
-            figure. You get a small allowance every day, so choose your box wisely!
+            {t('Every blind box hides one of the figures in a series — and with a little luck, a rare secret figure. You get a small allowance every day, so choose your box wisely!')}
           </p>
         </div>
       </div>
@@ -26,13 +27,13 @@ export function SeriesGrid({ inventory, onSelect }) {
               </div>
               <div className="series-card__body">
                 <h3>{s.name}</h3>
-                <p className="series-card__tagline">{s.tagline}</p>
-                <div className="progress" aria-label={`${owned} of ${s.figures.length} collected`}>
+                <p className="series-card__tagline">{t(s.tagline)}</p>
+                <div className="progress" aria-label={t('{owned} of {total} collected', { owned, total: s.figures.length })}>
                   <div className="progress__bar" style={{ width: `${pct}%` }} />
                 </div>
                 <div className="series-card__meta">
                   <span>
-                    {owned}/{s.figures.length} collected {secret && <span className="star">★</span>}
+                    {t('{owned}/{total} collected', { owned, total: s.figures.length })} {secret && <span className="star">★</span>}
                   </span>
                   <span className="price">{euro(s.price)}</span>
                 </div>
@@ -52,46 +53,47 @@ export function SeriesDetail({ series, inventory, seen = {}, listed = new Set(),
   const isSeen = (f) => !!(seen[f.id] || inventory[f.id])
   const secretOwned = !!inventory[series.secret.id]
   const secretSeen = isSeen(series.secret)
+  const { t } = useT()
 
   return (
     <section className="detail" style={{ '--theme': series.theme }}>
       <button className="link-back" onClick={onBack}>
-        ← All collections
+        {t('← All collections')}
       </button>
       <div className="detail__head">
         <div className="detail__art">
           <BoxArt series={series} size="lg" className="boxart--float" />
         </div>
         <div className="detail__info">
-          {series.limited && <span className="badge badge--limited">Limited edition</span>}
+          {series.limited && <span className="badge badge--limited">{t('Limited edition')}</span>}
           <h1>{series.name}</h1>
-          <p className="detail__tagline">{series.tagline}</p>
+          <p className="detail__tagline">{t(series.tagline)}</p>
           <dl className="facts">
             <div>
-              <dt>Box price</dt>
+              <dt>{t('Box price')}</dt>
               <dd>{euro(series.price)}</dd>
             </div>
             <div>
-              <dt>Collected</dt>
+              <dt>{t('Collected')}</dt>
               <dd>
                 {owned}/{series.figures.length}
               </dd>
             </div>
             <div>
-              <dt>Secret odds</dt>
-              <dd>1 in {series.odds}</dd>
+              <dt>{t('Secret odds')}</dt>
+              <dd>{t('1 in {n}', { n: series.odds })}</dd>
             </div>
           </dl>
           <button className="btn btn--primary btn--lg" onClick={onBuy} disabled={!canAfford}>
-            Buy a blind box · {euro(series.price)}
+            {t('Buy a blind box · {price}', { price: euro(series.price) })}
           </button>
           {!canAfford && (
-            <p className="detail__warn">Not enough budget — come back tomorrow or sell some duplicates.</p>
+            <p className="detail__warn">{t('Not enough budget — come back tomorrow or sell some duplicates.')}</p>
           )}
         </div>
       </div>
 
-      <h2 className="section-title">The line-up</h2>
+      <h2 className="section-title">{t('The line-up')}</h2>
       <div className="lineup">
         {series.figures.map((f) => {
           const count = inventory[f.id] || 0
@@ -102,10 +104,10 @@ export function SeriesDetail({ series, inventory, seen = {}, listed = new Set(),
               key={f.id}
               className={`lineup__item ${count ? 'is-owned' : ''} ${sold ? 'is-sold' : ''}`}
               onClick={() => count && onFigure(f.id)}
-              title={sold ? (tag === 'Listed' ? "It's on the market right now" : 'You had this one but sold it') : undefined}
+              title={sold ? (tag === 'Listed' ? t("It's on the market right now") : t('You had this one but sold it')) : undefined}
             >
               {count > 1 && <span className="count">×{count}</span>}
-              {sold && <span className="sold-tag">{tag}</span>}
+              {sold && <span className="sold-tag">{t(tag)}</span>}
               <Angel figure={f} silhouette={!count && !sold} size={84} />
               <span className="lineup__name">{f.name}</span>
               <span className="lineup__value">{isSeen(f) ? euro(f.value) : '€ ?'}</span>
@@ -115,12 +117,12 @@ export function SeriesDetail({ series, inventory, seen = {}, listed = new Set(),
         <button
           className={`lineup__item lineup__item--secret ${secretOwned ? 'is-owned' : ''} ${secretSeen && !secretOwned ? 'is-sold' : ''}`}
           onClick={() => secretOwned && onFigure(series.secret.id)}
-          title={secretSeen && !secretOwned ? 'You had this one but sold it' : undefined}
+          title={secretSeen && !secretOwned ? t('You had this one but sold it') : undefined}
         >
           {inventory[series.secret.id] > 1 && <span className="count">×{inventory[series.secret.id]}</span>}
-          {secretSeen && !secretOwned && <span className="sold-tag">{listed.has(series.secret.id) ? 'Listed' : 'Sold'}</span>}
+          {secretSeen && !secretOwned && <span className="sold-tag">{t(listed.has(series.secret.id) ? 'Listed' : 'Sold')}</span>}
           <Angel figure={series.secret} silhouette={!secretSeen} size={84} />
-          <span className="lineup__name">{secretSeen ? series.secret.name : 'Secret'}</span>
+          <span className="lineup__name">{secretSeen ? series.secret.name : t('Secret')}</span>
           <span className="lineup__value">{secretSeen ? euro(series.secret.value) : '€ ?'}</span>
         </button>
       </div>
