@@ -49,6 +49,10 @@ export default function MarketView({ market, wallet, inventory, act }) {
   )
 }
 
+// Negotiations waiting for your answer first, then other open ones, newest offer first.
+const threadRank = (t) => (t.myTurn ? 0 : t.open ? 1 : 2)
+const byUrgency = (a, b) => threadRank(a) - threadRank(b) || b.latest.created_at.localeCompare(a.latest.created_at)
+
 function FigureCell({ figureId, size = 64 }) {
   const fig = FIGURE_BY_ID[figureId]
   const series = SERIES_BY_ID[fig.seriesId]
@@ -172,7 +176,21 @@ function Browse({ market, wallet, inventory, act, onGoOffers }) {
 function Selling({ market, act }) {
   const [editing, setEditing] = useState(null)
   const [price, setPrice] = useState('')
-  const active = market.mine.filter((l) => l.status === 'active')
+  // listings with a fresh offer for you float to the top, newest offer first
+  const threadsFor = (id) => market.selling.filter((t) => t.listing?.id === id).sort(byUrgency)
+  const active = market.mine
+    .filter((l) => l.status === 'active')
+    .map((l) => ({ l, threads: threadsFor(l.id) }))
+    .sort((a, b) => {
+      const ta = a.threads[0]
+      const tb = b.threads[0]
+      const ra = ta ? threadRank(ta) : 3
+      const rb = tb ? threadRank(tb) : 3
+      if (ra !== rb) return ra - rb
+      const la = ta?.latest.created_at || a.l.created_at
+      const lb = tb?.latest.created_at || b.l.created_at
+      return lb.localeCompare(la)
+    })
   const history = market.mine.filter((l) => l.status !== 'active')
 
   const savePrice = async (l) => {
@@ -184,8 +202,7 @@ function Selling({ market, act }) {
   return (
     <>
       {!active.length && <p className="market__empty">You have nothing listed. Open a figure on your shelf and choose "Put on market".</p>}
-      {active.map((l) => {
-        const threads = market.selling.filter((t) => t.listing?.id === l.id)
+      {active.map(({ l, threads }) => {
         return (
           <article key={l.id} className="listing listing--wide">
             <div className="listing__row">
@@ -256,7 +273,7 @@ function Selling({ market, act }) {
 // ---------------------------------------------------------------- my offers
 
 function Buying({ market, act }) {
-  const open = market.buying.filter((t) => t.open)
+  const open = market.buying.filter((t) => t.open).sort(byUrgency)
   const closed = market.buying.filter((t) => !t.open).reverse()
   if (!market.buying.length) return <p className="market__empty">You haven't made any offers yet. Find a figure in Browse and make an offer.</p>
   return (
