@@ -5,9 +5,9 @@ import { FIGURE_BY_ID, SERIES } from '../data/collections.js'
 // series). On the right shelf some figures have a subtle change.
 // maxMisses: wrong taps allowed before the puzzle is lost, so tapping everything doesn't work
 export const DIFF_SIZES = {
-  small: { cols: 4, rows: 3, diffs: 4, maxMisses: 3 },
-  medium: { cols: 5, rows: 4, diffs: 6, maxMisses: 3 },
-  large: { cols: 6, rows: 5, diffs: 9, maxMisses: 4 },
+  small: { cols: 4, rows: 3, diffs: 4, maxMisses: 2 },
+  medium: { cols: 5, rows: 4, diffs: 6, maxMisses: 2 },
+  large: { cols: 6, rows: 5, diffs: 9, maxMisses: 2 },
 }
 
 const EXTRAS = ['bow:#FF6F91', 'bell', 'whiskers', 'cheeks', 'flower:#FFD3E0', 'collar:#4D79B5', 'scarf:#E5343A', 'bowtie:#2B2B2B', 'nose']
