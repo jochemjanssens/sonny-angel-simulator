@@ -800,8 +800,10 @@ h3 {
   animation: popIn 0.35s cubic-bezier(0.2, 1.4, 0.4, 1);
 }
 .modal__art {
-  background: radial-gradient(circle, var(--theme) 0, transparent 70%);
+  /* closest-side keeps the round glow inside the box, so it never gets cut off */
+  background: radial-gradient(circle closest-side, var(--theme) 0, transparent 100%);
   margin: -6px auto 6px;
+  padding: 8px 0;
   display: flex;
   justify-content: center;
 }
@@ -1677,7 +1679,7 @@ h3 {
   gap: 10px;
 }
 .listing__figure .angel {
-  background: radial-gradient(circle, color-mix(in srgb, var(--theme) 55%, #fff) 0, transparent 70%);
+  background: radial-gradient(circle closest-side, color-mix(in srgb, var(--theme) 55%, #fff) 0, transparent 100%);
   border-radius: 14px;
 }
 .listing__figure > div {
