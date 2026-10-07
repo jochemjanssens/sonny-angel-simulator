@@ -420,7 +420,7 @@ end $$;
 create table if not exists public.puzzle_sessions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users (id) on delete cascade,
-  kind text not null check (kind in ('wordsearch', 'swedish', 'binary', 'memory', 'differences')),
+  kind text not null check (kind in ('wordsearch', 'swedish', 'binary', 'memory', 'differences', 'tetris', 'coloring')),
   size text not null check (size in ('small', 'medium', 'large')),
   started_at timestamptz not null default now(),
   finished_at timestamptz,

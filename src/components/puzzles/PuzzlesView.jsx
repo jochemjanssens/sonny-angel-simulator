@@ -4,12 +4,16 @@ import BinaryGame from './BinaryGame'
 import SwedishGame from './SwedishGame'
 import MemoryGame from './MemoryGame'
 import DifferencesGame from './DifferencesGame'
+import TetrisGame from './TetrisGame'
+import ColoringGame from './ColoringGame'
 import { WORD_CATEGORIES, CATEGORY_BY_ID } from '../../puzzles/words.js'
 import { makeWordSearch } from '../../puzzles/wordsearch.js'
 import { makeBinary, BINARY_SIZES } from '../../puzzles/binary.js'
 import { makeSwedish } from '../../puzzles/swedish.js'
 import { makeMemory, MEMORY_SIZES } from '../../puzzles/memory.js'
 import { makeDifferences, DIFF_SIZES } from '../../puzzles/differences.js'
+import { TETRIS_TARGETS } from '../../puzzles/tetris.js'
+import { COLORING_PAGES } from '../../puzzles/coloring.js'
 import { PUZZLE_REWARDS, euro } from '../../data/collections'
 import { rpc, supabase } from '../../lib/supabase'
 
@@ -19,6 +23,8 @@ const KINDS = [
   { id: 'binary', name: 'Binary puzzle', icon: '🔢', text: 'Fill the grid with 0s and 1s by the rules.', words: false },
   { id: 'memory', name: 'Memory', icon: '🃏', text: 'Turn over the cards and find the pairs.', words: false },
   { id: 'differences', name: 'Spot the difference', icon: '🔍', text: 'Find what changed between two shelves.', words: false },
+  { id: 'tetris', name: 'Tetris', icon: '🧱', text: 'Stack the blocks and clear the lines.', words: false },
+  { id: 'coloring', name: 'Colouring page', icon: '🖍️', text: 'Colour in a Sonny Angel picture.', words: false },
 ]
 const SIZE_LABEL = { small: 'Small', medium: 'Medium', large: 'Large' }
 const GRID = {
@@ -27,6 +33,8 @@ const GRID = {
   binary: Object.fromEntries(Object.entries(BINARY_SIZES).map(([k, n]) => [k, `${n}×${n}`])),
   memory: Object.fromEntries(Object.entries(MEMORY_SIZES).map(([k, m]) => [k, `${m.pairs} pairs`])),
   differences: Object.fromEntries(Object.entries(DIFF_SIZES).map(([k, d]) => [k, `${d.diffs} differences`])),
+  tetris: Object.fromEntries(Object.entries(TETRIS_TARGETS).map(([k, n]) => [k, `${n} lines`])),
+  coloring: Object.fromEntries(Object.entries(COLORING_PAGES).map(([k, page]) => [k, page().name])),
 }
 
 function build(kind, category, size, seed) {
@@ -34,6 +42,8 @@ function build(kind, category, size, seed) {
   if (kind === 'swedish') return makeSwedish(CATEGORY_BY_ID[category], size, seed)
   if (kind === 'memory') return makeMemory(size, seed)
   if (kind === 'differences') return makeDifferences(size, seed)
+  if (kind === 'tetris') return { target: TETRIS_TARGETS[size], seed }
+  if (kind === 'coloring') return { page: COLORING_PAGES[size]() }
   return makeBinary(size, seed)
 }
 
@@ -179,6 +189,10 @@ export default function PuzzlesView({ userId, notify, onEarned }) {
           <MemoryGame key={session.id} puzzle={session.puzzle} onSolved={solved} />
         ) : session.kind === 'differences' ? (
           <DifferencesGame key={session.id} puzzle={session.puzzle} onSolved={solved} />
+        ) : session.kind === 'tetris' ? (
+          <TetrisGame key={session.id} puzzle={session.puzzle} onSolved={solved} />
+        ) : session.kind === 'coloring' ? (
+          <ColoringGame key={session.id} puzzle={session.puzzle} onSolved={solved} />
         ) : (
           <BinaryGame key={session.id} puzzle={session.puzzle} onSolved={solved} />
         )}
