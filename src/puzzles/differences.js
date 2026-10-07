@@ -3,7 +3,12 @@ import { FIGURE_BY_ID, SERIES } from '../data/collections.js'
 
 // Spot the differences: two shelves of look-alike figures (from only a few
 // series). On the right shelf some figures have a subtle change.
-export const DIFF_SIZES = { small: { cols: 4, rows: 3, diffs: 4 }, medium: { cols: 5, rows: 4, diffs: 6 }, large: { cols: 6, rows: 5, diffs: 9 } }
+// maxMisses: wrong taps allowed before the puzzle is lost, so tapping everything doesn't work
+export const DIFF_SIZES = {
+  small: { cols: 4, rows: 3, diffs: 4, maxMisses: 3 },
+  medium: { cols: 5, rows: 4, diffs: 6, maxMisses: 3 },
+  large: { cols: 6, rows: 5, diffs: 9, maxMisses: 4 },
+}
 
 const EXTRAS = ['bow:#FF6F91', 'bell', 'whiskers', 'cheeks', 'flower:#FFD3E0', 'collar:#4D79B5', 'scarf:#E5343A', 'bowtie:#2B2B2B', 'nose']
 const ACCENTS = ['#FF6F91', '#7FD0EC', '#8CCB5E', '#FFD34D', '#B39DDB', '#FFA94D', '#2B2B2B', '#FFFFFF']
@@ -46,7 +51,7 @@ const CHANGES = {
 }
 
 export function makeDifferences(size, seed) {
-  const { cols, rows, diffs } = DIFF_SIZES[size]
+  const { cols, rows, diffs, maxMisses } = DIFF_SIZES[size]
   const r = makeRandom(seed)
   const cells = cols * rows
   // a few series only, so the figures look alike
@@ -74,7 +79,7 @@ export function makeDifferences(size, seed) {
       }
     }
   }
-  return { cols, rows, left, right, spots }
+  return { cols, rows, left, right, spots, maxMisses }
 }
 
 export const figureFor = (item) => ({ ...FIGURE_BY_ID[item.id], ...item.over })

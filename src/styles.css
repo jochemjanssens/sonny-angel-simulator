@@ -2665,3 +2665,22 @@ h3 {
   justify-content: flex-end;
   margin: -12px -8px 4px 0;
 }
+
+.diff__lives {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  font-size: 1.5rem;
+  color: var(--red);
+  margin-bottom: 8px;
+}
+.diff__lives .is-lost {
+  color: #e6d7cf;
+}
+.diff__pair.is-lost {
+  opacity: 0.45;
+  pointer-events: none;
+}
+.diff__lost {
+  margin-top: 14px;
+}

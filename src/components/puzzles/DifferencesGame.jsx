@@ -4,16 +4,18 @@ import { figureFor } from '../../puzzles/differences.js'
 import { useT } from '../../i18n'
 
 // Spot the differences: tap a figure on either shelf that isn't the same on the other.
-export default function DifferencesGame({ puzzle, onSolved }) {
+export default function DifferencesGame({ puzzle, onSolved, onRetry }) {
   const { t } = useT()
-  const { cols, left, right, spots } = puzzle
+  const { cols, left, right, spots, maxMisses } = puzzle
   const [found, setFound] = useState(() => new Set())
   const [miss, setMiss] = useState(null)
   const [misses, setMisses] = useState(0)
   const solvedSent = useRef(false)
 
+  const lost = misses >= maxMisses
+
   const tap = (i) => {
-    if (found.has(i)) return
+    if (found.has(i) || lost || solvedSent.current) return
     if (!spots.includes(i)) {
       setMiss(i)
       setMisses((m) => m + 1)
@@ -45,17 +47,31 @@ export default function DifferencesGame({ puzzle, onSolved }) {
 
   return (
     <div className="diff">
-      <div className="diff__pair">
+      <div className="diff__lives" aria-label={t('{n} tries left', { n: maxMisses - misses })}>
+        {Array.from({ length: maxMisses }, (_, k) => (
+          <span key={k} className={k < maxMisses - misses ? '' : 'is-lost'}>
+            ♥
+          </span>
+        ))}
+      </div>
+      <div className={`diff__pair ${lost ? 'is-lost' : ''}`}>
         {shelf(left, t('Left shelf'))}
         {shelf(right, t('Right shelf'))}
       </div>
-      <p className="puzzle__hint">
-        {t('Look closely: colours, accessories and patterns can differ. {found}/{total} found · {misses} misses.', {
-          found: found.size,
-          total: spots.length,
-          misses,
-        })}
-      </p>
+      {lost ? (
+        <div className="puzzle__done is-error diff__lost">
+          <span className="puzzle__done-icon">💔</span>
+          <h2>{t('Out of tries')}</h2>
+          <p>{t('You tapped wrong {n} times. Look carefully before you tap — try a new puzzle!', { n: maxMisses })}</p>
+          <button className="btn btn--primary" onClick={onRetry}>
+            {t('New puzzle')}
+          </button>
+        </div>
+      ) : (
+        <p className="puzzle__hint">
+          {t('Look closely: colours, accessories and patterns can differ. {found}/{total} found.', { found: found.size, total: spots.length })}
+        </p>
+      )}
     </div>
   )
 }

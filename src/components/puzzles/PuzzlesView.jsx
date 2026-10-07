@@ -194,7 +194,7 @@ export default function PuzzlesView({ userId, notify, onEarned }) {
         ) : session.kind === 'memory' ? (
           <MemoryGame key={session.id} puzzle={session.puzzle} onSolved={solved} />
         ) : session.kind === 'differences' ? (
-          <DifferencesGame key={session.id} puzzle={session.puzzle} onSolved={solved} />
+          <DifferencesGame key={session.id} puzzle={session.puzzle} onSolved={solved} onRetry={start} />
         ) : session.kind === 'tetris' ? (
           <TetrisGame key={session.id} puzzle={session.puzzle} onSolved={solved} />
         ) : session.kind === 'coloring' ? (

@@ -307,4 +307,9 @@ export default {
   "Left shelf": "Linker plankje",
   "Right shelf": "Rechter plankje",
   "Look closely: colours, accessories and patterns can differ. {found}/{total} found · {misses} misses.": "Kijk goed: kleuren, accessoires en patronen kunnen verschillen. {found}/{total} gevonden · {misses} keer mis.",
+  "{n} tries left": "Nog {n} pogingen",
+  "Out of tries": "Geen pogingen meer",
+  "You tapped wrong {n} times. Look carefully before you tap — try a new puzzle!": "Je tikte {n} keer mis. Kijk goed voordat je tikt — probeer een nieuwe puzzel!",
+  "New puzzle": "Nieuwe puzzel",
+  "Look closely: colours, accessories and patterns can differ. {found}/{total} found.": "Kijk goed: kleuren, accessoires en patronen kunnen verschillen. {found}/{total} gevonden.",
 }
