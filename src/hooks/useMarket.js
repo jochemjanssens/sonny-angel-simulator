@@ -3,6 +3,17 @@ import { supabase } from '../lib/supabase'
 
 const LISTING_FIELDS = 'id, figure_id, price, status, created_at, seller_id, sold_price, seller:profiles!listings_seller_id_fkey(username)'
 
+// Supabase returns at most 1000 rows per request, so long lists are read in pages.
+async function fetchAll(build) {
+  const rows = []
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await build().range(from, from + 999)
+    if (error) return { error }
+    rows.push(...data)
+    if (data.length < 1000) return { data: rows }
+  }
+}
+
 // Market listings plus every negotiation the player takes part in.
 export function useMarket(userId) {
   const [active, setActive] = useState([])
@@ -11,19 +22,36 @@ export function useMarket(userId) {
   const [loaded, setLoaded] = useState(false)
 
   const refresh = useCallback(async () => {
-    const [a, m, o] = await Promise.all([
-      supabase.from('listings').select(LISTING_FIELDS).eq('status', 'active').order('created_at', { ascending: false }).limit(300),
-      supabase.from('listings').select(LISTING_FIELDS).eq('seller_id', userId).order('created_at', { ascending: false }).limit(60),
-      // row level security only returns offers where we are the buyer or the seller
+    const OFFER_FIELDS = 'id, listing_id, buyer_id, amount, proposed_by, status, created_at, buyer:profiles(username)'
+    const [a, mineActive, mineHistory, openOffers, pastOffers] = await Promise.all([
+      fetchAll(() => supabase.from('listings').select(LISTING_FIELDS).eq('status', 'active').order('created_at', { ascending: false }).order('id')),
+      fetchAll(() =>
+        supabase.from('listings').select(LISTING_FIELDS).eq('seller_id', userId).eq('status', 'active').order('created_at', { ascending: false }).order('id'),
+      ),
+      supabase.from('listings').select(LISTING_FIELDS).eq('seller_id', userId).neq('status', 'active').order('closed_at', { ascending: false }).limit(40),
+      // row level security only returns offers where we are the buyer or the seller.
+      // Every offer on a still-active listing is loaded; finished ones only recently.
+      fetchAll(() =>
+        supabase
+          .from('offers')
+          .select(`${OFFER_FIELDS}, listing:listings!inner(${LISTING_FIELDS})`)
+          .eq('listing.status', 'active')
+          .order('created_at')
+          .order('id'),
+      ),
       supabase
         .from('offers')
-        .select(`id, listing_id, buyer_id, amount, proposed_by, status, created_at, buyer:profiles(username), listing:listings(${LISTING_FIELDS})`)
-        .order('created_at', { ascending: true })
-        .limit(1000),
+        .select(`${OFFER_FIELDS}, listing:listings!inner(${LISTING_FIELDS})`)
+        .neq('listing.status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(300),
     ])
     if (!a.error) setActive(a.data)
-    if (!m.error) setMine(m.data)
-    if (!o.error) setOffers(o.data)
+    if (!mineActive.error && !mineHistory.error) setMine([...mineActive.data, ...mineHistory.data])
+    if (!openOffers.error && !pastOffers.error) {
+      const all = [...openOffers.data, ...pastOffers.data].sort((x, y) => x.created_at.localeCompare(y.created_at))
+      setOffers(all)
+    }
     setLoaded(true)
   }, [userId])
 
