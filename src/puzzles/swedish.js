@@ -87,13 +87,19 @@ function tryBuild(category, n, target, r) {
   return { n, cells, words }
 }
 
-export function makeSwedish(category, size, seed) {
-  const { n, target } = CONFIG[size]
+// level 0 (first puzzle of the day) shows some letters already; later levels
+// show fewer, then none, and pack in more words.
+export function makeSwedish(category, size, seed, level = 0) {
+  const { n } = CONFIG[size]
+  const target = CONFIG[size].target + Math.floor(level / 3)
   let best = null
   for (let attempt = 0; attempt < 160; attempt++) {
     const built = tryBuild(category, n, target, makeRandom(`${seed}:${attempt}`))
     if (!best || built.words.length > best.words.length) best = built
     if (built.words.length >= target) break
   }
+  const reveal = [0.35, 0.2, 0.1][level] ?? 0
+  const r = makeRandom(`${seed}:hints`)
+  for (const row of best.cells) for (const cell of row) if (cell.letter && r.next() < reveal) cell.given = true
   return best
 }

@@ -312,4 +312,7 @@ export default {
   "You tapped wrong {n} times. Look carefully before you tap — try a new puzzle!": "Je tikte {n} keer mis. Kijk goed voordat je tikt — probeer een nieuwe puzzel!",
   "New puzzle": "Nieuwe puzzel",
   "Look closely: colours, accessories and patterns can differ. {found}/{total} found.": "Kijk goed: kleuren, accessoires en patronen kunnen verschillen. {found}/{total} gevonden.",
+  "{used}/{min} colours used": "{used}/{min} kleuren gebruikt",
+  "Level {n}": "Niveau {n}",
+  "Every puzzle you solve today makes the next one harder. Back to level 1 at midnight (UTC).": "Elke puzzel die je vandaag oplost, maakt de volgende moeilijker. Om middernacht (UTC) begin je weer op niveau 1.",
 }

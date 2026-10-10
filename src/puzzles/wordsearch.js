@@ -6,11 +6,22 @@ const CONFIG = {
   medium: { n: 11, count: 9, dirs: [[0, 1], [1, 0], [1, 1], [-1, 1]] },
   large: { n: 14, count: 12, dirs: [[0, 1], [1, 0], [1, 1], [-1, 1], [0, -1], [-1, 0], [-1, -1], [1, -1]] },
 }
+const DIAGONAL = [[1, 1], [-1, 1]]
+const BACKWARDS = [[0, -1], [-1, 0], [-1, -1], [1, -1]]
 // Filler letters roughly follow Dutch letter frequencies.
 const FILLER = 'EEEEEEEEEENNNNNAAAAATTTTRRRRIIIIOOOODDDSSSLLLGGVVHHKKMMUUBBPWJZCF'
 
-export function makeWordSearch(category, size, seed) {
-  const { n, count, dirs } = CONFIG[size]
+// level: 0 for the first puzzle of the day, +1 for every puzzle solved since.
+// Harder levels add words, diagonal and backward words, and filler letters
+// borrowed from the hidden words (look-alike decoys).
+export function makeWordSearch(category, size, seed, level = 0) {
+  const base = CONFIG[size]
+  const n = base.n
+  const count = base.count + Math.min(4, Math.floor(level / 2))
+  const dirs = [...base.dirs]
+  if (level >= 2) dirs.push(...DIAGONAL.filter((d) => !dirs.some((x) => x[0] === d[0] && x[1] === d[1])))
+  if (level >= 4) dirs.push(...BACKWARDS.filter((d) => !dirs.some((x) => x[0] === d[0] && x[1] === d[1])))
+  const decoy = level >= 3 ? Math.min(0.6, 0.15 * (level - 2)) : 0
   const r = makeRandom(seed)
   const grid = Array.from({ length: n }, () => Array(n).fill(null))
   const words = []
@@ -39,7 +50,10 @@ export function makeWordSearch(category, size, seed) {
       break
     }
   }
-  for (let rr = 0; rr < n; rr++) for (let cc = 0; cc < n; cc++) grid[rr][cc] ??= r.pick(FILLER)
+  const wordLetters = words.map((w) => w.word).join('')
+  for (let rr = 0; rr < n; rr++) {
+    for (let cc = 0; cc < n; cc++) grid[rr][cc] ??= r.next() < decoy ? r.pick(wordLetters) : r.pick(FILLER)
+  }
   return { n, grid, words }
 }
 

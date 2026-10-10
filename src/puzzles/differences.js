@@ -50,10 +50,14 @@ const CHANGES = {
   hoodFace: (f) => ({ hoodFace: !f.hoodFace }),
 }
 
-export function makeDifferences(size, seed) {
-  const { cols, rows, diffs, maxMisses } = DIFF_SIZES[size]
+// level 0 is the first puzzle of the day. Higher levels add differences and,
+// from level 4, use only the subtle kinds (no swapped figures or hood faces).
+export function makeDifferences(size, seed, level = 0) {
+  const { cols, rows, maxMisses } = DIFF_SIZES[size]
   const r = makeRandom(seed)
   const cells = cols * rows
+  const diffs = Math.min(Math.floor(cells / 2), DIFF_SIZES[size].diffs + Math.floor(level / 2))
+  const kinds = level >= 4 ? Object.keys(CHANGES).filter((k) => k !== 'hoodFace') : [...Object.keys(CHANGES), 'swap']
   // a few series only, so the figures look alike
   const series = r.shuffle(SERIES.filter((s) => !s.limited)).slice(0, Math.ceil(cells / 10) + 1)
   const pool = r.shuffle(series.flatMap((s) => s.figures))
@@ -64,7 +68,7 @@ export function makeDifferences(size, seed) {
   for (const i of spots) {
     const fig = FIGURE_BY_ID[left[i].id]
     for (let attempt = 0; attempt < 10; attempt++) {
-      const kind = r.pick([...Object.keys(CHANGES), 'swap'])
+      const kind = r.pick(kinds)
       if (kind === 'swap') {
         // a different figure from the same series
         const sameSeries = SERIES.find((s) => s.id === fig.seriesId).figures.filter((f) => !left.some((l) => l.id === f.id))

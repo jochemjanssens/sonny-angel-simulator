@@ -82,7 +82,8 @@ export function logicSolve(start) {
   return g.every((row) => row.every((x) => x !== null)) ? g : null
 }
 
-export function makeBinary(size, seed) {
+// level 0 (first puzzle of the day) gives extra digits; from level 3 only the minimum.
+export function makeBinary(size, seed, level = 0) {
   const n = BINARY_SIZES[size]
   const r = makeRandom(seed)
   let solution = null
@@ -96,6 +97,12 @@ export function makeBinary(size, seed) {
     puzzle[row][c] = null
     const solved = logicSolve(puzzle)
     if (!solved || solved.some((line, i) => line.some((v, j) => v !== solution[i][j]))) puzzle[row][c] = keep
+  }
+  const extra = [0.4, 0.25, 0.12][level] ?? 0
+  for (const idx of r.shuffle([...Array(n * n).keys()])) {
+    const row = Math.floor(idx / n)
+    const c = idx % n
+    if (puzzle[row][c] === null && r.next() < extra) puzzle[row][c] = solution[row][c]
   }
   return { n, puzzle, solution }
 }

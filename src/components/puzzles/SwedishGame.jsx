@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
+import { useT } from '../../i18n'
 
 const STEP = { across: [0, 1], down: [1, 0] }
 const cellsOf = (w) => [...w.word].map((_, i) => [w.row + STEP[w.dir][0] * i, w.col + STEP[w.dir][1] * i])
@@ -7,7 +8,15 @@ const cellsOf = (w) => [...w.word].map((_, i) => [w.row + STEP[w.dir][0] * i, w.
 export default function SwedishGame({ puzzle, onSolved }) {
   const { t } = useT()
   const { n, cells, words } = puzzle
-  const [letters, setLetters] = useState({})
+  // letters shown from the start on easier levels; they can't be changed
+  const givenKeys = useMemo(() => {
+    const set = new Set()
+    cells.forEach((row, r) => row.forEach((cell, c) => cell.given && set.add(`${r},${c}`)))
+    return set
+  }, [cells])
+  const [letters, setLetters] = useState(() =>
+    Object.fromEntries([...givenKeys].map((k) => [k, cells[k.split(',')[0]][k.split(',')[1]].letter])),
+  )
   const [active, setActive] = useState(null) // { word: index, pos: index within word }
   const [checked, setChecked] = useState(false)
   const inputRef = useRef(null)
@@ -49,9 +58,13 @@ export default function SwedishGame({ puzzle, onSolved }) {
     const { letters: prev, active: act } = live.current
     if (!act) return
     const wordCells = cellsOf(words[act.word])
-    const key = wordCells[act.pos].join(',')
+    // skip over letters that were given
+    let at = act.pos
+    while (at < wordCells.length - 1 && givenKeys.has(wordCells[at].join(','))) at++
+    const key = wordCells[at].join(',')
+    if (givenKeys.has(key)) return
     const next = { ...prev, [key]: char }
-    const pos = char && act.pos < wordCells.length - 1 ? act.pos + 1 : act.pos
+    const pos = char && at < wordCells.length - 1 ? at + 1 : at
     update(next, { ...act, pos })
     const allRight = [...wordsAt.keys()].every((k) => {
       const [r, c] = k.split(',').map(Number)
@@ -70,8 +83,9 @@ export default function SwedishGame({ puzzle, onSolved }) {
     const key = wordCells[act.pos].join(',')
     if (e.key === 'Backspace') {
       e.preventDefault()
-      if (prev[key]) update({ ...prev, [key]: '' }, act)
-      else if (act.pos > 0) update({ ...prev, [wordCells[act.pos - 1].join(',')]: '' }, { ...act, pos: act.pos - 1 })
+      const prevKey = act.pos > 0 ? wordCells[act.pos - 1].join(',') : null
+      if (prev[key] && !givenKeys.has(key)) update({ ...prev, [key]: '' }, act)
+      else if (prevKey) update(givenKeys.has(prevKey) ? prev : { ...prev, [prevKey]: '' }, { ...act, pos: act.pos - 1 })
     } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
       update(prev, { ...act, pos: Math.min(wordCells.length - 1, act.pos + 1) })
     } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
@@ -118,7 +132,7 @@ export default function SwedishGame({ puzzle, onSolved }) {
             return (
               <button
                 key={key}
-                className={`sw__cell ${activeSet.has(key) ? 'is-word' : ''} ${cursor === key ? 'is-cursor' : ''} ${wrong ? 'is-wrong' : ''}`}
+                className={`sw__cell ${givenKeys.has(key) ? 'is-given' : ''} ${activeSet.has(key) ? 'is-word' : ''} ${cursor === key ? 'is-cursor' : ''} ${wrong ? 'is-wrong' : ''}`}
                 onClick={() => select(r, c)}
               >
                 {letters[key] || ''}

@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { COLS, ROWS, cellsOf, emptyBoard, fits, lock, makeBag, rotate } from '../../puzzles/tetris.js'
+import { COLS, ROWS, cellsOf, fits, lock, makeBag, rotate, startBoard } from '../../puzzles/tetris.js'
 import { useT } from '../../i18n'
 
 // Tetris: clear the target number of lines. Arrow keys on a computer,
 // big buttons on a phone. Game over just starts a new round.
 export default function TetrisGame({ puzzle, onSolved }) {
   const { t } = useT()
-  const { target, seed } = puzzle
+  const { target, seed, level = 0 } = puzzle
   const game = useRef(null)
   const [, redraw] = useState(0)
   const solvedSent = useRef(false)
@@ -14,9 +14,9 @@ export default function TetrisGame({ puzzle, onSolved }) {
 
   const newGame = useCallback(() => {
     const next = makeBag(`${seed}:${round.current++}`)
-    game.current = { board: emptyBoard(), piece: next(), next, lines: 0, score: 0, over: false, won: false }
+    game.current = { board: startBoard(level, seed), piece: next(), next, lines: 0, score: 0, over: false, won: false }
     redraw((x) => x + 1)
-  }, [seed])
+  }, [seed, level])
 
   useEffect(() => {
     newGame()
@@ -69,10 +69,11 @@ export default function TetrisGame({ puzzle, onSolved }) {
   // gravity: a little faster with every line cleared
   const lines = game.current?.lines ?? 0
   useEffect(() => {
-    const speed = Math.max(160, 700 - lines * 35)
+    // harder levels start faster
+    const speed = Math.max(110, 700 - lines * 35 - level * 60)
     const t = setInterval(() => act('down'), speed)
     return () => clearInterval(t)
-  }, [act, lines])
+  }, [act, lines, level])
 
   useEffect(() => {
     const keys = { ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'rotate', ArrowDown: 'down', ' ': 'drop' }

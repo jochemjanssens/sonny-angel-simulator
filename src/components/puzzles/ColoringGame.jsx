@@ -7,13 +7,15 @@ const ERASER = 'eraser'
 // Colouring page: pick a colour, tap an area. "Done" unlocks once every area has a colour.
 export default function ColoringGame({ puzzle, onSolved }) {
   const { t } = useT()
-  const { page } = puzzle
+  // harder levels ask for more different colours before the picture counts as done
+  const { page, minColors = 0 } = puzzle
   const [fills, setFills] = useState({})
   const [color, setColor] = useState(COLORS[1])
   const [done, setDone] = useState(false)
   const svgRef = useRef(null)
   const colored = page.regions.filter((r) => fills[r.id]).length
-  const complete = colored === page.regions.length
+  const usedColors = new Set(Object.values(fills)).size
+  const complete = colored === page.regions.length && usedColors >= minColors
 
   const paint = (id) => {
     if (done) return
@@ -115,6 +117,7 @@ export default function ColoringGame({ puzzle, onSolved }) {
       <div className="puzzle__bar">
         <span className="puzzle__hint">
           {t('{colored}/{total} areas coloured', { colored, total: page.regions.length })}
+          {minColors > 0 && ` · ${t('{used}/{min} colours used', { used: usedColors, min: minColors })}`}
         </span>
         <span className="color__actions">
           <button className="btn btn--ghost btn--sm" onClick={save}>

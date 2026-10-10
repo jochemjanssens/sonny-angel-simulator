@@ -41,14 +41,16 @@ const gridLabel = (t, kind, size) => {
   return STATIC_GRID[kind][size]
 }
 
-function build(kind, category, size, seed) {
-  if (kind === 'wordsearch') return makeWordSearch(CATEGORY_BY_ID[category], size, seed)
-  if (kind === 'swedish') return makeSwedish(CATEGORY_BY_ID[category], size, seed)
-  if (kind === 'memory') return makeMemory(size, seed)
-  if (kind === 'differences') return makeDifferences(size, seed)
-  if (kind === 'tetris') return { target: TETRIS_TARGETS[size], seed }
-  if (kind === 'coloring') return { page: COLORING_PAGES[size]() }
-  return makeBinary(size, seed)
+// level: puzzles solved today (0 = first puzzle of the day). Each one makes the
+// next harder; the count resets at midnight UTC.
+function build(kind, category, size, seed, level) {
+  if (kind === 'wordsearch') return makeWordSearch(CATEGORY_BY_ID[category], size, seed, level)
+  if (kind === 'swedish') return makeSwedish(CATEGORY_BY_ID[category], size, seed, level)
+  if (kind === 'memory') return makeMemory(size, seed, level)
+  if (kind === 'differences') return makeDifferences(size, seed, level)
+  if (kind === 'tetris') return { target: TETRIS_TARGETS[size], seed, level }
+  if (kind === 'coloring') return { page: COLORING_PAGES[size](), minColors: level ? Math.min(2 + level, 10) : 0 }
+  return makeBinary(size, seed, level)
 }
 
 export default function PuzzlesView({ userId, notify, onEarned }) {
@@ -88,7 +90,7 @@ export default function PuzzlesView({ userId, notify, onEarned }) {
     setBusy(true)
     try {
       const id = await rpc('start_puzzle', { p_kind: kind, p_size: size })
-      setSession({ id, kind, category, size, puzzle: build(kind, category, size, id), startedAt: Date.now() })
+      setSession({ id, kind, category, size, level: today, puzzle: build(kind, category, size, id, today), startedAt: Date.now() })
       setResult(null)
     } catch (err) {
       notify(err.message)
@@ -98,6 +100,7 @@ export default function PuzzlesView({ userId, notify, onEarned }) {
 
   const paid = (amount) => {
     setResult({ amount })
+    setToday((n) => n + 1) // the next puzzle is one level harder straight away
     notify(t('Puzzle solved! +{amount}', { amount: euro(amount) }))
     onEarned()
     loadToday()
@@ -149,6 +152,7 @@ export default function PuzzlesView({ userId, notify, onEarned }) {
               {t(SIZE_LABEL[session.size])} · {gridLabel(t, session.kind, session.size)}
             </span>
             <span className="puzzle__reward">{euro(PUZZLE_REWARDS[session.size])}</span>
+            <span className="puzzle__level">{t('Level {n}', { n: session.level + 1 })}</span>
             {!result && (
               <span className="puzzle__time">
                 {Math.floor(secs / 60)}:{String(secs % 60).padStart(2, '0')}
@@ -215,6 +219,10 @@ export default function PuzzlesView({ userId, notify, onEarned }) {
           <p className="hero__text">
             {t('Solve a puzzle to earn money for blind boxes: {small} for small, {medium} for medium and {large} for large.', { small: euro(PUZZLE_REWARDS.small), medium: euro(PUZZLE_REWARDS.medium), large: euro(PUZZLE_REWARDS.large) })}{' '}
             {t(today === 1 ? "You've solved {n} puzzle today." : "You've solved {n} puzzles today.", { n: today })}
+          </p>
+          <p className="puzzles__level">
+            <strong>{t('Level {n}', { n: today + 1 })}</strong>{' '}
+            {t('Every puzzle you solve today makes the next one harder. Back to level 1 at midnight (UTC).')}
           </p>
         </div>
       </div>

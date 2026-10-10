@@ -2684,3 +2684,27 @@ h3 {
 .diff__lost {
   margin-top: 14px;
 }
+
+.sw__cell.is-given {
+  color: #2e8b57;
+  background: #eef8ea;
+}
+
+.puzzle__meta .puzzle__level {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+.puzzles__level {
+  margin: 10px 0 0;
+  color: var(--muted);
+}
+.puzzles__level strong {
+  display: inline-block;
+  background: var(--ink);
+  color: #fff;
+  border-radius: 999px;
+  padding: 2px 10px;
+  margin-right: 4px;
+  font-family: var(--font-display);
+}

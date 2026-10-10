@@ -17,6 +17,18 @@ const SHAPES = {
 
 export const emptyBoard = () => Array.from({ length: ROWS }, () => Array(COLS).fill(null))
 
+// From level 3, a round starts with a few rows of grey junk blocks, each with one gap.
+export function startBoard(level, seed) {
+  const board = emptyBoard()
+  const rows = Math.min(6, Math.max(0, level - 2))
+  const r = makeRandom(`${seed}:junk`)
+  for (let i = 0; i < rows; i++) {
+    const gap = r.int(COLS)
+    board[ROWS - 1 - i] = Array.from({ length: COLS }, (_, x) => (x === gap ? null : '#C9BDB4'))
+  }
+  return board
+}
+
 export function makeBag(seed) {
   const r = makeRandom(seed)
   let bag = []
