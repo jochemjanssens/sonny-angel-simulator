@@ -350,4 +350,6 @@ export default {
   "Your shelf": "Jouw plank",
   "Shelf of @{user}": "Plank van @{user}",
   "This shelf is still empty.": "Deze plank is nog leeg.",
+  "Roll up, roll up — the show is about to start!": "Kom maar binnen — de voorstelling gaat beginnen!",
+  "Sparkly, dreamy and a little bit magical.": "Glinsterend, dromerig en een tikje magisch.",
 }

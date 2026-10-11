@@ -136,6 +136,13 @@ function BackFeature({ hat, c, a, sil, petal }) {
           <path d="M90 24 m-12 0 a12 12 0 1 1 12 12 a8 8 0 1 1 -8 -8 a4 4 0 1 1 4 4" fill="none" stroke={sil ? SIL : shade(a, 0.3)} strokeWidth="2.5" />
         </g>
       )
+    case 'unicorn':
+      return (
+        <g strokeLinejoin="round">
+          <path d="M30 40 L32 14 L50 26 Z M90 40 L88 14 L70 26 Z" fill={c} stroke={c} strokeWidth="5" />
+          <path d="M35 33 L36 20 L45 27 Z M85 33 L84 20 L75 27 Z" fill={sil ? SIL_DARK : a} />
+        </g>
+      )
     case 'wrapper':
       return (
         <g fill={c}>
@@ -287,6 +294,22 @@ function FrontFeature({ hat, c, a, sil }) {
           <rect x="58" y="4" width="4" height="18" rx="2" fill={sil ? SIL_DARK : '#FFFFFF'} />
           <circle cx="60" cy="-2" r="11" fill={sil ? SIL_DARK : a} />
           {!sil && <path d="M60 -2 m-7 0 a7 7 0 1 1 7 7 a4.5 4.5 0 1 1 -4.5 -4.5" fill="none" stroke="#FFFFFF" strokeWidth="2.2" />}
+        </g>
+      )
+    case 'unicorn':
+      return (
+        <g>
+          <path d="M66 20 Q74 10 80 18 Q86 26 92 24 M70 24 Q80 16 86 26 Q90 32 96 32" stroke={sil ? SIL_DARK : a} strokeWidth="4" fill="none" strokeLinecap="round" />
+          <path d="M53 24 L60 -10 L67 24 Z" fill={sil ? SIL_DARK : '#FFD34D'} strokeLinejoin="round" />
+          {!sil && <path d="M55.5 15 L64.5 13 M57 6 L63 4.5 M58.5 -2 L61.5 -3" stroke="#E0A800" strokeWidth="1.6" strokeLinecap="round" />}
+        </g>
+      )
+    case 'topHat':
+      return (
+        <g>
+          <rect x="42" y="-14" width="36" height="34" rx="3" fill={sil ? SIL_DARK : '#2B2238'} />
+          <rect x="42" y="10" width="36" height="7" fill={sil ? SIL : a} />
+          <ellipse cx="60" cy="20" rx="30" ry="6" fill={sil ? SIL_DARK : '#2B2238'} />
         </g>
       )
     case 'witchHat':

@@ -316,6 +316,62 @@ insert into public.figures (id, series_id, value, secret) values ('sweets-11', '
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret;
 insert into public.figures (id, series_id, value, secret) values ('sweets-secret', 'sweets', 170, true)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret;
+insert into public.series (id, price, secret_odds) values ('circus', 12.95, 144)
+  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds;
+insert into public.figures (id, series_id, value, secret) values ('circus-0', 'circus', 16, false)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret;
+insert into public.figures (id, series_id, value, secret) values ('circus-1', 'circus', 15, false)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret;
+insert into public.figures (id, series_id, value, secret) values ('circus-2', 'circus', 14, false)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret;
+insert into public.figures (id, series_id, value, secret) values ('circus-3', 'circus', 9, false)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret;
+insert into public.figures (id, series_id, value, secret) values ('circus-4', 'circus', 10, false)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret;
+insert into public.figures (id, series_id, value, secret) values ('circus-5', 'circus', 8, false)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret;
+insert into public.figures (id, series_id, value, secret) values ('circus-6', 'circus', 11, false)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret;
+insert into public.figures (id, series_id, value, secret) values ('circus-7', 'circus', 12, false)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret;
+insert into public.figures (id, series_id, value, secret) values ('circus-8', 'circus', 9, false)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret;
+insert into public.figures (id, series_id, value, secret) values ('circus-9', 'circus', 8, false)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret;
+insert into public.figures (id, series_id, value, secret) values ('circus-10', 'circus', 9, false)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret;
+insert into public.figures (id, series_id, value, secret) values ('circus-11', 'circus', 13, false)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret;
+insert into public.figures (id, series_id, value, secret) values ('circus-secret', 'circus', 180, true)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret;
+insert into public.series (id, price, secret_odds) values ('unicorn', 12.95, 144)
+  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds;
+insert into public.figures (id, series_id, value, secret) values ('unicorn-0', 'unicorn', 22, false)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret;
+insert into public.figures (id, series_id, value, secret) values ('unicorn-1', 'unicorn', 12, false)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret;
+insert into public.figures (id, series_id, value, secret) values ('unicorn-2', 'unicorn', 10, false)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret;
+insert into public.figures (id, series_id, value, secret) values ('unicorn-3', 'unicorn', 9, false)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret;
+insert into public.figures (id, series_id, value, secret) values ('unicorn-4', 'unicorn', 9, false)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret;
+insert into public.figures (id, series_id, value, secret) values ('unicorn-5', 'unicorn', 8, false)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret;
+insert into public.figures (id, series_id, value, secret) values ('unicorn-6', 'unicorn', 8, false)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret;
+insert into public.figures (id, series_id, value, secret) values ('unicorn-7', 'unicorn', 13, false)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret;
+insert into public.figures (id, series_id, value, secret) values ('unicorn-8', 'unicorn', 9, false)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret;
+insert into public.figures (id, series_id, value, secret) values ('unicorn-9', 'unicorn', 10, false)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret;
+insert into public.figures (id, series_id, value, secret) values ('unicorn-10', 'unicorn', 8, false)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret;
+insert into public.figures (id, series_id, value, secret) values ('unicorn-11', 'unicorn', 11, false)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret;
+insert into public.figures (id, series_id, value, secret) values ('unicorn-secret', 'unicorn', 200, true)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret;
 insert into public.series (id, price, secret_odds) values ('halloween', 14.95, 72)
   on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds;
 insert into public.figures (id, series_id, value, secret) values ('halloween-0', 'halloween', 13, false)
