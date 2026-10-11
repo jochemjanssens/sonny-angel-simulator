@@ -3,7 +3,7 @@ import Angel from './Angel'
 import PriceInput, { formatPrice, parsePrice } from './PriceInput'
 import { FIGURE_BY_ID, SERIES, SERIES_BY_ID, euro } from '../data/collections'
 import { useT } from '../i18n'
-import { FigurePicker, OfferModeTabs, OfferValue, useShelf } from './Swap'
+import { FigurePicker, OfferModeTabs, OfferValue, ownedBy, useShelf } from './Swap'
 
 const STATUS_TEXT = {
   countered: 'countered',
@@ -84,6 +84,11 @@ function Browse({ market, wallet, inventory, act, onGoOffers, onProfile }) {
   const [swapFig, setSwapFig] = useState(null)
   const offerListing = market.active.find((l) => l.id === offerFor)
   const sellerShelf = useShelf(offerListing?.seller_id)
+  const myOwned = ownedBy(inventory, market.userId, market.active)
+  const sellerOwned = ownedBy(sellerShelf, offerListing?.seller_id, market.active)
+  // you can only swap for a figure you don't have yet
+  const swapBlockedFor = (l) =>
+    myOwned[l.figure_id] > 0 ? t('You already have {name}, so you can only offer money.', { name: FIGURE_BY_ID[l.figure_id].name }) : null
 
   const myThreadByListing = useMemo(() => new Map(market.buying.filter((t) => t.open).map((t) => [t.listing.id, t])), [market.buying])
   const listings = market.active.filter(
@@ -160,11 +165,11 @@ function Browse({ market, wallet, inventory, act, onGoOffers, onProfile }) {
                   </button>
                 ) : offerFor === l.id ? (
                   <div className="offer-form">
-                    <OfferModeTabs mode={mode} onChange={setMode} />
+                    <OfferModeTabs mode={mode} onChange={setMode} swapBlocked={swapBlockedFor(l)} />
                     {mode === 'swap' && (
                       <FigurePicker
                         shelf={inventory}
-                        receiver={{ name: l.seller?.username, shelf: sellerShelf }}
+                        receiver={{ name: l.seller?.username, shelf: sellerOwned }}
                         value={swapFig}
                         onChange={setSwapFig}
                       />
@@ -288,7 +293,7 @@ function Selling({ market, act, inventory, onProfile }) {
               </div>
             </div>
             {threads.length ? (
-              threads.map((th) => <Thread key={th.key} thread={th} act={act} inventory={inventory} onProfile={onProfile} />)
+              threads.map((th) => <Thread key={th.key} thread={th} act={act} inventory={inventory} market={market} onProfile={onProfile} />)
             ) : (
               <p className="listing__none">{t('No offers yet.')}</p>
             )}
@@ -333,7 +338,7 @@ function Buying({ market, act, inventory, onProfile }) {
               <span className="listing__price">{t('Asking {price}', { price: euro(th.listing.price) })}</span>
             </div>
           </div>
-          <Thread thread={th} act={act} inventory={inventory} onProfile={onProfile} />
+          <Thread thread={th} act={act} inventory={inventory} market={market} onProfile={onProfile} />
         </article>
       ))}
       {closed.length > 0 && (
@@ -344,7 +349,7 @@ function Buying({ market, act, inventory, onProfile }) {
               <div className="listing__row">
                 <FigureCell figureId={th.listing.figure_id} size={48} />
               </div>
-              <Thread thread={th} act={act} inventory={inventory} onProfile={onProfile} />
+              <Thread thread={th} act={act} inventory={inventory} market={market} onProfile={onProfile} />
             </article>
           ))}
         </>
@@ -355,7 +360,7 @@ function Buying({ market, act, inventory, onProfile }) {
 
 // ---------------------------------------------------------------- negotiation thread
 
-function Thread({ thread, act, inventory, onProfile }) {
+function Thread({ thread, act, inventory, market, onProfile }) {
   const { t } = useT()
   const [countering, setCountering] = useState(false)
   const [amount, setAmount] = useState('')
@@ -367,11 +372,20 @@ function Thread({ thread, act, inventory, onProfile }) {
   const fig = FIGURE_BY_ID[listing.figure_id]
   const who = (o) => (o.proposed_by === role ? t('You') : `@${other}`)
   // swapped figures always go to the seller: show whether they already have them
-  const sellerShelf = useShelf(role === 'buyer' ? listing.seller_id : null)
-  const receiver = role === 'seller' ? { isMe: true, shelf: inventory } : { name: other, shelf: sellerShelf }
+  const sellerShelf = useShelf(role === 'buyer' && open ? listing.seller_id : null)
   // a swap always uses a figure from the buyer's shelf
-  const buyerShelf = useShelf(role === 'seller' && countering && mode === 'swap' ? thread.buyerId : null)
+  const buyerShelf = useShelf(role === 'seller' && open ? thread.buyerId : null)
   const pickFrom = role === 'buyer' ? inventory : buyerShelf
+  // swaps only between figures both players don't have yet (shelf + own listings)
+  const sellerOwned = role === 'seller' ? ownedBy(inventory, market.userId, market.active) : ownedBy(sellerShelf, listing.seller_id, market.active)
+  const buyerOwned = role === 'buyer' ? ownedBy(inventory, market.userId, market.active) : ownedBy(buyerShelf, thread.buyerId, market.active)
+  const receiver = role === 'seller' ? { isMe: true, shelf: sellerOwned, from: other } : { name: other, shelf: sellerOwned }
+  const swapBlocked = !(buyerOwned?.[listing.figure_id] > 0)
+    ? null
+    : role === 'buyer'
+      ? t('You already have {name}, so you can only offer money.', { name: fig.name })
+      : t('@{user} already has {name}, so only money offers are possible.', { user: other, name: fig.name })
+  const acceptBlocked = latest.offered_figure && (swapBlocked || sellerOwned?.[latest.offered_figure] > 0)
   const offerText = (o) => (o.offered_figure ? FIGURE_BY_ID[o.offered_figure].name : euro(o.amount))
 
   const sendCounter = async () => {
@@ -427,7 +441,7 @@ function Thread({ thread, act, inventory, onProfile }) {
       ) : myTurn ? (
         countering ? (
           <div className="offer-form">
-            <OfferModeTabs mode={mode} onChange={setMode} />
+            <OfferModeTabs mode={mode} onChange={setMode} swapBlocked={swapBlocked} />
             {mode === 'swap' && (
               <>
                 <p className="offer-form__note">
@@ -447,25 +461,30 @@ function Thread({ thread, act, inventory, onProfile }) {
             </div>
           </div>
         ) : (
-          <div className="listing__actions">
-            <button className="btn btn--primary btn--sm" onClick={() => act('accept_offer', { p_offer: latest.id }, acceptMsg)}>
-              {latest.offered_figure ? t('Accept swap') : t('Accept {amount}', { amount: euro(latest.amount) })}
-            </button>
-            <button
-              className="btn btn--ghost btn--sm"
-              onClick={() => {
-                setCountering(true)
-                setMode(latest.offered_figure ? 'swap' : 'money')
-                setSwapFig(null)
-                setAmount(latest.amount ? formatPrice(latest.amount) : formatPrice(listing.price))
-              }}
-            >
-              {t('Counter')}
-            </button>
-            <button className="btn btn--ghost btn--sm" onClick={() => act('reject_offer', { p_offer: latest.id }, t('Offer declined'))}>
-              {t('Decline')}
-            </button>
-          </div>
+          <>
+            {acceptBlocked && (
+              <p className="offer-form__note">{t('This swap is no longer possible: one of you already has the figure. Make a counter-offer instead.')}</p>
+            )}
+            <div className="listing__actions">
+              <button className="btn btn--primary btn--sm" disabled={!!acceptBlocked} onClick={() => act('accept_offer', { p_offer: latest.id }, acceptMsg)}>
+                {latest.offered_figure ? t('Accept swap') : t('Accept {amount}', { amount: euro(latest.amount) })}
+              </button>
+              <button
+                className="btn btn--ghost btn--sm"
+                onClick={() => {
+                  setCountering(true)
+                  setMode(latest.offered_figure && !swapBlocked ? 'swap' : 'money')
+                  setSwapFig(null)
+                  setAmount(latest.amount ? formatPrice(latest.amount) : formatPrice(listing.price))
+                }}
+              >
+                {t('Counter')}
+              </button>
+              <button className="btn btn--ghost btn--sm" onClick={() => act('reject_offer', { p_offer: latest.id }, t('Offer declined'))}>
+                {t('Decline')}
+              </button>
+            </div>
+          </>
         )
       ) : (
         <div className="listing__actions">

@@ -20,6 +20,15 @@ export function useShelf(userId) {
   return shelf
 }
 
+// Everything a player has: their shelf plus what they have listed on the market.
+// Swaps only happen between figures both players don't have yet.
+export function ownedBy(shelf, userId, active) {
+  if (!shelf) return null
+  const out = { ...shelf }
+  for (const l of active) if (l.seller_id === userId) out[l.figure_id] = (out[l.figure_id] || 0) + 1
+  return out
+}
+
 // "Does the person who would receive this figure already have it?"
 // receiver: { name, shelf, isMe }
 export function HaveBadge({ figureId, receiver }) {
@@ -36,13 +45,20 @@ export function HaveBadge({ figureId, receiver }) {
   return <span className={`have ${n ? 'have--yes' : 'have--no'}`}>{label}</span>
 }
 
-// Pick one figure from a shelf to offer in a swap.
+// Pick one figure from a shelf to offer in a swap: only figures the receiver doesn't have yet.
 export function FigurePicker({ shelf, receiver, value, onChange }) {
   const { t } = useT()
-  if (!shelf) return <p className="picker__empty">{t('Loading shelf…')}</p>
+  if (!shelf || !receiver?.shelf) return <p className="picker__empty">{t('Loading shelf…')}</p>
   const order = SERIES.flatMap((s) => [...s.figures, s.secret].map((f) => f.id))
-  const ids = order.filter((id) => shelf[id] > 0)
-  if (!ids.length) return <p className="picker__empty">{t('No figures on this shelf to swap.')}</p>
+  const ids = order.filter((id) => shelf[id] > 0 && !(receiver.shelf[id] > 0))
+  if (!ids.length)
+    return (
+      <p className="picker__empty">
+        {receiver.isMe
+          ? t('@{user} has no figures that you don’t have yet.', { user: receiver.from })
+          : t('No figures here that @{user} doesn’t have yet.', { user: receiver.name })}
+      </p>
+    )
   return (
     <div className="picker" role="radiogroup" aria-label={t('Choose a figure to swap')}>
       {ids.map((id) => {
@@ -82,17 +98,28 @@ export function OfferValue({ offer, receiver }) {
   )
 }
 
-// Money or swap, used by the offer and counter-offer forms.
-export function OfferModeTabs({ mode, onChange }) {
+// Money or swap, used by the offer and counter-offer forms. `swapBlocked` explains why swapping isn't possible.
+export function OfferModeTabs({ mode, onChange, swapBlocked }) {
   const { t } = useT()
   return (
-    <div className="mode-tabs" role="tablist">
-      <button type="button" role="tab" aria-selected={mode === 'money'} className={mode === 'money' ? 'is-active' : ''} onClick={() => onChange('money')}>
-        💶 {t('Money')}
-      </button>
-      <button type="button" role="tab" aria-selected={mode === 'swap'} className={mode === 'swap' ? 'is-active' : ''} onClick={() => onChange('swap')}>
-        🔁 {t('Swap')}
-      </button>
-    </div>
+    <>
+      <div className="mode-tabs" role="tablist">
+        <button type="button" role="tab" aria-selected={mode === 'money'} className={mode === 'money' ? 'is-active' : ''} onClick={() => onChange('money')}>
+          💶 {t('Money')}
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={mode === 'swap'}
+          className={mode === 'swap' ? 'is-active' : ''}
+          onClick={() => onChange('swap')}
+          disabled={!!swapBlocked}
+          title={swapBlocked || undefined}
+        >
+          🔁 {t('Swap')}
+        </button>
+      </div>
+      {swapBlocked && <p className="offer-form__note">{swapBlocked}</p>}
+    </>
   )
 }
