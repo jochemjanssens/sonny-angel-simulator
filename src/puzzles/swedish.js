@@ -3,9 +3,9 @@ import { makeRandom } from './random.js'
 // Swedish puzzle: every word starts right after a clue cell, to its right
 // (across) or below it (down). One clue cell can hold an across and a down clue.
 const CONFIG = {
-  small: { n: 7, target: 5 },
-  medium: { n: 9, target: 8 },
-  large: { n: 11, target: 11 },
+  small: { n: 7, target: 7 },
+  medium: { n: 9, target: 11 },
+  large: { n: 11, target: 15 },
 }
 const STEP = { across: [0, 1], down: [1, 0] }
 

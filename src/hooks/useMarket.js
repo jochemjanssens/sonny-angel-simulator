@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 
-const LISTING_FIELDS = 'id, figure_id, price, status, created_at, seller_id, sold_price, seller:profiles!listings_seller_id_fkey(username)'
+const LISTING_FIELDS = 'id, figure_id, price, status, created_at, seller_id, sold_price, sold_figure, seller:profiles!listings_seller_id_fkey(username)'
 
 // Supabase returns at most 1000 rows per request, so long lists are read in pages.
 async function fetchAll(build) {
@@ -22,7 +22,7 @@ export function useMarket(userId) {
   const [loaded, setLoaded] = useState(false)
 
   const refresh = useCallback(async () => {
-    const OFFER_FIELDS = 'id, listing_id, buyer_id, amount, proposed_by, status, created_at, buyer:profiles(username)'
+    const OFFER_FIELDS = 'id, listing_id, buyer_id, amount, offered_figure, proposed_by, status, created_at, buyer:profiles(username)'
     const [a, mineActive, mineHistory, openOffers, pastOffers] = await Promise.all([
       fetchAll(() => supabase.from('listings').select(LISTING_FIELDS).eq('status', 'active').order('created_at', { ascending: false }).order('id')),
       fetchAll(() =>

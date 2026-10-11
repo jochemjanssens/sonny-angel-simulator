@@ -3,6 +3,7 @@ import Angel from './Angel'
 import PriceInput, { formatPrice, parsePrice } from './PriceInput'
 import { FIGURE_BY_ID, SERIES, SERIES_BY_ID, euro } from '../data/collections'
 import { useT } from '../i18n'
+import { FigurePicker, OfferModeTabs, OfferValue, useShelf } from './Swap'
 
 const STATUS_TEXT = {
   countered: 'countered',
@@ -12,7 +13,7 @@ const STATUS_TEXT = {
   closed: 'closed',
 }
 
-export default function MarketView({ market, wallet, inventory, act }) {
+export default function MarketView({ market, wallet, inventory, act, onProfile }) {
   const { t } = useT()
   const [view, setView] = useState('browse')
   const sellingTurns = market.selling.filter((t) => t.myTurn).length
@@ -41,11 +42,11 @@ export default function MarketView({ market, wallet, inventory, act }) {
       {!market.loaded ? (
         <p className="market__empty">{t('Loading the market…')}</p>
       ) : view === 'browse' ? (
-        <Browse market={market} wallet={wallet} inventory={inventory} act={act} onGoOffers={() => setView('buying')} />
+        <Browse market={market} wallet={wallet} inventory={inventory} act={act} onProfile={onProfile} onGoOffers={() => setView('buying')} />
       ) : view === 'selling' ? (
-        <Selling market={market} act={act} />
+        <Selling market={market} act={act} inventory={inventory} onProfile={onProfile} />
       ) : (
-        <Buying market={market} act={act} />
+        <Buying market={market} act={act} inventory={inventory} onProfile={onProfile} />
       )}
     </section>
   )
@@ -73,12 +74,16 @@ function FigureCell({ figureId, size = 64 }) {
 
 // ---------------------------------------------------------------- browse
 
-function Browse({ market, wallet, inventory, act, onGoOffers }) {
+function Browse({ market, wallet, inventory, act, onGoOffers, onProfile }) {
   const { t } = useT()
   const [seriesFilter, setSeriesFilter] = useState('all')
   const [missingOnly, setMissingOnly] = useState(false)
   const [offerFor, setOfferFor] = useState(null)
   const [amount, setAmount] = useState('')
+  const [mode, setMode] = useState('money')
+  const [swapFig, setSwapFig] = useState(null)
+  const offerListing = market.active.find((l) => l.id === offerFor)
+  const sellerShelf = useShelf(offerListing?.seller_id)
 
   const myThreadByListing = useMemo(() => new Map(market.buying.filter((t) => t.open).map((t) => [t.listing.id, t])), [market.buying])
   const listings = market.active.filter(
@@ -89,9 +94,15 @@ function Browse({ market, wallet, inventory, act, onGoOffers }) {
   )
 
   const sendOffer = async (l) => {
-    const p = parsePrice(amount)
-    if (!p) return
-    const done = await act('make_offer', { p_listing: l.id, p_amount: p }, t('Offer of {amount} sent to @{user}', { amount: euro(p), user: l.seller?.username }))
+    let done
+    if (mode === 'swap') {
+      if (!swapFig) return
+      done = await act('make_offer', { p_listing: l.id, p_figure: swapFig }, t('Swap offer sent to @{user}', { user: l.seller?.username }))
+    } else {
+      const p = parsePrice(amount)
+      if (!p) return
+      done = await act('make_offer', { p_listing: l.id, p_amount: p }, t('Offer of {amount} sent to @{user}', { amount: euro(p), user: l.seller?.username }))
+    }
     if (done) setOfferFor(null)
   }
 
@@ -110,7 +121,7 @@ function Browse({ market, wallet, inventory, act, onGoOffers }) {
           <input type="checkbox" checked={missingOnly} onChange={(e) => setMissingOnly(e.target.checked)} />
           <span>{t("Only figures I don't have")}</span>
         </label>
-        <span className="market__count">{listings.length} for sale</span>
+        <span className="market__count">{t('{n} for sale', { n: listings.length })}</span>
       </div>
 
       {!listings.length ? (
@@ -126,24 +137,51 @@ function Browse({ market, wallet, inventory, act, onGoOffers }) {
               <article key={l.id} className={`listing ${own ? 'listing--own' : ''}`}>
                 <FigureCell figureId={l.figure_id} />
                 <div className="listing__meta">
-                  <span className="listing__seller">{own ? t('Your listing') : t('by @{user}', { user: l.seller?.username })}</span>
+                  <span className="listing__seller">
+                    {own ? (
+                      t('Your listing')
+                    ) : (
+                      <button className="user-link" onClick={() => onProfile(l.seller_id)}>
+                        {t('by @{user}', { user: l.seller?.username })}
+                      </button>
+                    )}
+                  </span>
                   <span className="listing__price">{euro(l.price)}</span>
                 </div>
                 {own ? null : thread ? (
                   <button className="listing__thread" onClick={onGoOffers}>
-                    {thread.myTurn
-                      ? t('@{user} countered: {amount} — respond', { user: l.seller?.username, amount: euro(thread.latest.amount) })
-                      : t('Your offer {amount} is waiting', { amount: euro(thread.latest.amount) })}
+                    {thread.latest.offered_figure
+                      ? thread.myTurn
+                        ? t('@{user} countered with a swap — respond', { user: l.seller?.username })
+                        : t('Your swap offer is waiting')
+                      : thread.myTurn
+                        ? t('@{user} countered: {amount} — respond', { user: l.seller?.username, amount: euro(thread.latest.amount) })
+                        : t('Your offer {amount} is waiting', { amount: euro(thread.latest.amount) })}
                   </button>
                 ) : offerFor === l.id ? (
-                  <div className="listing__actions">
-                    <PriceInput value={amount} onChange={setAmount} autoFocus label={t('Your offer')} />
-                    <button className="btn btn--primary btn--sm" onClick={() => sendOffer(l)} disabled={!parsePrice(amount)}>
-                      {t('Send offer')}
-                    </button>
-                    <button className="btn btn--ghost btn--sm" onClick={() => setOfferFor(null)}>
-                      {t('Cancel')}
-                    </button>
+                  <div className="offer-form">
+                    <OfferModeTabs mode={mode} onChange={setMode} />
+                    {mode === 'swap' && (
+                      <FigurePicker
+                        shelf={inventory}
+                        receiver={{ name: l.seller?.username, shelf: sellerShelf }}
+                        value={swapFig}
+                        onChange={setSwapFig}
+                      />
+                    )}
+                    <div className="listing__actions">
+                      {mode === 'money' && <PriceInput value={amount} onChange={setAmount} autoFocus label={t('Your offer')} />}
+                      <button
+                        className="btn btn--primary btn--sm"
+                        onClick={() => sendOffer(l)}
+                        disabled={mode === 'swap' ? !swapFig : !parsePrice(amount)}
+                      >
+                        {mode === 'swap' ? t('Offer swap') : t('Send offer')}
+                      </button>
+                      <button className="btn btn--ghost btn--sm" onClick={() => setOfferFor(null)}>
+                        {t('Cancel')}
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <div className="listing__actions">
@@ -159,6 +197,8 @@ function Browse({ market, wallet, inventory, act, onGoOffers }) {
                       className="btn btn--ghost btn--sm"
                       onClick={() => {
                         setOfferFor(l.id)
+                        setMode('money')
+                        setSwapFig(null)
                         setAmount(formatPrice(Math.max(0.01, Math.round(l.price * 80) / 100)))
                       }}
                     >
@@ -177,7 +217,7 @@ function Browse({ market, wallet, inventory, act, onGoOffers }) {
 
 // ---------------------------------------------------------------- my listings
 
-function Selling({ market, act }) {
+function Selling({ market, act, inventory, onProfile }) {
   const { t } = useT()
   const [editing, setEditing] = useState(null)
   const [price, setPrice] = useState('')
@@ -248,7 +288,7 @@ function Selling({ market, act }) {
               </div>
             </div>
             {threads.length ? (
-              threads.map((t) => <Thread key={t.key} thread={t} act={act} />)
+              threads.map((th) => <Thread key={th.key} thread={th} act={act} inventory={inventory} onProfile={onProfile} />)
             ) : (
               <p className="listing__none">{t('No offers yet.')}</p>
             )}
@@ -264,7 +304,7 @@ function Selling({ market, act }) {
               <li key={l.id}>
                 <span>{FIGURE_BY_ID[l.figure_id].name}</span>
                 <span className={`history__status history__status--${l.status}`}>
-                  {l.status === 'sold' ? t('Sold for {price}', { price: euro(l.sold_price) }) : t('Taken off market')}
+                  {l.status === 'sold' ? (l.sold_figure ? t('Swapped for {name}', { name: FIGURE_BY_ID[l.sold_figure].name }) : t('Sold for {price}', { price: euro(l.sold_price) })) : t('Taken off market')}
                 </span>
               </li>
             ))}
@@ -277,7 +317,7 @@ function Selling({ market, act }) {
 
 // ---------------------------------------------------------------- my offers
 
-function Buying({ market, act }) {
+function Buying({ market, act, inventory, onProfile }) {
   const { t } = useT()
   const open = market.buying.filter((th) => th.open).sort(byUrgency)
   const closed = market.buying.filter((th) => !th.open).reverse()
@@ -289,11 +329,11 @@ function Buying({ market, act }) {
           <div className="listing__row">
             <FigureCell figureId={th.listing.figure_id} />
             <div className="listing__side">
-              <span className="listing__seller">{t('by @{user}', { user: th.listing.seller?.username })}</span>
+              <button className="listing__seller user-link" onClick={() => onProfile(th.listing.seller_id)}>{t('by @{user}', { user: th.listing.seller?.username })}</button>
               <span className="listing__price">{t('Asking {price}', { price: euro(th.listing.price) })}</span>
             </div>
           </div>
-          <Thread thread={th} act={act} />
+          <Thread thread={th} act={act} inventory={inventory} onProfile={onProfile} />
         </article>
       ))}
       {closed.length > 0 && (
@@ -304,7 +344,7 @@ function Buying({ market, act }) {
               <div className="listing__row">
                 <FigureCell figureId={th.listing.figure_id} size={48} />
               </div>
-              <Thread thread={th} act={act} />
+              <Thread thread={th} act={act} inventory={inventory} onProfile={onProfile} />
             </article>
           ))}
         </>
@@ -315,37 +355,69 @@ function Buying({ market, act }) {
 
 // ---------------------------------------------------------------- negotiation thread
 
-function Thread({ thread, act }) {
+function Thread({ thread, act, inventory, onProfile }) {
   const { t } = useT()
   const [countering, setCountering] = useState(false)
   const [amount, setAmount] = useState('')
+  const [mode, setMode] = useState('money')
+  const [swapFig, setSwapFig] = useState(null)
   const { latest, role, myTurn, open, listing } = thread
   const other = role === 'buyer' ? listing.seller?.username : thread.buyer
+  const otherId = role === 'buyer' ? listing.seller_id : thread.buyerId
   const fig = FIGURE_BY_ID[listing.figure_id]
   const who = (o) => (o.proposed_by === role ? t('You') : `@${other}`)
+  // swapped figures always go to the seller: show whether they already have them
+  const sellerShelf = useShelf(role === 'buyer' ? listing.seller_id : null)
+  const receiver = role === 'seller' ? { isMe: true, shelf: inventory } : { name: other, shelf: sellerShelf }
+  // a swap always uses a figure from the buyer's shelf
+  const buyerShelf = useShelf(role === 'seller' && countering && mode === 'swap' ? thread.buyerId : null)
+  const pickFrom = role === 'buyer' ? inventory : buyerShelf
+  const offerText = (o) => (o.offered_figure ? FIGURE_BY_ID[o.offered_figure].name : euro(o.amount))
 
   const sendCounter = async () => {
-    const p = parsePrice(amount)
-    if (!p) return
-    if (await act('counter_offer', { p_offer: latest.id, p_amount: p }, t('Counter-offer of {amount} sent', { amount: euro(p) }))) setCountering(false)
+    let ok
+    if (mode === 'swap') {
+      if (!swapFig) return
+      ok = await act('counter_offer', { p_offer: latest.id, p_figure: swapFig }, t('Swap counter-offer sent'))
+    } else {
+      const p = parsePrice(amount)
+      if (!p) return
+      ok = await act('counter_offer', { p_offer: latest.id, p_amount: p }, t('Counter-offer of {amount} sent', { amount: euro(p) }))
+    }
+    if (ok) setCountering(false)
   }
 
   let outcome = null
   if (!open) {
-    if (latest.status === 'accepted') outcome = t('Deal! {name} sold for {amount}', { name: fig.name, amount: euro(latest.amount) })
-    else if (latest.status === 'rejected') outcome = latest.proposed_by === role ? t('@{user} declined {amount}', { user: other, amount: euro(latest.amount) }) : t('You declined {amount}', { amount: euro(latest.amount) })
+    if (latest.status === 'accepted')
+      outcome = latest.offered_figure
+        ? t('Deal! {name} swapped for {other}', { name: fig.name, other: FIGURE_BY_ID[latest.offered_figure].name })
+        : t('Deal! {name} sold for {amount}', { name: fig.name, amount: euro(latest.amount) })
+    else if (latest.status === 'rejected')
+      outcome = latest.proposed_by === role ? t('@{user} declined {amount}', { user: other, amount: offerText(latest) }) : t('You declined {amount}', { amount: offerText(latest) })
     else if (latest.status === 'withdrawn') outcome = t('Offer withdrawn')
     else outcome = listing.status === 'sold' ? t('Sold to someone else') : t('Listing closed')
   }
 
+  const acceptMsg = latest.offered_figure
+    ? t('Swapped! You got {name}', { name: role === 'seller' ? FIGURE_BY_ID[latest.offered_figure].name : fig.name })
+    : role === 'seller'
+      ? t('Sold to @{user} for {amount}!', { user: other, amount: euro(latest.amount) })
+      : t('You bought {name} for {price}!', { name: fig.name, price: euro(latest.amount) })
+
   return (
     <div className={`thread ${myTurn ? 'thread--turn' : ''}`}>
-      <div className="thread__title">{role === 'seller' ? t('Negotiation with @{user}', { user: other }) : t('Your negotiation with @{user}', { user: other })}</div>
+      <div className="thread__title">
+        {role === 'seller' ? t('Negotiation with') : t('Your negotiation with')}{' '}
+        <button className="user-link" onClick={() => onProfile(otherId)}>
+          @{other}
+        </button>
+      </div>
       <ol className="thread__offers">
         {thread.offers.map((o) => (
           <li key={o.id} className={o.proposed_by === role ? 'is-mine' : ''}>
             <span className="thread__who">{who(o)}</span>
-            <span className="thread__amount">{euro(o.amount)}</span>
+            <OfferValue offer={o} receiver={receiver} />
             {o.status !== 'pending' && <span className="thread__status">{t(STATUS_TEXT[o.status])}</span>}
           </li>
         ))}
@@ -354,34 +426,38 @@ function Thread({ thread, act }) {
         <p className="thread__outcome">{outcome}</p>
       ) : myTurn ? (
         countering ? (
-          <div className="listing__actions">
-            <PriceInput value={amount} onChange={setAmount} autoFocus label={t('Your counter-offer')} />
-            <button className="btn btn--primary btn--sm" onClick={sendCounter} disabled={!parsePrice(amount)}>
-              {t('Send')}
-            </button>
-            <button className="btn btn--ghost btn--sm" onClick={() => setCountering(false)}>
-              {t('Cancel')}
-            </button>
+          <div className="offer-form">
+            <OfferModeTabs mode={mode} onChange={setMode} />
+            {mode === 'swap' && (
+              <>
+                <p className="offer-form__note">
+                  {role === 'seller' ? t('Pick a figure from @{user}’s shelf that you would like instead:', { user: other }) : t('Pick a figure from your shelf to offer:')}
+                </p>
+                <FigurePicker shelf={pickFrom} receiver={receiver} value={swapFig} onChange={setSwapFig} />
+              </>
+            )}
+            <div className="listing__actions">
+              {mode === 'money' && <PriceInput value={amount} onChange={setAmount} autoFocus label={t('Your counter-offer')} />}
+              <button className="btn btn--primary btn--sm" onClick={sendCounter} disabled={mode === 'swap' ? !swapFig : !parsePrice(amount)}>
+                {t('Send')}
+              </button>
+              <button className="btn btn--ghost btn--sm" onClick={() => setCountering(false)}>
+                {t('Cancel')}
+              </button>
+            </div>
           </div>
         ) : (
           <div className="listing__actions">
-            <button
-              className="btn btn--primary btn--sm"
-              onClick={() =>
-                act(
-                  'accept_offer',
-                  { p_offer: latest.id },
-                  role === 'seller' ? t('Sold to @{user} for {amount}!', { user: other, amount: euro(latest.amount) }) : t('You bought {name} for {price}!', { name: fig.name, price: euro(latest.amount) }),
-                )
-              }
-            >
-              {t('Accept {amount}', { amount: euro(latest.amount) })}
+            <button className="btn btn--primary btn--sm" onClick={() => act('accept_offer', { p_offer: latest.id }, acceptMsg)}>
+              {latest.offered_figure ? t('Accept swap') : t('Accept {amount}', { amount: euro(latest.amount) })}
             </button>
             <button
               className="btn btn--ghost btn--sm"
               onClick={() => {
                 setCountering(true)
-                setAmount(formatPrice(latest.amount))
+                setMode(latest.offered_figure ? 'swap' : 'money')
+                setSwapFig(null)
+                setAmount(latest.amount ? formatPrice(latest.amount) : formatPrice(listing.price))
               }}
             >
               {t('Counter')}

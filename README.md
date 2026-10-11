@@ -15,6 +15,7 @@ npm run dev
 - **Puzzles:** earn money with a word search, Swedish puzzle or binary puzzle (Dutch words around the blind-box themes, pick a category), or the kids' games Memory, Spot the difference, Tetris (clear 5/10/20 lines) and colouring pages. Small pays €5, medium €10, large €15, with no daily or time limit.
 - **Lucky wheel:** one free spin per day for money (€5–€100) or random figures (1–3), with a 0.2% chance of a secret figure. The server draws the prize.
 - **Bank:** sell any figure to the bank instantly for 70% of its market value.
+- **Profiles & swaps:** tap a username to see that player's shelf and listings (and which figures you're missing). Offer a figure from your shelf instead of money; you see right away whether the other player already has it.
 - **Market:** sell only to other real players. List a figure at your own price (it leaves your shelf while listed), buy now, or make an offer and counter back and forth until someone accepts.
 
 Market values in `src/data/collections.js` are approximate resale prices. The Robby Angel secrets are worth €140–230, and popular regulars such as Rabbit, Strawberry and Cherry Blossom are worth more than the rest.

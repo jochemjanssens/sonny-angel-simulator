@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import Header from './components/Header'
 import { SeriesDetail, SeriesGrid } from './components/CollectionsView'
 import ShelfView from './components/ShelfView'
+import ProfileView from './components/ProfileView'
 import MarketView from './components/MarketView'
 import PuzzlesView from './components/puzzles/PuzzlesView'
 import BlindBoxOpener from './components/BlindBoxOpener'
@@ -41,6 +42,8 @@ function Game({ userId }) {
   const game = useOnlineGame(userId)
   const market = useMarket(userId)
   const [tab, setTab] = useState('collections')
+  const [profileId, setProfileId] = useState(null)
+  const [profileFrom, setProfileFrom] = useState('market')
   const [seriesId, setSeriesId] = useState(null)
   const [opening, setOpening] = useState(null)
   const [figureId, setFigureId] = useState(null)
@@ -117,6 +120,14 @@ function Game({ userId }) {
     if (ok && (state.inventory[id] || 0) <= 1) setFigureId(null)
   }
 
+  // Opens a player's profile; "back" returns to where you came from.
+  const openProfile = (id) => {
+    setProfileFrom(tab === 'profile' ? profileFrom : tab)
+    setProfileId(id)
+    setTab('profile')
+    window.scrollTo(0, 0)
+  }
+
   const ownedUnique = FIGURES.filter((f) => !f.secret && state.inventory[f.id]).length
   const totalUnique = FIGURES.filter((f) => !f.secret).length
   const series = seriesId && SERIES_BY_ID[seriesId]
@@ -139,6 +150,7 @@ function Game({ userId }) {
         marketBadge={market.actionCount}
         username={state.username}
         onLogout={() => supabase.auth.signOut()}
+        onProfile={() => openProfile(userId)}
       />
 
       <main className="main">
@@ -166,7 +178,18 @@ function Game({ userId }) {
             onGoMarket={() => setTab('market')}
           />
         )}
-        {tab === 'market' && <MarketView market={market} wallet={state.wallet} inventory={state.inventory} act={act} />}
+        {tab === 'market' && <MarketView market={market} wallet={state.wallet} inventory={state.inventory} act={act} onProfile={openProfile} />}
+        {tab === 'profile' && profileId && (
+          <ProfileView
+            key={profileId}
+            userId={profileId}
+            meId={userId}
+            myInventory={state.inventory}
+            listings={market.active}
+            onBack={() => setTab(profileFrom)}
+            onGoMarket={() => setTab('market')}
+          />
+        )}
         {tab === 'puzzles' && <PuzzlesView userId={userId} notify={notify} onEarned={game.refresh} />}
       </main>
 

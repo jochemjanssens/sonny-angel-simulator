@@ -6,7 +6,7 @@ import MemoryGame from './MemoryGame'
 import DifferencesGame from './DifferencesGame'
 import TetrisGame from './TetrisGame'
 import ColoringGame from './ColoringGame'
-import { WORD_CATEGORIES, CATEGORY_BY_ID } from '../../puzzles/words.js'
+import { WORD_CATEGORIES, CATEGORY_BY_ID, SWEDISH_WORDS } from '../../puzzles/words.js'
 import { makeWordSearch } from '../../puzzles/wordsearch.js'
 import { makeBinary, BINARY_SIZES } from '../../puzzles/binary.js'
 import { makeSwedish } from '../../puzzles/swedish.js'
@@ -20,7 +20,7 @@ import { useT } from '../../i18n'
 
 const KINDS = [
   { id: 'wordsearch', name: 'Word search', icon: '🔎', text: 'Find the hidden Dutch words in the letter grid.', words: true },
-  { id: 'swedish', name: 'Swedish puzzle', icon: '✏️', text: 'An arrow-word crossword with Dutch clues.', words: true },
+  { id: 'swedish', name: 'Swedish puzzle', icon: '✏️', text: 'An arrow-word crossword with Dutch clues.', words: false },
   { id: 'binary', name: 'Binary puzzle', icon: '🔢', text: 'Fill the grid with 0s and 1s by the rules.', words: false },
   { id: 'memory', name: 'Memory', icon: '🃏', text: 'Turn over the cards and find the pairs.', words: false },
   { id: 'differences', name: 'Spot the difference', icon: '🔍', text: 'Find what changed between two shelves.', words: false },
@@ -45,7 +45,7 @@ const gridLabel = (t, kind, size) => {
 // next harder; the count resets at midnight UTC.
 function build(kind, category, size, seed, level) {
   if (kind === 'wordsearch') return makeWordSearch(CATEGORY_BY_ID[category], size, seed, level)
-  if (kind === 'swedish') return makeSwedish(CATEGORY_BY_ID[category], size, seed, level)
+  if (kind === 'swedish') return makeSwedish(SWEDISH_WORDS, size, seed, level)
   if (kind === 'memory') return makeMemory(size, seed, level)
   if (kind === 'differences') return makeDifferences(size, seed, level)
   if (kind === 'tetris') return { target: TETRIS_TARGETS[size], seed, level }

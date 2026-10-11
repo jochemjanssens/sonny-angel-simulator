@@ -137,3 +137,45 @@ export const WORD_CATEGORIES = [
 ]
 
 export const CATEGORY_BY_ID = Object.fromEntries(WORD_CATEGORIES.map((c) => [c.id, c]))
+
+// General Dutch words for the Swedish puzzle, which mixes these with every
+// theme word above. More variety (and more short words) makes it harder.
+const GENERAL_WORDS = [
+  ['BOOM', 'Heeft takken'], ['HUIS', 'Woning'], ['DEUR', 'Ga je door naar binnen'], ['RAAM', 'Glas in de muur'],
+  ['DAK', 'Bovenop het huis'], ['TAFEL', 'Eet je aan'], ['STOEL', 'Zit je op'], ['BED', 'Slaap je in'],
+  ['LAMP', 'Geeft licht'], ['KLOK', 'Tikt de tijd'], ['BOEK', 'Vol bladzijden'], ['PEN', 'Schrijft met inkt'],
+  ['FIETS', 'Twee wielen, trappen'], ['AUTO', 'Vier wielen'], ['TREIN', 'Rijdt op rails'], ['BOOT', 'Vaart op water'],
+  ['ZON', 'Schijnt overdag'], ['MAAN', 'Schijnt ’s nachts'], ['STER', 'Twinkelt aan de hemel'], ['WOLK', 'Wit in de lucht'],
+  ['REGEN', 'Water uit de lucht'], ['SNEEUW', 'Witte vlokken'], ['WIND', 'Waait'], ['IJS', 'Bevroren water'],
+  ['ZEE', 'Groot zout water'], ['MEER', 'Water tussen land'], ['BERG', 'Hoog land'], ['BOS', 'Veel bomen'],
+  ['VELD', 'Open stuk land'], ['WEG', 'Hier rijden auto’s'], ['BRUG', 'Over het water'], ['STAD', 'Groter dan een dorp'],
+  ['DORP', 'Kleiner dan een stad'], ['SCHOOL', 'Hier leer je'], ['TUIN', 'Achter het huis'], ['MUUR', 'Stenen wand'],
+  ['BAL', 'Rond speelgoed'], ['POP', 'Speelgoedkindje'], ['VLIEGER', 'Vliegt aan een touw'], ['TROMMEL', 'Sla je op'],
+  ['GITAAR', 'Snaarinstrument'], ['PIANO', 'Zwarte en witte toetsen'], ['LIED', 'Zing je'], ['DANS', 'Bewegen op muziek'],
+  ['ROOD', 'Kleur van bloed'], ['BLAUW', 'Kleur van de lucht'], ['GEEL', 'Kleur van de zon'], ['GROEN', 'Kleur van gras'],
+  ['ZWART', 'Donkerste kleur'], ['WIT', 'Kleur van sneeuw'], ['ROZE', 'Lichtrood'], ['PAARS', 'Rood plus blauw'],
+  ['EEN', 'Eerste getal'], ['TWEE', 'Een paar'], ['DRIE', 'Na twee'], ['VIER', 'Twee keer twee'], ['TIEN', 'Vingers aan je handen'],
+  ['OOG', 'Kijk je mee'], ['OOR', 'Hoor je mee'], ['NEUS', 'Ruik je mee'], ['MOND', 'Eet je mee'], ['HAND', 'Vijf vingers'],
+  ['VOET', 'Staat op de grond'], ['HART', 'Klopt in je borst'], ['HAAR', 'Groeit op je hoofd'], ['TAND', 'Bijt je mee'],
+  ['BROOD', 'Gebakken van meel'], ['KAAS', 'Gemaakt van melk'], ['MELK', 'Witte drank'], ['THEE', 'Warme drank met blaadjes'],
+  ['SOEP', 'Eet je met een lepel'], ['EI', 'Gelegd door een kip'], ['RIJST', 'Kleine witte korrels'], ['PIZZA', 'Italiaanse platte taart'],
+  ['LEPEL', 'Voor soep'], ['VORK', 'Heeft tanden'], ['MES', 'Snijdt'], ['BORD', 'Eet je van'], ['KOPJE', 'Drink je uit'],
+  ['JAS', 'Draag je buiten'], ['SJAAL', 'Om je nek'], ['MUTS', 'Op je hoofd'], ['SOK', 'Aan je voet'], ['SCHOEN', 'Loop je op'],
+  ['ROK', 'Kledingstuk voor je benen'], ['TAS', 'Draag je spullen in'], ['RING', 'Om je vinger'], ['BRIL', 'Helpt je zien'],
+  ['LENTE', 'Seizoen na de winter'], ['ZOMER', 'Warmste seizoen'], ['HERFST', 'Bladeren vallen'], ['WINTER', 'Koudste seizoen'],
+  ['DAG', 'Licht deel van het etmaal'], ['NACHT', 'Donker deel'], ['WEEK', 'Zeven dagen'], ['JAAR', 'Twaalf maanden'],
+  ['BLIJ', 'Vrolijk'], ['BOOS', 'Kwaad'], ['MOE', 'Wil slapen'], ['GROOT', 'Niet klein'], ['KLEIN', 'Niet groot'],
+  ['WARM', 'Niet koud'], ['KOUD', 'Niet warm'], ['SNEL', 'Vlug'], ['TRAAG', 'Langzaam'], ['NIEUW', 'Niet oud'],
+  ['LACHEN', 'Doe je als je blij bent'], ['HUILEN', 'Tranen'], ['SLAPEN', 'Doe je in bed'], ['ZWEMMEN', 'In het water bewegen'],
+  ['SPELEN', 'Kinderen doen het graag'], ['LEZEN', 'Doe je met een boek'], ['ZINGEN', 'Een lied laten horen'], ['KOKEN', 'Eten maken'],
+  ['KONING', 'Draagt een kroon'], ['PRINSES', 'Dochter van de koning'], ['KASTEEL', 'Groot gebouw met torens'], ['DRAAK', 'Spuwt vuur'],
+  ['PIRAAT', 'Rover op zee'], ['SCHAT', 'Verborgen goud'], ['ROBOT', 'Machine die beweegt'], ['RAKET', 'Vliegt naar de ruimte'],
+  ['ANKER', 'Houdt de boot op zijn plek'], ['EMMER', 'Draag je water in'], ['SCHEP', 'Graaf je mee'], ['ZAND', 'Op het strand'],
+  ['SLEUTEL', 'Opent een slot'], ['BRIEF', 'Gaat in een envelop'], ['FOTO', 'Plaatje van een camera'], ['KAART', 'Toont de weg'],
+]
+
+// Every word with its clue, without duplicates, for the Swedish puzzle.
+export const SWEDISH_WORDS = {
+  id: 'algemeen',
+  words: [...new Map([...GENERAL_WORDS, ...WORD_CATEGORIES.flatMap((c) => c.words)].map((w) => [w[0], w])).values()],
+}

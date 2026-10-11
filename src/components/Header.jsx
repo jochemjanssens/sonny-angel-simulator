@@ -13,7 +13,7 @@ function untilMidnight() {
   return `${h}h ${String(m).padStart(2, '0')}m`
 }
 
-export default function Header({ tab, setTab, wallet, canClaim, onClaim, canSpin, onWheel, ownedUnique, totalUnique, marketBadge, username, onLogout }) {
+export default function Header({ tab, setTab, wallet, canClaim, onClaim, canSpin, onWheel, ownedUnique, totalUnique, marketBadge, username, onLogout, onProfile }) {
   const [countdown, setCountdown] = useState(untilMidnight)
   const { t } = useT()
 
@@ -67,7 +67,9 @@ export default function Header({ tab, setTab, wallet, canClaim, onClaim, canSpin
             🎡 {canSpin && <span>{t('Spin')}</span>}
           </button>
           <div className="user">
-            <span className="user__name">@{username}</span>
+            <button className="user__name user-link" onClick={onProfile} title={t('My profile')}>
+              @{username}
+            </button>
             <button className="user__logout" onClick={onLogout}>
               {t('Log out')}
             </button>
