@@ -352,4 +352,7 @@ export default {
   "This shelf is still empty.": "Deze plank is nog leeg.",
   "Roll up, roll up — the show is about to start!": "Kom maar binnen — de voorstelling gaat beginnen!",
   "Sparkly, dreamy and a little bit magical.": "Glinsterend, dromerig en een tikje magisch.",
+  "Colour by number: give every area the colour of its number.": "Kleuren op nummer: geef elk vlak de kleur van zijn nummer.",
+  "{n} areas have the wrong colour. They are outlined in red.": "{n} vlakken hebben de verkeerde kleur. Ze zijn rood omlijnd.",
+  "One area has the wrong colour. It is outlined in red.": "Eén vlak heeft de verkeerde kleur. Het is rood omlijnd.",
 }

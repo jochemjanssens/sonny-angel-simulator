@@ -13,7 +13,7 @@ import { makeSwedish } from '../../puzzles/swedish.js'
 import { makeMemory, MEMORY_SIZES } from '../../puzzles/memory.js'
 import { makeDifferences, DIFF_SIZES } from '../../puzzles/differences.js'
 import { TETRIS_TARGETS } from '../../puzzles/tetris.js'
-import { COLORING_PAGES } from '../../puzzles/coloring.js'
+import { coloringName, makeColoringPage } from '../../puzzles/coloring.js'
 import { PUZZLE_REWARDS, euro } from '../../data/collections'
 import { rpc, supabase } from '../../lib/supabase'
 import { useT } from '../../i18n'
@@ -37,7 +37,7 @@ const gridLabel = (t, kind, size) => {
   if (kind === 'memory') return t('{n} pairs', { n: MEMORY_SIZES[size].pairs })
   if (kind === 'differences') return t('{n} differences', { n: DIFF_SIZES[size].diffs })
   if (kind === 'tetris') return t('{n} lines', { n: TETRIS_TARGETS[size] })
-  if (kind === 'coloring') return t(COLORING_PAGES[size]().name)
+  if (kind === 'coloring') return t(coloringName(size))
   return STATIC_GRID[kind][size]
 }
 
@@ -49,7 +49,7 @@ function build(kind, category, size, seed, level) {
   if (kind === 'memory') return makeMemory(size, seed, level)
   if (kind === 'differences') return makeDifferences(size, seed, level)
   if (kind === 'tetris') return { target: TETRIS_TARGETS[size], seed, level }
-  if (kind === 'coloring') return { page: COLORING_PAGES[size](), minColors: level ? Math.min(2 + level, 10) : 0 }
+  if (kind === 'coloring') return { page: makeColoringPage(size, seed, level), minColors: 4, byNumber: level > 0 }
   return makeBinary(size, seed, level)
 }
 

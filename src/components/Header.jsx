@@ -60,12 +60,16 @@ export default function Header({ tab, setTab, wallet, canClaim, onClaim, canSpin
             </button>
           ) : (
             <span className="wallet__next" title={t('Next daily allowance')}>
-              {t('Next allowance in {time}', { time: countdown })}
+              <span className="wallet__next-label">{t('Next allowance in {time}', { time: countdown })}</span>
+              <span className="wallet__next-short">⏳ {countdown}</span>
             </span>
           )}
           <button className={`wheel-btn ${canSpin ? 'is-ready' : ''}`} onClick={onWheel} title={canSpin ? t('Spin the lucky wheel!') : t('Lucky wheel')}>
             🎡 {canSpin && <span>{t('Spin')}</span>}
           </button>
+        </div>
+
+        <div className="header__account">
           <div className="user">
             <button className="user__name user-link" onClick={onProfile} title={t('My profile')}>
               @{username}
