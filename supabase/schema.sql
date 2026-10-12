@@ -515,13 +515,17 @@ language sql stable security definer set search_path = public as $$
       or exists (select 1 from public.listings where seller_id = p_user and figure_id = p_figure and status = 'active');
 $$;
 
--- A swap is only allowed when both players get a figure they don't have yet.
+-- A swap is only allowed when both players get a figure they don't have yet,
+-- and the buyer only gives away a duplicate (they keep at least one).
 create or replace function public._check_swap(p_listing uuid, p_buyer uuid, p_figure text) returns void
 language plpgsql stable security definer set search_path = public as $$
 declare l public.listings;
 begin
   select * into l from public.listings where id = p_listing;
   perform public._require_figure(p_buyer, p_figure);
+  if not exists (select 1 from public.inventory where user_id = p_buyer and figure_id = p_figure and count >= 2) then
+    raise exception 'Only duplicates can be swapped: the buyer needs at least two of that figure';
+  end if;
   if public._owns(p_buyer, l.figure_id) then
     raise exception 'The buyer already has the listed figure, so only money offers are possible';
   end if;

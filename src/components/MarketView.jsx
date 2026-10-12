@@ -385,7 +385,9 @@ function Thread({ thread, act, inventory, market, onProfile }) {
     : role === 'buyer'
       ? t('You already have {name}, so you can only offer money.', { name: fig.name })
       : t('@{user} already has {name}, so only money offers are possible.', { user: other, name: fig.name })
-  const acceptBlocked = latest.offered_figure && (swapBlocked || sellerOwned?.[latest.offered_figure] > 0)
+  // the buyer must still have a duplicate of the figure they give
+  const buyerCopies = (role === 'buyer' ? inventory : buyerShelf)?.[latest.offered_figure]
+  const acceptBlocked = latest.offered_figure && (swapBlocked || sellerOwned?.[latest.offered_figure] > 0 || (buyerCopies ?? 2) < 2)
   const offerText = (o) => (o.offered_figure ? FIGURE_BY_ID[o.offered_figure].name : euro(o.amount))
 
   const sendCounter = async () => {
@@ -445,7 +447,7 @@ function Thread({ thread, act, inventory, market, onProfile }) {
             {mode === 'swap' && (
               <>
                 <p className="offer-form__note">
-                  {role === 'seller' ? t('Pick a figure from @{user}’s shelf that you would like instead:', { user: other }) : t('Pick a figure from your shelf to offer:')}
+                  {role === 'seller' ? t('Pick one of @{user}’s duplicates that you would like instead:', { user: other }) : t('Pick one of your duplicates to offer:')}
                 </p>
                 <FigurePicker shelf={pickFrom} receiver={receiver} value={swapFig} onChange={setSwapFig} />
               </>
@@ -463,7 +465,7 @@ function Thread({ thread, act, inventory, market, onProfile }) {
         ) : (
           <>
             {acceptBlocked && (
-              <p className="offer-form__note">{t('This swap is no longer possible: one of you already has the figure. Make a counter-offer instead.')}</p>
+              <p className="offer-form__note">{t('This swap is no longer possible: one of you already has the figure, or the buyer has no duplicate left. Make a counter-offer instead.')}</p>
             )}
             <div className="listing__actions">
               <button className="btn btn--primary btn--sm" disabled={!!acceptBlocked} onClick={() => act('accept_offer', { p_offer: latest.id }, acceptMsg)}>

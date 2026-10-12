@@ -45,18 +45,19 @@ export function HaveBadge({ figureId, receiver }) {
   return <span className={`have ${n ? 'have--yes' : 'have--no'}`}>{label}</span>
 }
 
-// Pick one figure from a shelf to offer in a swap: only figures the receiver doesn't have yet.
+// Pick one figure from a shelf to offer in a swap: only duplicates (the giver keeps one)
+// that the receiver doesn't have yet.
 export function FigurePicker({ shelf, receiver, value, onChange }) {
   const { t } = useT()
   if (!shelf || !receiver?.shelf) return <p className="picker__empty">{t('Loading shelf…')}</p>
   const order = SERIES.flatMap((s) => [...s.figures, s.secret].map((f) => f.id))
-  const ids = order.filter((id) => shelf[id] > 0 && !(receiver.shelf[id] > 0))
+  const ids = order.filter((id) => shelf[id] >= 2 && !(receiver.shelf[id] > 0))
   if (!ids.length)
     return (
       <p className="picker__empty">
         {receiver.isMe
-          ? t('@{user} has no figures that you don’t have yet.', { user: receiver.from })
-          : t('No figures here that @{user} doesn’t have yet.', { user: receiver.name })}
+          ? t('@{user} has no duplicates that you don’t have yet.', { user: receiver.from })
+          : t('You have no duplicates that @{user} doesn’t have yet. Only figures you have twice or more can be swapped.', { user: receiver.name })}
       </p>
     )
   return (
@@ -74,7 +75,9 @@ export function FigurePicker({ shelf, receiver, value, onChange }) {
           >
             <Angel figure={f} size={44} />
             <span className="picker__name">{f.name}</span>
-            <span className="picker__value">{euro(f.value)}</span>
+            <span className="picker__value">
+              {euro(f.value)} · ×{shelf[id]}
+            </span>
             <HaveBadge figureId={id} receiver={receiver} />
           </button>
         )
