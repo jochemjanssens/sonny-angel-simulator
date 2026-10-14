@@ -362,4 +362,6 @@ export default {
   "Only duplicates can be swapped: the buyer needs at least two of that figure": "Je kunt alleen dubbele figuurtjes ruilen: de koper moet er minstens twee van hebben",
   "Pick one of @{user}’s duplicates that you would like instead:": "Kies een dubbel figuurtje van @{user} dat je liever wilt:",
   "Pick one of your duplicates to offer:": "Kies een van je dubbele figuurtjes om aan te bieden:",
+  "Missed difference": "Gemist verschil",
+  "The differences you missed are marked in orange.": "De verschillen die je miste zijn oranje gemarkeerd.",
 }

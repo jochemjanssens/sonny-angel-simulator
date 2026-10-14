@@ -22,13 +22,16 @@ function shade(hex, f) {
 
 // Headgear that shows the accent colour somewhere (inner ears, leaves, fins...).
 const ACCENT_HATS = new Set(['longEars', 'roundEars', 'pointyEars', 'bigEars', 'floppyEars', 'mane', 'leaf', 'sprout', 'fin', 'tuft', 'heart', 'cream', 'calyx', 'antennae', 'crest', 'lollipop', 'witchHat', 'shell', 'petals', 'unicorn', 'topHat'])
-const accentVisible = (f) => ACCENT_HATS.has(f.hat) || (f.pattern && f.pattern !== 'blaze')
+// Patterns around the eyes: changing them reads as "the eyes are different", which isn't fair.
+const EYE_PATTERNS = new Set(['panda', 'mask'])
+const accentVisible = (f) => ACCENT_HATS.has(f.hat) || (f.pattern && f.pattern !== 'blaze' && !EYE_PATTERNS.has(f.pattern))
 
 // Each change returns property overrides for the figure, or null if it doesn't apply.
 const CHANGES = {
   tint: (f, r) => ({ color: shade(f.color, f.color.toLowerCase() === '#ffffff' ? 0.16 : r.next() < 0.5 ? 0.22 : -0.3) }),
   accent: (f, r) => {
-    if (!accentVisible(f)) return null
+    // the accent also colours panda patches / masks unless they have their own colour
+    if (!accentVisible(f) || (EYE_PATTERNS.has(f.pattern) && !f.patternColor)) return null
     const options = ACCENTS.filter((c) => c.toLowerCase() !== f.accent.toLowerCase())
     return { accent: r.pick(options) }
   },
@@ -43,21 +46,21 @@ const CHANGES = {
     return { extras: f.extras.filter((_, i) => i !== drop) }
   },
   pattern: (f) => {
+    if (EYE_PATTERNS.has(f.pattern)) return null
     if (f.pattern) return { pattern: undefined }
     // spots use the accent colour, so make sure they stand out from the hood
     return f.accent.toLowerCase() === f.color.toLowerCase() ? { pattern: 'spots', accent: shade(f.color, 0.35) } : { pattern: 'spots' }
   },
-  hoodFace: (f) => ({ hoodFace: !f.hoodFace }),
 }
 
 // level 0 is the first puzzle of the day. Higher levels add differences and,
-// from level 4, use only the subtle kinds (no swapped figures or hood faces).
+// from level 4, use only the subtle kinds (no swapped figures).
 export function makeDifferences(size, seed, level = 0) {
   const { cols, rows, maxMisses } = DIFF_SIZES[size]
   const r = makeRandom(seed)
   const cells = cols * rows
   const diffs = Math.min(Math.floor(cells / 2), DIFF_SIZES[size].diffs + Math.floor(level / 2))
-  const kinds = level >= 4 ? Object.keys(CHANGES).filter((k) => k !== 'hoodFace') : [...Object.keys(CHANGES), 'swap']
+  const kinds = level >= 4 ? Object.keys(CHANGES) : [...Object.keys(CHANGES), 'swap']
   // a few series only, so the figures look alike
   const series = r.shuffle(SERIES.filter((s) => !s.limited)).slice(0, Math.ceil(cells / 10) + 1)
   const pool = r.shuffle(series.flatMap((s) => s.figures))
@@ -82,6 +85,8 @@ export function makeDifferences(size, seed, level = 0) {
         break
       }
     }
+    // nothing applied: a colour tint always works, so every spot really differs
+    if (right[i].id === left[i].id && !right[i].over) right[i] = { id: fig.id, over: CHANGES.tint(fig, r) }
   }
   return { cols, rows, left, right, spots, maxMisses }
 }
