@@ -16,9 +16,9 @@ create table if not exists public.game_config (
   puzzle_small numeric(10, 2) not null default 5,
   puzzle_medium numeric(10, 2) not null default 10,
   puzzle_large numeric(10, 2) not null default 15,
-  tables_small numeric(10, 2) not null default 0.15, -- times tables, per correct sum
-  tables_medium numeric(10, 2) not null default 0.30,
-  tables_large numeric(10, 2) not null default 0.45,
+  tables_small numeric(10, 2) not null default 0.10, -- times tables, per point
+  tables_medium numeric(10, 2) not null default 0.15,
+  tables_large numeric(10, 2) not null default 0.20,
   tables_prize numeric(10, 2) not null default 50
 );
 
