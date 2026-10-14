@@ -1,8 +1,11 @@
 import { makeRandom } from './random.js'
 
 // Tafel-kampioen: answer as many times-table sums as you can in one minute.
-// Every correct answer pays TABLES_SIZES[size].reward; the server pays it out.
+// A correct answer scores a point, a wrong one costs TABLES_PENALTY points
+// (never below 0). Every point pays TABLES_SIZES[size].reward; the server pays it out.
 export const TABLES_SECONDS = 60
+export const TABLES_PENALTY = 2
+export const tablesScore = (correct, wrong) => Math.max(0, correct - TABLES_PENALTY * wrong)
 export const TABLES_SIZES = {
   small: { tables: [1, 2, 3, 4, 5, 10], label: 'Tables 1–5 and 10', reward: 0.15 },
   medium: { tables: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], label: 'Tables 1–10', reward: 0.3 },

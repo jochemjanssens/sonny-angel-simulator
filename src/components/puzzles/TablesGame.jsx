@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { TABLES_SECONDS, TABLES_SIZES } from '../../puzzles/tables.js'
+import { TABLES_PENALTY, TABLES_SECONDS, TABLES_SIZES, tablesScore } from '../../puzzles/tables.js'
 import { euro } from '../../data/collections'
 import { useT } from '../../i18n'
 
@@ -17,6 +17,7 @@ export default function TablesGame({ puzzle, onSolved }) {
   const [wrong, setWrong] = useState(0)
   const [flash, setFlash] = useState(null) // { ok, answer }
   const sent = useRef(false)
+  const score = tablesScore(correct, wrong)
 
   const left = endsAt ? Math.max(0, Math.ceil((endsAt - now) / 1000)) : TABLES_SECONDS
   const over = endsAt !== null && left === 0
@@ -38,8 +39,8 @@ export default function TablesGame({ puzzle, onSolved }) {
   useEffect(() => {
     if (!over || sent.current) return
     sent.current = true
-    setTimeout(() => onSolved(correct), 1500)
-  }, [over, correct, onSolved])
+    setTimeout(() => onSolved({ correct, wrong }), 1500)
+  }, [over, correct, wrong, onSolved])
 
   const press = useCallback(
     (key) => {
@@ -72,11 +73,11 @@ export default function TablesGame({ puzzle, onSolved }) {
     <div className="tab">
       <div className="tab__stats">
         <span>
-          ✅ <strong>{correct}</strong>
+          ⭐ <strong>{score}</strong>
         </span>
         <span className={`tab__clock ${playing && left <= 10 ? 'is-low' : ''}`}>⏱️ 0:{String(left).padStart(2, '0')}</span>
         <span>
-          💰 <strong>{euro(correct * reward)}</strong>
+          💰 <strong>{euro(score * reward)}</strong>
         </span>
       </div>
       <div className="tab__bar">
@@ -92,6 +93,7 @@ export default function TablesGame({ puzzle, onSolved }) {
           <div className="tab__over">
             <strong>{t("Time's up!")}</strong>
             <span>{t('{correct} right · {wrong} wrong', { correct, wrong })}</span>
+            <span>{t('{n} points', { n: score })}</span>
           </div>
         ) : (
           <>
@@ -99,7 +101,7 @@ export default function TablesGame({ puzzle, onSolved }) {
             <span className="tab__answer">{input || '?'}</span>
             {flash && (
               <span key={flash.id} className={`tab__flash ${flash.ok ? 'is-ok' : 'is-bad'}`}>
-                {flash.ok ? '+' + euro(reward) : t('It was {n}', { n: flash.answer })}
+                {flash.ok ? '+' + euro(reward) : t('−{p} points · it was {n}', { p: TABLES_PENALTY, n: flash.answer })}
               </span>
             )}
           </>
@@ -113,7 +115,7 @@ export default function TablesGame({ puzzle, onSolved }) {
           </button>
         ))}
       </div>
-      <p className="puzzle__hint">{t('Every correct sum earns {amount}. The answer is checked as soon as you have typed enough digits.', { amount: euro(reward) })}</p>
+      <p className="puzzle__hint">{t('Every correct sum is a point worth {amount}; a wrong one costs {p} points. The answer is checked as soon as you have typed enough digits.', { amount: euro(reward), p: TABLES_PENALTY })}</p>
     </div>
   )
 }

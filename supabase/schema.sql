@@ -465,14 +465,15 @@ begin
   end loop;
 end $$;
 
--- Times tables pay per correct sum, more for bigger sizes. The minute must
--- really be over, and no more than 90 sums (1.5 per second) count.
-create or replace function public.finish_tables(p_session uuid, p_correct int) returns numeric
+-- Times tables score one point per correct sum and lose two per wrong one
+-- (never below 0). Pay is per point, more for bigger sizes. The minute must
+-- really be over, and no more than 90 correct sums (1.5 per second) count.
+create or replace function public.finish_tables(p_session uuid, p_correct int, p_wrong int) returns numeric
 language plpgsql security definer set search_path = public as $$
 declare u uuid := public._uid();
   s public.puzzle_sessions;
   cfg public.game_config;
-  n int := least(greatest(coalesce(p_correct, 0), 0), 90);
+  n int := greatest(least(greatest(coalesce(p_correct, 0), 0), 90) - 2 * greatest(coalesce(p_wrong, 0), 0), 0);
   pay numeric;
 begin
   perform public._settle_tables_weeks();
@@ -724,7 +725,7 @@ grant execute on function
   public.claim_welcome_bonus(),
   public.start_puzzle(text, text),
   public.finish_puzzle(uuid),
-  public.finish_tables(uuid, int),
+  public.finish_tables(uuid, int, int),
   public.tables_highscores(text),
   public.sell_to_bank(text),
   public.spin_wheel(),

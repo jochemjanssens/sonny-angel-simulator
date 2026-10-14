@@ -70,13 +70,13 @@ export default function TablesHighscores({ userId, size, refreshKey, onProfile }
         </ol>
       )}
       <p className="hs__mine">
-        {data.mine ? t('Your best this week: {n} sums', { n: data.mine }) : t("You haven't played this week yet.")}
+        {data.mine ? t('Your best this week: {n} points', { n: data.mine }) : t("You haven't played this week yet.")}
       </p>
       {data.last && (
         <p className="hs__last">
           {data.last.user_id === userId
-            ? t('You won last week with {n} sums and got {amount}! 🎉', { n: data.last.score, amount: euro(data.last.prize) })
-            : t('Last week {user} won {amount} with {n} sums.', { user: name(data.last), n: data.last.score, amount: euro(data.last.prize) })}
+            ? t('You won last week with {n} points and got {amount}! 🎉', { n: data.last.score, amount: euro(data.last.prize) })
+            : t('Last week {user} won {amount} with {n} points.', { user: name(data.last), n: data.last.score, amount: euro(data.last.prize) })}
         </p>
       )}
     </div>

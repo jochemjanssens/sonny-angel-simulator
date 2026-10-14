@@ -16,7 +16,7 @@ import { makeMemory, MEMORY_SIZES } from '../../puzzles/memory.js'
 import { makeDifferences, DIFF_SIZES } from '../../puzzles/differences.js'
 import { TETRIS_TARGETS } from '../../puzzles/tetris.js'
 import { coloringName, makeColoringPage } from '../../puzzles/coloring.js'
-import { makeTables, TABLES_SECONDS, TABLES_SIZES } from '../../puzzles/tables.js'
+import { makeTables, TABLES_SECONDS, TABLES_SIZES, tablesScore } from '../../puzzles/tables.js'
 import { PUZZLE_REWARDS, euro } from '../../data/collections'
 import { rpc, supabase } from '../../lib/supabase'
 import { useT } from '../../i18n'
@@ -46,7 +46,7 @@ const gridLabel = (t, kind, size, level = 0) => {
   return STATIC_GRID[kind][size]
 }
 
-// Times tables pay per correct answer instead of a fixed amount.
+// Times tables pay per point instead of a fixed amount.
 const rewardLabel = (t, kind, size) =>
   kind === 'tables' ? t('{amount} per sum', { amount: euro(TABLES_SIZES[size].reward) }) : euro(PUZZLE_REWARDS[size])
 
@@ -108,8 +108,8 @@ export default function PuzzlesView({ userId, notify, onEarned, onProfile }) {
     setBusy(false)
   }
 
-  const paid = (amount, correct) => {
-    setResult({ amount, correct })
+  const paid = (amount, tally) => {
+    setResult({ amount, tally })
     setToday((n) => n + 1) // the next puzzle is one level harder straight away
     notify(t('Puzzle solved! +{amount}', { amount: euro(amount) }))
     onEarned()
@@ -119,34 +119,35 @@ export default function PuzzlesView({ userId, notify, onEarned, onProfile }) {
   // Claims the reward, retrying when the request doesn't get through (e.g. the
   // phone paused the page or the connection dropped). The puzzle stays unpaid on
   // the server until a claim succeeds, so the player never loses the reward.
-  const claimReward = async (correct, attempt = 0) => {
-    setResult({ claiming: true, correct })
+  // tally: { correct, wrong } for times tables
+  const claimReward = async (tally, attempt = 0) => {
+    setResult({ claiming: true, tally })
     try {
       await supabase.auth.getSession() // refreshes the login if it expired while the phone slept
       const pay =
         session.kind === 'tables'
-          ? await rpc('finish_tables', { p_session: session.id, p_correct: correct })
+          ? await rpc('finish_tables', { p_session: session.id, p_correct: tally.correct, p_wrong: tally.wrong })
           : await rpc('finish_puzzle', { p_session: session.id })
-      paid(Number(pay), correct)
+      paid(Number(pay), tally)
     } catch (err) {
       if (/already paid/i.test(err.message)) {
         // an earlier try reached the server but its answer got lost: it was paid
         const { data } = await supabase.from('puzzle_sessions').select('reward').eq('id', session.id).maybeSingle()
-        return paid(Number(data?.reward ?? (session.kind === 'tables' ? correct * TABLES_SIZES[session.size].reward : PUZZLE_REWARDS[session.size])), correct)
+        return paid(Number(data?.reward ?? (session.kind === 'tables' ? tablesScore(tally.correct, tally.wrong) * TABLES_SIZES[session.size].reward : PUZZLE_REWARDS[session.size])), tally)
       }
       const network = /load failed|failed to fetch|networkerror|network request failed/i.test(err.message)
       if (network && attempt < 3) {
         await new Promise((r) => setTimeout(r, 800 * 2 ** attempt))
-        return claimReward(correct, attempt + 1)
+        return claimReward(tally, attempt + 1)
       }
       setResult(
         network
-          ? { error: t("Couldn't reach the server to pay your reward. Check your connection and try again — your puzzle is saved."), retry: true, correct }
+          ? { error: t("Couldn't reach the server to pay your reward. Check your connection and try again — your puzzle is saved."), retry: true, tally }
           : { error: t(err.message) },
       )
     }
   }
-  const solved = (correct) => claimReward(correct)
+  const solved = (tally) => claimReward(tally)
 
   if (session) {
     const k = KINDS.find((x) => x.id === session.kind)
@@ -186,7 +187,7 @@ export default function PuzzlesView({ userId, notify, onEarned, onProfile }) {
             <h2>{t('Your reward is waiting')}</h2>
             <p>{result.error}</p>
             <div className="modal__actions">
-              <button className="btn btn--primary" onClick={() => claimReward(result.correct)}>
+              <button className="btn btn--primary" onClick={() => claimReward(result.tally)}>
                 {t('Try again')}
               </button>
             </div>
@@ -196,7 +197,7 @@ export default function PuzzlesView({ userId, notify, onEarned, onProfile }) {
             <span className="puzzle__done-icon">{result.error ? '🙈' : '🎉'}</span>
             <h2>{result.error ? t('No reward this time') : t('You earned {amount}!', { amount: euro(result.amount) })}</h2>
             <p>
-              {session.kind === 'tables' && !result.error && t('{n} sums right in {s} seconds. ', { n: result.correct, s: TABLES_SECONDS })}
+              {session.kind === 'tables' && !result.error && t('{correct} right and {wrong} wrong in {s} seconds: {n} points. ', { correct: result.tally.correct, wrong: result.tally.wrong, n: tablesScore(result.tally.correct, result.tally.wrong), s: TABLES_SECONDS })}
               {result.error || t('The money is in your budget. Up for another one?')}
             </p>
             {session.kind === 'tables' && !result.error && <TablesHighscores userId={userId} size={session.size} refreshKey={session.id} onProfile={onProfile} />}
