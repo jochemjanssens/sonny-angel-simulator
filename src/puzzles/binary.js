@@ -5,8 +5,17 @@ import { makeRandom } from './random.js'
 // - every row and column has as many 0s as 1s,
 // - no two rows (or two columns) are the same.
 export const BINARY_SIZES = { small: 6, medium: 8, large: 10 }
-// From level 5 the grid grows by two rows and columns.
-export const binarySize = (size, level = 0) => BINARY_SIZES[size] + (level >= 5 ? 2 : 0)
+// From level 20 (level 19 in code, which counts from 0) the grid grows by two
+// rows and columns.
+export const binarySize = (size, level = 0) => BINARY_SIZES[size] + (level >= 19 ? 2 : 0)
+
+// Share of the empty cells that get an extra digit as a hint. It shrinks from
+// 40% on level 1 to none on level 15, and when the grid grows on level 20 it
+// starts again at 15% and shrinks to none on level 30.
+function extraClues(level) {
+  if (level >= 19) return Math.max(0, 0.15 * (1 - (level - 19) / 10))
+  return Math.max(0, 0.4 * (1 - level / 14))
+}
 
 const col = (g, c) => g.map((row) => row[c])
 
@@ -128,12 +137,13 @@ export function logicSolve(start, depth = 0) {
   return g.every((row) => row.every((x) => x !== null)) ? g : null
 }
 
-// Harder with every level: level 0–2 give extra digits, level 3 only the minimum,
-// from level 4 the puzzle needs smarter reasoning, from level 5 the grid is two
-// bigger, and from level 7 you also need "no two lines are the same".
+// A little harder with every level (levels as shown to the player): fewer
+// extra digits up to level 15, smarter reasoning from level 10, a grid two
+// bigger from level 20, and from level 30 you also need "no two lines are the
+// same", which is the hardest it gets.
 export function makeBinary(size, seed, level = 0) {
   const n = binarySize(size, level)
-  const depth = level >= 7 ? 2 : level >= 4 ? 1 : 0
+  const depth = level >= 29 ? 2 : level >= 9 ? 1 : 0
   const r = makeRandom(seed)
   let solution = null
   for (let i = 0; !solution && i < 20; i++) solution = makeSolution(n, r)
@@ -147,7 +157,7 @@ export function makeBinary(size, seed, level = 0) {
     const solved = logicSolve(puzzle, depth)
     if (!solved || solved.some((line, i) => line.some((v, j) => v !== solution[i][j]))) puzzle[row][c] = keep
   }
-  const extra = [0.4, 0.25, 0.12][level] ?? 0
+  const extra = extraClues(level)
   for (const idx of r.shuffle([...Array(n * n).keys()])) {
     const row = Math.floor(idx / n)
     const c = idx % n
