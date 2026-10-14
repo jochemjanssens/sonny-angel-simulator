@@ -13,7 +13,7 @@ function untilMidnight() {
   return `${h}h ${String(m).padStart(2, '0')}m`
 }
 
-export default function Header({ tab, setTab, wallet, canClaim, onClaim, canSpin, onWheel, ownedUnique, totalUnique, marketBadge, username, onLogout, onProfile }) {
+export default function Header({ tab, setTab, wallet, canClaim, onClaim, canSpin, bonusSpins = 0, onWheel, ownedUnique, totalUnique, marketBadge, username, onLogout, onProfile }) {
   const [countdown, setCountdown] = useState(untilMidnight)
   const { t } = useT()
 
@@ -66,6 +66,7 @@ export default function Header({ tab, setTab, wallet, canClaim, onClaim, canSpin
           )}
           <button className={`wheel-btn ${canSpin ? 'is-ready' : ''}`} onClick={onWheel} title={canSpin ? t('Spin the lucky wheel!') : t('Lucky wheel')}>
             🎡 {canSpin && <span>{t('Spin')}</span>}
+            {bonusSpins > 0 && <span className="wheel-btn__count">×{bonusSpins}</span>}
           </button>
         </div>
 

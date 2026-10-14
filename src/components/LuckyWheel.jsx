@@ -27,8 +27,10 @@ function untilMidnightUtc() {
   return `${Math.floor(s / 3600)}h ${String(Math.floor((s % 3600) / 60)).padStart(2, '0')}m`
 }
 
-// Daily lucky wheel: the server picks the prize, the wheel spins to it.
-export default function LuckyWheel({ canSpin, onSpin, onDone, onClose }) {
+// Daily lucky wheel: the server picks the prize, the wheel spins to it. Bonus
+// spins (won with times tables) can be used after the free daily spin.
+export default function LuckyWheel({ dailySpin, bonusSpins = 0, onSpin, onDone, onClose }) {
+  const canSpin = dailySpin || bonusSpins > 0
   const [rotation, setRotation] = useState(0)
   const { t } = useT()
   const [spinning, setSpinning] = useState(false)
@@ -127,12 +129,21 @@ export default function LuckyWheel({ canSpin, onSpin, onDone, onClose }) {
                 </div>
               </>
             )}
-            <p className="wheel__note">{t('Come back tomorrow for another spin.')}</p>
+            {canSpin ? (
+              <button className="btn btn--primary wheel__spin" onClick={() => setResult(null)}>
+                {dailySpin ? t('Spin again') : t(bonusSpins > 1 ? 'Spin again ({n} bonus spins left)' : 'Spin again ({n} bonus spin left)', { n: bonusSpins })}
+              </button>
+            ) : (
+              <p className="wheel__note">{t('Come back tomorrow for another spin.')}</p>
+            )}
           </div>
         ) : canSpin ? (
-          <button className="btn btn--primary btn--lg wheel__spin" onClick={spin} disabled={spinning}>
-            {spinning ? t('Spinning…') : t('Spin the wheel!')}
-          </button>
+          <>
+            <button className="btn btn--primary btn--lg wheel__spin" onClick={spin} disabled={spinning}>
+              {spinning ? t('Spinning…') : dailySpin ? t('Spin the wheel!') : t('Use a bonus spin!')}
+            </button>
+            {bonusSpins > 0 && <p className="wheel__note">{t(bonusSpins > 1 ? 'You have {n} bonus spins from Times table champion.' : 'You have {n} bonus spin from Times table champion.', { n: bonusSpins })}</p>}
+          </>
         ) : (
           <p className="wheel__note">{t('You already spun today. Next spin in {time}.', { time: untilMidnightUtc() })}</p>
         )}

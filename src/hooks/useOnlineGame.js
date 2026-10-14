@@ -30,6 +30,7 @@ export function useOnlineGame(userId) {
       wallet: Number(p.wallet),
       lastClaim: p.last_claim,
       lastSpin: p.last_spin,
+      bonusSpins: p.bonus_spins ?? 0,
       imported: p.imported,
       welcomeBonus: p.welcome_bonus,
       inventory,

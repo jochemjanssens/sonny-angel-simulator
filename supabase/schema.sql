@@ -18,8 +18,7 @@ create table if not exists public.game_config (
   puzzle_large numeric(10, 2) not null default 15,
   tables_small numeric(10, 2) not null default 0.10, -- times tables, per point
   tables_medium numeric(10, 2) not null default 0.15,
-  tables_large numeric(10, 2) not null default 0.20,
-  tables_prize numeric(10, 2) not null default 50
+  tables_large numeric(10, 2) not null default 0.20
 );
 
 create table if not exists public.series (
@@ -57,7 +56,8 @@ create table if not exists public.players (
   secrets int not null default 0,
   puzzles int not null default 0,
   puzzle_earned numeric(10, 2) not null default 0,
-  last_spin date
+  last_spin date,
+  bonus_spins int not null default 0 check (bonus_spins >= 0) -- extra wheel spins, won with times tables
 );
 
 -- A row with count 0 means "had it once" (shown as Sold in the line-up).
@@ -426,41 +426,50 @@ begin
   return pay;
 end $$;
 
--- One row per finished week and size: who won and what they were paid.
+-- The top 3 of every finished week and size, and the free wheel spins they got.
 create table if not exists public.tables_prizes (
   week date not null,
   size text not null check (size in ('small', 'medium', 'large')),
+  rank int not null check (rank between 1 and 3),
   user_id uuid not null references auth.users (id) on delete cascade,
   score int not null,
-  prize numeric(10, 2) not null,
+  spins int not null,
   paid_at timestamptz not null default now(),
-  primary key (week, size)
+  primary key (week, size, rank)
 );
 alter table public.tables_prizes enable row level security;
 
--- Pays the winner of every finished week, per size, that hasn't been paid yet.
--- Called whenever someone plays or looks at the highscores, so no cron job is
--- needed. On a tie, whoever got the score first wins.
+-- Gives the top 3 of every finished week, per size, their free wheel spins
+-- (3, 2 and 1). Called whenever someone plays or looks at the highscores, so
+-- no cron job is needed. Each player's best score counts; on a tie, whoever
+-- got the score first ranks higher.
 create or replace function public._settle_tables_weeks() returns void
 language plpgsql security definer set search_path = public as $$
-declare cfg public.game_config;
-  w record;
+declare w record;
 begin
-  select * into cfg from public.game_config;
   for w in
-    select distinct on (wk, size) wk, size, s.user_id, s.score
+    select wk, size, user_id, score, rank
     from (
-      select date_trunc('week', finished_at at time zone 'UTC')::date as wk, size, user_id, score, finished_at
-      from public.puzzle_sessions
-      where kind = 'tables' and score > 0 and finished_at < date_trunc('week', now() at time zone 'UTC') at time zone 'UTC'
-    ) s
-    where not exists (select 1 from public.tables_prizes p where p.week = s.wk and p.size = s.size)
-    order by wk, size, s.score desc, s.finished_at
+      select wk, size, user_id, score,
+        row_number() over (partition by wk, size order by score desc, finished_at) as rank
+      from (
+        select distinct on (wk, size, user_id) wk, size, user_id, score, finished_at
+        from (
+          select date_trunc('week', finished_at at time zone 'UTC')::date as wk, size, user_id, score, finished_at
+          from public.puzzle_sessions
+          where kind = 'tables' and score > 0 and finished_at < date_trunc('week', now() at time zone 'UTC') at time zone 'UTC'
+        ) s
+        order by wk, size, user_id, score desc, finished_at
+      ) best
+    ) ranked
+    where rank <= 3
+      and not exists (select 1 from public.tables_prizes p where p.week = ranked.wk and p.size = ranked.size)
   loop
-    insert into public.tables_prizes (week, size, user_id, score, prize) values (w.wk, w.size, w.user_id, w.score, cfg.tables_prize)
+    insert into public.tables_prizes (week, size, rank, user_id, score, spins)
+      values (w.wk, w.size, w.rank, w.user_id, w.score, 4 - w.rank)
       on conflict do nothing;
     if found then
-      update public.players set wallet = wallet + cfg.tables_prize, puzzle_earned = puzzle_earned + cfg.tables_prize where id = w.user_id;
+      update public.players set bonus_spins = bonus_spins + 4 - w.rank where id = w.user_id;
     end if;
   end loop;
 end $$;
@@ -490,7 +499,7 @@ begin
 end $$;
 
 -- This week's top 10 for one size (each player's best score), your own best,
--- and last week's winner of that size.
+-- and last week's top 3 of that size.
 create or replace function public.tables_highscores(p_size text) returns jsonb
 language plpgsql security definer set search_path = public as $$
 declare u uuid := public._uid();
@@ -513,12 +522,11 @@ begin
   from ranked r left join public.profiles pr on pr.id = r.user_id;
   select max(score) into mine from public.puzzle_sessions
     where kind = 'tables' and size = p_size and user_id = u and finished_at >= wk;
-  select jsonb_build_object('user_id', p.user_id, 'username', pr.username, 'score', p.score, 'prize', p.prize)
+  select coalesce(jsonb_agg(jsonb_build_object('user_id', p.user_id, 'username', pr.username, 'score', p.score, 'spins', p.spins) order by p.rank), '[]')
     into last
   from public.tables_prizes p left join public.profiles pr on pr.id = p.user_id
   where p.size = p_size and p.week = (date_trunc('week', now() at time zone 'UTC') - interval '7 days')::date;
-  return jsonb_build_object('top', top, 'mine', mine, 'last', last, 'ends_at', wk + interval '7 days',
-    'prize', (select tables_prize from public.game_config));
+  return jsonb_build_object('top', top, 'mine', mine, 'last', last, 'ends_at', wk + interval '7 days');
 end $$;
 
 -- The bank always buys, for a fixed share of the market value.
@@ -535,7 +543,8 @@ begin
   return pay;
 end $$;
 
--- Daily lucky wheel: one spin per player per UTC day, drawn on the server.
+-- Daily lucky wheel: one spin per player per UTC day (plus any bonus spins),
+-- drawn on the server.
 create table if not exists public.wheel_prizes (
   key text primary key,
   kind text not null check (kind in ('cash', 'figures', 'secret')),
@@ -561,9 +570,13 @@ declare u uuid := public._uid();
   news boolean[] := '{}';
   f text;
 begin
+  -- the free daily spin first, then any bonus spins won with times tables
   update public.players set last_spin = today
     where id = u and (last_spin is null or last_spin < today);
-  if not found then raise exception 'You already spun the wheel today — come back tomorrow'; end if;
+  if not found then
+    update public.players set bonus_spins = bonus_spins - 1 where id = u and bonus_spins > 0;
+    if not found then raise exception 'You already spun the wheel today — come back tomorrow'; end if;
+  end if;
 
   -- weighted draw: walk the running total until it passes a random roll
   roll := floor(random() * (select sum(weight) from public.wheel_prizes))::int;

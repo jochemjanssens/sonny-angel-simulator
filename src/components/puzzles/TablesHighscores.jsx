@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { rpc } from '../../lib/supabase'
-import { euro } from '../../data/collections'
 import { TABLES_SIZES } from '../../puzzles/tables.js'
 import { useT } from '../../i18n'
 
@@ -8,9 +7,10 @@ const MEDALS = ['🥇', '🥈', '🥉']
 
 const SIZE_LABEL = { small: 'Small', medium: 'Medium', large: 'Large' }
 
-// This week's best times-table scores for one size. The best of the week in
-// each size wins a prize, paid out by the server once the week is over
-// (Monday 00:00 UTC).
+// This week's best times-table scores for one size. The top 3 of the week in
+// each size win free wheel spins (3, 2, 1), given by the server once the week
+// is over (Monday 00:00 UTC).
+export const PRIZE_SPINS = [3, 2, 1]
 export default function TablesHighscores({ userId, size, refreshKey, onProfile }) {
   const { t } = useT()
   const [data, setData] = useState(null)
@@ -45,7 +45,7 @@ export default function TablesHighscores({ userId, size, refreshKey, onProfile }
         <h3>
           🏆 {t('Highscores this week')} · {t(SIZE_LABEL[size])}
         </h3>
-        <span className="hs__prize">{t('Best of the week wins {amount}', { amount: euro(data.prize) })}</span>
+        <span className="hs__prize">{t('Top 3 win 3, 2 or 1 free wheel spins')}</span>
       </div>
       <p className="hs__ends">
         {t(TABLES_SIZES[size].label)} · {t('Ends in {time} (Monday 00:00 UTC)', { time: left })}
@@ -64,6 +64,7 @@ export default function TablesHighscores({ userId, size, refreshKey, onProfile }
               ) : (
                 <span className="hs__name">{name(row)}</span>
               )}
+              {i < 3 && <span className="hs__spins">🎡×{PRIZE_SPINS[i]}</span>}
               <strong className="hs__score">{row.score}</strong>
             </li>
           ))}
@@ -72,11 +73,17 @@ export default function TablesHighscores({ userId, size, refreshKey, onProfile }
       <p className="hs__mine">
         {data.mine ? t('Your best this week: {n} points', { n: data.mine }) : t("You haven't played this week yet.")}
       </p>
-      {data.last && (
+      {data.last?.length > 0 && (
         <p className="hs__last">
-          {data.last.user_id === userId
-            ? t('You won last week with {n} points and got {amount}! 🎉', { n: data.last.score, amount: euro(data.last.prize) })
-            : t('Last week {user} won {amount} with {n} points.', { user: name(data.last), n: data.last.score, amount: euro(data.last.prize) })}
+          {t('Last week:')}{' '}
+          {data.last.map((row, i) => (
+            <span key={row.user_id}>
+              {i > 0 && ' · '}
+              {MEDALS[i]} {row.user_id === userId ? t('you') : name(row)} ({row.score})
+            </span>
+          ))}
+          {data.last.some((row) => row.user_id === userId && row.spins > 0) &&
+            ' — ' + t('your free spins are waiting at the lucky wheel! 🎉')}
         </p>
       )}
     </div>

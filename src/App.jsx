@@ -143,7 +143,8 @@ function Game({ userId }) {
         wallet={state.wallet}
         canClaim={state.lastClaim !== utcTodayKey()}
         onClaim={claim}
-        canSpin={state.lastSpin !== utcTodayKey()}
+        canSpin={state.lastSpin !== utcTodayKey() || state.bonusSpins > 0}
+        bonusSpins={state.bonusSpins}
         onWheel={() => setWheelOpen(true)}
         ownedUnique={ownedUnique}
         totalUnique={totalUnique}
@@ -221,7 +222,8 @@ function Game({ userId }) {
 
       {wheelOpen && (
         <LuckyWheel
-          canSpin={state.lastSpin !== utcTodayKey()}
+          dailySpin={state.lastSpin !== utcTodayKey()}
+          bonusSpins={state.bonusSpins}
           onSpin={async () => {
             try {
               return await rpc('spin_wheel')
