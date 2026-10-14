@@ -1,0 +1,75 @@
+import { useEffect, useState } from 'react'
+import { rpc } from '../../lib/supabase'
+import { euro } from '../../data/collections'
+import { useT } from '../../i18n'
+
+const MEDALS = ['🥇', '🥈', '🥉']
+
+// This week's best times-table scores. The best of the week wins a prize,
+// paid out by the server once the week is over (Monday 00:00 UTC).
+export default function TablesHighscores({ userId, refreshKey, onProfile }) {
+  const { t } = useT()
+  const [data, setData] = useState(null)
+  const [now, setNow] = useState(Date.now())
+
+  useEffect(() => {
+    let live = true
+    rpc('tables_highscores')
+      .then((d) => live && setData(d))
+      .catch(() => live && setData({ error: true }))
+    return () => {
+      live = false
+    }
+  }, [refreshKey])
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 60000)
+    return () => clearInterval(id)
+  }, [])
+
+  if (!data) return <div className="hs">{t('Loading highscores…')}</div>
+  if (data.error) return null
+
+  const mins = Math.max(0, Math.floor((new Date(data.ends_at) - now) / 60000))
+  const left = mins >= 1440 ? t('{d}d {h}h', { d: Math.floor(mins / 1440), h: Math.floor((mins % 1440) / 60) }) : t('{h}h {m}m', { h: Math.floor(mins / 60), m: mins % 60 })
+  const name = (row) => (row.username ? `@${row.username}` : t('Anonymous'))
+
+  return (
+    <div className="hs">
+      <div className="hs__head">
+        <h3>🏆 {t('Highscores this week')}</h3>
+        <span className="hs__prize">{t('Best of the week wins {amount}', { amount: euro(data.prize) })}</span>
+      </div>
+      <p className="hs__ends">{t('Ends in {time} (Monday 00:00 UTC)', { time: left })}</p>
+      {data.top.length === 0 ? (
+        <p className="hs__empty">{t('No scores yet this week. Be the first!')}</p>
+      ) : (
+        <ol className="hs__list">
+          {data.top.map((row, i) => (
+            <li key={row.user_id} className={row.user_id === userId ? 'is-me' : ''}>
+              <span className="hs__rank">{MEDALS[i] ?? i + 1}</span>
+              {row.username && onProfile ? (
+                <button className="hs__name user-link" onClick={() => onProfile(row.user_id)}>
+                  {name(row)}
+                </button>
+              ) : (
+                <span className="hs__name">{name(row)}</span>
+              )}
+              <strong className="hs__score">{row.score}</strong>
+            </li>
+          ))}
+        </ol>
+      )}
+      <p className="hs__mine">
+        {data.mine ? t('Your best this week: {n} sums', { n: data.mine }) : t("You haven't played this week yet.")}
+      </p>
+      {data.last && (
+        <p className="hs__last">
+          {data.last.user_id === userId
+            ? t('You won last week with {n} sums and got {amount}! 🎉', { n: data.last.score, amount: euro(data.last.prize) })
+            : t('Last week {user} won {amount} with {n} sums.', { user: name(data.last), n: data.last.score, amount: euro(data.last.prize) })}
+        </p>
+      )}
+    </div>
+  )
+}

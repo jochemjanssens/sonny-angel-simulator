@@ -7,6 +7,7 @@ import DifferencesGame from './DifferencesGame'
 import TetrisGame from './TetrisGame'
 import ColoringGame from './ColoringGame'
 import TablesGame from './TablesGame'
+import TablesHighscores from './TablesHighscores'
 import { WORD_CATEGORIES, CATEGORY_BY_ID, SWEDISH_WORDS } from '../../puzzles/words.js'
 import { makeWordSearch } from '../../puzzles/wordsearch.js'
 import { makeBinary, binarySize } from '../../puzzles/binary.js'
@@ -62,7 +63,7 @@ function build(kind, category, size, seed, level) {
   return makeBinary(size, seed, level)
 }
 
-export default function PuzzlesView({ userId, notify, onEarned }) {
+export default function PuzzlesView({ userId, notify, onEarned, onProfile }) {
   const [kind, setKind] = useState('wordsearch')
   const { t, lang } = useT()
   const catName = (c) => (lang === 'nl' ? c.name : c.en)
@@ -198,6 +199,7 @@ export default function PuzzlesView({ userId, notify, onEarned }) {
               {session.kind === 'tables' && !result.error && t('{n} sums right in {s} seconds. ', { n: result.correct, s: TABLES_SECONDS })}
               {result.error || t('The money is in your budget. Up for another one?')}
             </p>
+            {session.kind === 'tables' && !result.error && <TablesHighscores userId={userId} refreshKey={session.id} onProfile={onProfile} />}
             <div className="modal__actions">
               <button className="btn btn--ghost" onClick={() => setSession(null)}>
                 {t('Choose another')}
@@ -279,6 +281,8 @@ export default function PuzzlesView({ userId, notify, onEarned }) {
           </button>
         ))}
       </div>
+
+      {kind === 'tables' && <TablesHighscores userId={userId} refreshKey={today} onProfile={onProfile} />}
 
       <div className="puzzles__start">
         <button className="btn btn--primary btn--lg" onClick={start} disabled={busy}>

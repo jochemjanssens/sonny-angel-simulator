@@ -190,7 +190,7 @@ function Game({ userId }) {
             onGoMarket={() => setTab('market')}
           />
         )}
-        {tab === 'puzzles' && <PuzzlesView userId={userId} notify={notify} onEarned={game.refresh} />}
+        {tab === 'puzzles' && <PuzzlesView userId={userId} notify={notify} onEarned={game.refresh} onProfile={openProfile} />}
       </main>
 
       <footer className="footer">
