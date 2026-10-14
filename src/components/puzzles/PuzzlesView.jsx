@@ -6,14 +6,16 @@ import MemoryGame from './MemoryGame'
 import DifferencesGame from './DifferencesGame'
 import TetrisGame from './TetrisGame'
 import ColoringGame from './ColoringGame'
+import TablesGame from './TablesGame'
 import { WORD_CATEGORIES, CATEGORY_BY_ID, SWEDISH_WORDS } from '../../puzzles/words.js'
 import { makeWordSearch } from '../../puzzles/wordsearch.js'
-import { makeBinary, BINARY_SIZES } from '../../puzzles/binary.js'
+import { makeBinary, binarySize } from '../../puzzles/binary.js'
 import { makeSwedish } from '../../puzzles/swedish.js'
 import { makeMemory, MEMORY_SIZES } from '../../puzzles/memory.js'
 import { makeDifferences, DIFF_SIZES } from '../../puzzles/differences.js'
 import { TETRIS_TARGETS } from '../../puzzles/tetris.js'
 import { coloringName, makeColoringPage } from '../../puzzles/coloring.js'
+import { makeTables, TABLES_REWARD, TABLES_SECONDS, TABLES_SIZES } from '../../puzzles/tables.js'
 import { PUZZLE_REWARDS, euro } from '../../data/collections'
 import { rpc, supabase } from '../../lib/supabase'
 import { useT } from '../../i18n'
@@ -26,20 +28,26 @@ const KINDS = [
   { id: 'differences', name: 'Spot the difference', icon: '🔍', text: 'Find what changed between two shelves.', words: false },
   { id: 'tetris', name: 'Tetris', icon: '🧱', text: 'Stack the blocks and clear the lines.', words: false },
   { id: 'coloring', name: 'Colouring page', icon: '🖍️', text: 'Colour in a Sonny Angel picture.', words: false },
+  { id: 'tables', name: 'Times table champion', icon: '✖️', text: 'Solve as many times tables as you can in one minute.', words: false },
 ]
 const SIZE_LABEL = { small: 'Small', medium: 'Medium', large: 'Large' }
 const STATIC_GRID = {
   wordsearch: { small: '8×8', medium: '11×11', large: '14×14' },
   swedish: { small: '7×7', medium: '9×9', large: '11×11' },
-  binary: Object.fromEntries(Object.entries(BINARY_SIZES).map(([k, n]) => [k, `${n}×${n}`])),
 }
-const gridLabel = (t, kind, size) => {
+const gridLabel = (t, kind, size, level = 0) => {
+  if (kind === 'binary') return `${binarySize(size, level)}×${binarySize(size, level)}`
+  if (kind === 'tables') return t(TABLES_SIZES[size].label)
   if (kind === 'memory') return t('{n} pairs', { n: MEMORY_SIZES[size].pairs })
   if (kind === 'differences') return t('{n} differences', { n: DIFF_SIZES[size].diffs })
   if (kind === 'tetris') return t('{n} lines', { n: TETRIS_TARGETS[size] })
   if (kind === 'coloring') return t(coloringName(size))
   return STATIC_GRID[kind][size]
 }
+
+// Times tables pay per correct answer instead of a fixed amount.
+const rewardLabel = (t, kind, size) =>
+  kind === 'tables' ? t('{amount} per sum', { amount: euro(TABLES_REWARD) }) : euro(PUZZLE_REWARDS[size])
 
 // level: puzzles solved today (0 = first puzzle of the day). Each one makes the
 // next harder; the count resets at midnight UTC.
@@ -50,6 +58,7 @@ function build(kind, category, size, seed, level) {
   if (kind === 'differences') return makeDifferences(size, seed, level)
   if (kind === 'tetris') return { target: TETRIS_TARGETS[size], seed, level }
   if (kind === 'coloring') return { page: makeColoringPage(size, seed, level), minColors: 4, byNumber: level > 0 }
+  if (kind === 'tables') return makeTables(size, seed, level)
   return makeBinary(size, seed, level)
 }
 
@@ -98,8 +107,8 @@ export default function PuzzlesView({ userId, notify, onEarned }) {
     setBusy(false)
   }
 
-  const paid = (amount) => {
-    setResult({ amount })
+  const paid = (amount, correct) => {
+    setResult({ amount, correct })
     setToday((n) => n + 1) // the next puzzle is one level harder straight away
     notify(t('Puzzle solved! +{amount}', { amount: euro(amount) }))
     onEarned()
@@ -109,30 +118,34 @@ export default function PuzzlesView({ userId, notify, onEarned }) {
   // Claims the reward, retrying when the request doesn't get through (e.g. the
   // phone paused the page or the connection dropped). The puzzle stays unpaid on
   // the server until a claim succeeds, so the player never loses the reward.
-  const claimReward = async (attempt = 0) => {
-    setResult({ claiming: true })
+  const claimReward = async (correct, attempt = 0) => {
+    setResult({ claiming: true, correct })
     try {
       await supabase.auth.getSession() // refreshes the login if it expired while the phone slept
-      paid(Number(await rpc('finish_puzzle', { p_session: session.id })))
+      const pay =
+        session.kind === 'tables'
+          ? await rpc('finish_tables', { p_session: session.id, p_correct: correct })
+          : await rpc('finish_puzzle', { p_session: session.id })
+      paid(Number(pay), correct)
     } catch (err) {
       if (/already paid/i.test(err.message)) {
         // an earlier try reached the server but its answer got lost: it was paid
         const { data } = await supabase.from('puzzle_sessions').select('reward').eq('id', session.id).maybeSingle()
-        return paid(Number(data?.reward ?? PUZZLE_REWARDS[session.size]))
+        return paid(Number(data?.reward ?? (session.kind === 'tables' ? correct * TABLES_REWARD : PUZZLE_REWARDS[session.size])), correct)
       }
       const network = /load failed|failed to fetch|networkerror|network request failed/i.test(err.message)
       if (network && attempt < 3) {
         await new Promise((r) => setTimeout(r, 800 * 2 ** attempt))
-        return claimReward(attempt + 1)
+        return claimReward(correct, attempt + 1)
       }
       setResult(
         network
-          ? { error: t("Couldn't reach the server to pay your reward. Check your connection and try again — your puzzle is saved."), retry: true }
+          ? { error: t("Couldn't reach the server to pay your reward. Check your connection and try again — your puzzle is saved."), retry: true, correct }
           : { error: t(err.message) },
       )
     }
   }
-  const solved = () => claimReward()
+  const solved = (correct) => claimReward(correct)
 
   if (session) {
     const k = KINDS.find((x) => x.id === session.kind)
@@ -149,11 +162,11 @@ export default function PuzzlesView({ userId, notify, onEarned }) {
           <p className="puzzle__meta">
             {k.words && <span>{catName(CATEGORY_BY_ID[session.category])}</span>}
             <span>
-              {t(SIZE_LABEL[session.size])} · {gridLabel(t, session.kind, session.size)}
+              {t(SIZE_LABEL[session.size])} · {gridLabel(t, session.kind, session.size, session.level)}
             </span>
-            <span className="puzzle__reward">{euro(PUZZLE_REWARDS[session.size])}</span>
+            <span className="puzzle__reward">{rewardLabel(t, session.kind, session.size)}</span>
             <span className="puzzle__level">{t('Level {n}', { n: session.level + 1 })}</span>
-            {!result && (
+            {!result && session.kind !== 'tables' && (
               <span className="puzzle__time">
                 {Math.floor(secs / 60)}:{String(secs % 60).padStart(2, '0')}
               </span>
@@ -172,7 +185,7 @@ export default function PuzzlesView({ userId, notify, onEarned }) {
             <h2>{t('Your reward is waiting')}</h2>
             <p>{result.error}</p>
             <div className="modal__actions">
-              <button className="btn btn--primary" onClick={() => claimReward()}>
+              <button className="btn btn--primary" onClick={() => claimReward(result.correct)}>
                 {t('Try again')}
               </button>
             </div>
@@ -181,7 +194,10 @@ export default function PuzzlesView({ userId, notify, onEarned }) {
           <div className={`puzzle__done ${result.error ? 'is-error' : ''}`}>
             <span className="puzzle__done-icon">{result.error ? '🙈' : '🎉'}</span>
             <h2>{result.error ? t('No reward this time') : t('You earned {amount}!', { amount: euro(result.amount) })}</h2>
-            <p>{result.error || t('The money is in your budget. Up for another one?')}</p>
+            <p>
+              {session.kind === 'tables' && !result.error && t('{n} sums right in {s} seconds. ', { n: result.correct, s: TABLES_SECONDS })}
+              {result.error || t('The money is in your budget. Up for another one?')}
+            </p>
             <div className="modal__actions">
               <button className="btn btn--ghost" onClick={() => setSession(null)}>
                 {t('Choose another')}
@@ -201,6 +217,8 @@ export default function PuzzlesView({ userId, notify, onEarned }) {
           <DifferencesGame key={session.id} puzzle={session.puzzle} onSolved={solved} onRetry={start} />
         ) : session.kind === 'tetris' ? (
           <TetrisGame key={session.id} puzzle={session.puzzle} onSolved={solved} />
+        ) : session.kind === 'tables' ? (
+          <TablesGame key={session.id} puzzle={session.puzzle} onSolved={solved} />
         ) : session.kind === 'coloring' ? (
           <ColoringGame key={session.id} puzzle={session.puzzle} onSolved={solved} />
         ) : (
@@ -256,15 +274,17 @@ export default function PuzzlesView({ userId, notify, onEarned }) {
         {Object.keys(PUZZLE_REWARDS).map((s) => (
           <button key={s} className={`choice ${size === s ? 'is-active' : ''}`} onClick={() => setSize(s)}>
             <strong>{t(SIZE_LABEL[s])}</strong>
-            <span>{gridLabel(t, kind, s)}</span>
-            <span className="choice__reward">{euro(PUZZLE_REWARDS[s])}</span>
+            <span>{gridLabel(t, kind, s, today)}</span>
+            <span className="choice__reward">{rewardLabel(t, kind, s)}</span>
           </button>
         ))}
       </div>
 
       <div className="puzzles__start">
         <button className="btn btn--primary btn--lg" onClick={start} disabled={busy}>
-          {t('Start puzzle · earn {amount}', { amount: euro(PUZZLE_REWARDS[size]) })}
+          {kind === 'tables'
+            ? t('Start · {amount} per sum', { amount: euro(TABLES_REWARD) })
+            : t('Start puzzle · earn {amount}', { amount: euro(PUZZLE_REWARDS[size]) })}
         </button>
       </div>
     </section>

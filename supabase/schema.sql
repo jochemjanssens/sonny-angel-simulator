@@ -15,7 +15,8 @@ create table if not exists public.game_config (
   bank_rate numeric(4, 2) not null default 0.70,
   puzzle_small numeric(10, 2) not null default 5,
   puzzle_medium numeric(10, 2) not null default 10,
-  puzzle_large numeric(10, 2) not null default 15
+  puzzle_large numeric(10, 2) not null default 15,
+  tables_reward numeric(10, 2) not null default 0.20
 );
 
 create table if not exists public.series (
@@ -383,7 +384,7 @@ end $$;
 create table if not exists public.puzzle_sessions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users (id) on delete cascade,
-  kind text not null check (kind in ('wordsearch', 'swedish', 'binary', 'memory', 'differences', 'tetris', 'coloring')),
+  kind text not null check (kind in ('wordsearch', 'swedish', 'binary', 'memory', 'differences', 'tetris', 'coloring', 'tables')),
   size text not null check (size in ('small', 'medium', 'large')),
   started_at timestamptz not null default now(),
   finished_at timestamptz,
@@ -411,10 +412,31 @@ declare u uuid := public._uid();
 begin
   select * into cfg from public.game_config;
   select * into s from public.puzzle_sessions where id = p_session and user_id = u for update;
-  if not found then raise exception 'Puzzle not found'; end if;
+  if not found or s.kind = 'tables' then raise exception 'Puzzle not found'; end if;
   if s.finished_at is not null then raise exception 'This puzzle was already paid out'; end if;
 
   pay := case s.size when 'small' then cfg.puzzle_small when 'medium' then cfg.puzzle_medium else cfg.puzzle_large end;
+  update public.puzzle_sessions set finished_at = now(), reward = pay where id = p_session;
+  update public.players set wallet = wallet + pay, puzzles = puzzles + 1, puzzle_earned = puzzle_earned + pay where id = u;
+  return pay;
+end $$;
+
+-- Times tables pay tables_reward per correct sum. The minute must really be
+-- over, and no more than 90 sums (1.5 per second) count.
+create or replace function public.finish_tables(p_session uuid, p_correct int) returns numeric
+language plpgsql security definer set search_path = public as $$
+declare u uuid := public._uid();
+  s public.puzzle_sessions;
+  cfg public.game_config;
+  pay numeric;
+begin
+  select * into cfg from public.game_config;
+  select * into s from public.puzzle_sessions where id = p_session and user_id = u for update;
+  if not found or s.kind <> 'tables' then raise exception 'Puzzle not found'; end if;
+  if s.finished_at is not null then raise exception 'This puzzle was already paid out'; end if;
+  if now() - s.started_at < interval '58 seconds' then raise exception 'The minute is not over yet'; end if;
+
+  pay := least(greatest(coalesce(p_correct, 0), 0), 90) * cfg.tables_reward;
   update public.puzzle_sessions set finished_at = now(), reward = pay where id = p_session;
   update public.players set wallet = wallet + pay, puzzles = puzzles + 1, puzzle_earned = puzzle_earned + pay where id = u;
   return pay;
@@ -624,6 +646,7 @@ grant execute on function
   public.claim_welcome_bonus(),
   public.start_puzzle(text, text),
   public.finish_puzzle(uuid),
+  public.finish_tables(uuid, int),
   public.sell_to_bank(text),
   public.spin_wheel(),
   public.open_box(text),
