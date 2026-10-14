@@ -1,26 +1,31 @@
 import { useEffect, useState } from 'react'
 import { rpc } from '../../lib/supabase'
 import { euro } from '../../data/collections'
+import { TABLES_SIZES } from '../../puzzles/tables.js'
 import { useT } from '../../i18n'
 
 const MEDALS = ['🥇', '🥈', '🥉']
 
-// This week's best times-table scores. The best of the week wins a prize,
-// paid out by the server once the week is over (Monday 00:00 UTC).
-export default function TablesHighscores({ userId, refreshKey, onProfile }) {
+const SIZE_LABEL = { small: 'Small', medium: 'Medium', large: 'Large' }
+
+// This week's best times-table scores for one size. The best of the week in
+// each size wins a prize, paid out by the server once the week is over
+// (Monday 00:00 UTC).
+export default function TablesHighscores({ userId, size, refreshKey, onProfile }) {
   const { t } = useT()
   const [data, setData] = useState(null)
   const [now, setNow] = useState(Date.now())
 
   useEffect(() => {
     let live = true
-    rpc('tables_highscores')
+    setData(null)
+    rpc('tables_highscores', { p_size: size })
       .then((d) => live && setData(d))
       .catch(() => live && setData({ error: true }))
     return () => {
       live = false
     }
-  }, [refreshKey])
+  }, [size, refreshKey])
 
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 60000)
@@ -37,10 +42,14 @@ export default function TablesHighscores({ userId, refreshKey, onProfile }) {
   return (
     <div className="hs">
       <div className="hs__head">
-        <h3>🏆 {t('Highscores this week')}</h3>
+        <h3>
+          🏆 {t('Highscores this week')} · {t(SIZE_LABEL[size])}
+        </h3>
         <span className="hs__prize">{t('Best of the week wins {amount}', { amount: euro(data.prize) })}</span>
       </div>
-      <p className="hs__ends">{t('Ends in {time} (Monday 00:00 UTC)', { time: left })}</p>
+      <p className="hs__ends">
+        {t(TABLES_SIZES[size].label)} · {t('Ends in {time} (Monday 00:00 UTC)', { time: left })}
+      </p>
       {data.top.length === 0 ? (
         <p className="hs__empty">{t('No scores yet this week. Be the first!')}</p>
       ) : (

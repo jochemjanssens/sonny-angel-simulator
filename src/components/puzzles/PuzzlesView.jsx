@@ -16,7 +16,7 @@ import { makeMemory, MEMORY_SIZES } from '../../puzzles/memory.js'
 import { makeDifferences, DIFF_SIZES } from '../../puzzles/differences.js'
 import { TETRIS_TARGETS } from '../../puzzles/tetris.js'
 import { coloringName, makeColoringPage } from '../../puzzles/coloring.js'
-import { makeTables, TABLES_REWARD, TABLES_SECONDS, TABLES_SIZES } from '../../puzzles/tables.js'
+import { makeTables, TABLES_SECONDS, TABLES_SIZES } from '../../puzzles/tables.js'
 import { PUZZLE_REWARDS, euro } from '../../data/collections'
 import { rpc, supabase } from '../../lib/supabase'
 import { useT } from '../../i18n'
@@ -48,7 +48,7 @@ const gridLabel = (t, kind, size, level = 0) => {
 
 // Times tables pay per correct answer instead of a fixed amount.
 const rewardLabel = (t, kind, size) =>
-  kind === 'tables' ? t('{amount} per sum', { amount: euro(TABLES_REWARD) }) : euro(PUZZLE_REWARDS[size])
+  kind === 'tables' ? t('{amount} per sum', { amount: euro(TABLES_SIZES[size].reward) }) : euro(PUZZLE_REWARDS[size])
 
 // level: puzzles solved today (0 = first puzzle of the day). Each one makes the
 // next harder; the count resets at midnight UTC.
@@ -132,7 +132,7 @@ export default function PuzzlesView({ userId, notify, onEarned, onProfile }) {
       if (/already paid/i.test(err.message)) {
         // an earlier try reached the server but its answer got lost: it was paid
         const { data } = await supabase.from('puzzle_sessions').select('reward').eq('id', session.id).maybeSingle()
-        return paid(Number(data?.reward ?? (session.kind === 'tables' ? correct * TABLES_REWARD : PUZZLE_REWARDS[session.size])), correct)
+        return paid(Number(data?.reward ?? (session.kind === 'tables' ? correct * TABLES_SIZES[session.size].reward : PUZZLE_REWARDS[session.size])), correct)
       }
       const network = /load failed|failed to fetch|networkerror|network request failed/i.test(err.message)
       if (network && attempt < 3) {
@@ -199,7 +199,7 @@ export default function PuzzlesView({ userId, notify, onEarned, onProfile }) {
               {session.kind === 'tables' && !result.error && t('{n} sums right in {s} seconds. ', { n: result.correct, s: TABLES_SECONDS })}
               {result.error || t('The money is in your budget. Up for another one?')}
             </p>
-            {session.kind === 'tables' && !result.error && <TablesHighscores userId={userId} refreshKey={session.id} onProfile={onProfile} />}
+            {session.kind === 'tables' && !result.error && <TablesHighscores userId={userId} size={session.size} refreshKey={session.id} onProfile={onProfile} />}
             <div className="modal__actions">
               <button className="btn btn--ghost" onClick={() => setSession(null)}>
                 {t('Choose another')}
@@ -282,12 +282,12 @@ export default function PuzzlesView({ userId, notify, onEarned, onProfile }) {
         ))}
       </div>
 
-      {kind === 'tables' && <TablesHighscores userId={userId} refreshKey={today} onProfile={onProfile} />}
+      {kind === 'tables' && <TablesHighscores userId={userId} size={size} refreshKey={today} onProfile={onProfile} />}
 
       <div className="puzzles__start">
         <button className="btn btn--primary btn--lg" onClick={start} disabled={busy}>
           {kind === 'tables'
-            ? t('Start · {amount} per sum', { amount: euro(TABLES_REWARD) })
+            ? t('Start · {amount} per sum', { amount: euro(TABLES_SIZES[size].reward) })
             : t('Start puzzle · earn {amount}', { amount: euro(PUZZLE_REWARDS[size]) })}
         </button>
       </div>

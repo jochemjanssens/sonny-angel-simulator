@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { TABLES_REWARD, TABLES_SECONDS } from '../../puzzles/tables.js'
+import { TABLES_SECONDS, TABLES_SIZES } from '../../puzzles/tables.js'
 import { euro } from '../../data/collections'
 import { useT } from '../../i18n'
 
@@ -7,6 +7,7 @@ import { useT } from '../../i18n'
 // it is checked as soon as it has as many digits as the right answer.
 export default function TablesGame({ puzzle, onSolved }) {
   const { t } = useT()
+  const reward = TABLES_SIZES[puzzle.size].reward
   const [countdown, setCountdown] = useState(3)
   const [endsAt, setEndsAt] = useState(null)
   const [now, setNow] = useState(Date.now())
@@ -75,7 +76,7 @@ export default function TablesGame({ puzzle, onSolved }) {
         </span>
         <span className={`tab__clock ${playing && left <= 10 ? 'is-low' : ''}`}>⏱️ 0:{String(left).padStart(2, '0')}</span>
         <span>
-          💰 <strong>{euro(correct * TABLES_REWARD)}</strong>
+          💰 <strong>{euro(correct * reward)}</strong>
         </span>
       </div>
       <div className="tab__bar">
@@ -98,7 +99,7 @@ export default function TablesGame({ puzzle, onSolved }) {
             <span className="tab__answer">{input || '?'}</span>
             {flash && (
               <span key={flash.id} className={`tab__flash ${flash.ok ? 'is-ok' : 'is-bad'}`}>
-                {flash.ok ? '+' + euro(TABLES_REWARD) : t('It was {n}', { n: flash.answer })}
+                {flash.ok ? '+' + euro(reward) : t('It was {n}', { n: flash.answer })}
               </span>
             )}
           </>
@@ -112,7 +113,7 @@ export default function TablesGame({ puzzle, onSolved }) {
           </button>
         ))}
       </div>
-      <p className="puzzle__hint">{t('Every correct sum earns {amount}. The answer is checked as soon as you have typed enough digits.', { amount: euro(TABLES_REWARD) })}</p>
+      <p className="puzzle__hint">{t('Every correct sum earns {amount}. The answer is checked as soon as you have typed enough digits.', { amount: euro(reward) })}</p>
     </div>
   )
 }

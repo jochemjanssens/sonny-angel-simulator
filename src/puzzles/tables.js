@@ -1,13 +1,12 @@
 import { makeRandom } from './random.js'
 
 // Tafel-kampioen: answer as many times-table sums as you can in one minute.
-// Every correct answer pays TABLES_REWARD; the server pays it out.
+// Every correct answer pays TABLES_SIZES[size].reward; the server pays it out.
 export const TABLES_SECONDS = 60
-export const TABLES_REWARD = 0.2
 export const TABLES_SIZES = {
-  small: { tables: [1, 2, 3, 4, 5, 10], label: 'Tables 1–5 and 10' },
-  medium: { tables: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], label: 'Tables 1–10' },
-  large: { tables: [2, 3, 4, 5, 6, 7, 8, 9, 10], label: 'Tables 1–10 with dividing', divide: true },
+  small: { tables: [1, 2, 3, 4, 5, 10], label: 'Tables 1–5 and 10', reward: 0.15 },
+  medium: { tables: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], label: 'Tables 1–10', reward: 0.3 },
+  large: { tables: [2, 3, 4, 5, 6, 7, 8, 9, 10], label: 'Tables 1–10 with dividing', divide: true, reward: 0.45 },
 }
 
 // Endless stream of sums, rebuilt from the seed. From level 3 the easy
