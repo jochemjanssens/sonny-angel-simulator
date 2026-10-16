@@ -159,6 +159,14 @@ function BackFeature({ hat, c, a, sil, petal }) {
       )
     case 'santa':
       return <path d="M34 30 Q70 -16 104 22 L96 34 Z" fill={c} />
+    case 'mermaid':
+      // long wavy hair falling past both sides of the hood
+      return (
+        <g fill={p}>
+          <path d="M28 30 C10 44 22 62 12 80 C6 92 12 104 24 102 C32 90 24 78 32 64 C38 52 34 40 28 30 Z" />
+          <path d="M92 30 C110 44 98 62 108 80 C114 92 108 104 96 102 C88 90 96 78 88 64 C82 52 86 40 92 30 Z" />
+        </g>
+      )
     default:
       return null
   }
@@ -320,6 +328,37 @@ function FrontFeature({ hat, c, a, sil }) {
           <path d="M45 18 L79 18 L80.5 13 L46.5 13 Z" fill={sil ? SIL : a} />
         </g>
       )
+    case 'mermaid':
+      // a little seashell tiara with pearls
+      return (
+        <g>
+          <path d="M49 25 Q60 2 71 25 Q60 29 49 25 Z" fill={sil ? SIL_DARK : shade(a, -0.45)} strokeLinejoin="round" />
+          {!sil && <path d="M60 26 L60 10 M60 26 L54 13 M60 26 L66 13 M60 26 L51 19 M60 26 L69 19" stroke={shade(a, 0.1)} strokeWidth="1.2" strokeLinecap="round" />}
+          <circle cx="44" cy="27" r="3.2" fill={sil ? SIL_DARK : '#FFFFFF'} />
+          <circle cx="76" cy="27" r="3.2" fill={sil ? SIL_DARK : '#FFFFFF'} />
+          <circle cx="37.5" cy="31" r="2.4" fill={sil ? SIL_DARK : '#FFFFFF'} />
+          <circle cx="82.5" cy="31" r="2.4" fill={sil ? SIL_DARK : '#FFFFFF'} />
+        </g>
+      )
+    case 'helmet':
+      // racing helmet: a stripe over the top and a dark visor
+      return (
+        <g>
+          <path d="M55 18.5 Q60 18 65 18.5 L65 40 L55 40 Z" fill={sil ? SIL_DARK : a} />
+          <path d="M22 54 Q60 26 98 54 L98 44 Q60 16 22 44 Z" fill={sil ? SIL_DARK : '#2B2238'} strokeLinejoin="round" />
+          {!sil && <path d="M34 42 Q50 32 66 31" stroke="#FFFFFF" strokeWidth="2.2" strokeLinecap="round" fill="none" opacity="0.55" />}
+        </g>
+      )
+    case 'cap':
+      // baseball cap: seams, a button on top and a brim over the face
+      return (
+        <g>
+          {!sil && <path d="M60 19 Q45 25 36 38 M60 19 Q75 25 84 38" stroke={shade(c, 0.2)} strokeWidth="1.4" fill="none" />}
+          <circle cx="60" cy="19" r="3.4" fill={sil ? SIL_DARK : a} />
+          <ellipse cx="60" cy="40" rx="37" ry="7.5" fill={sil ? SIL_DARK : a} />
+          {!sil && <ellipse cx="60" cy="38.6" rx="33" ry="4.4" fill="#FFFFFF" opacity="0.18" />}
+        </g>
+      )
     case 'floppyEars':
       return (
         <g fill={sil ? SIL_DARK : a}>
@@ -454,6 +493,55 @@ function Pattern({ pattern, a, c, pc }) {
       )
     case 'band':
       return <rect x="10" y="34" width="100" height="9" fill={a} />
+    case 'scales':
+      return (
+        <g stroke={a} strokeWidth="1.6" fill="none" opacity="0.75" strokeLinecap="round">
+          {Array.from({ length: 9 }, (_, row) =>
+            Array.from({ length: 10 }, (_, k) => {
+              const x = 14 + k * 10 + (row % 2) * 5
+              const y = 20 + row * 8
+              return <path key={`${row}-${k}`} d={`M${x} ${y} a5 5 0 0 0 10 0`} />
+            }),
+          )}
+        </g>
+      )
+    case 'checkered':
+      return (
+        <g fill={a}>
+          {Array.from({ length: 10 }, (_, row) =>
+            Array.from({ length: 10 }, (_, k) => ((row + k) % 2 ? <rect key={`${row}-${k}`} x={20 + k * 8} y={18 + row * 8} width="8" height="8" /> : null)),
+          )}
+        </g>
+      )
+    case 'football':
+      return (
+        <g fill={a}>
+          {[[60, 31, 10], [32, 44, 8], [88, 44, 8], [22, 76, 7], [98, 76, 7]].map(([x, y, r], i) => (
+            <path key={i} d={starPath(x, y, r, r * 0.81)} transform={`rotate(36 ${x} ${y})`} />
+          ))}
+          <path d="M51 28 L39 40 M69 28 L81 40 M28 52 L24 69 M92 52 L96 69 M60 41 L60 46" stroke={a} strokeWidth="1.4" />
+        </g>
+      )
+    case 'basketball':
+      return (
+        <g stroke={a} strokeWidth="2" fill="none">
+          <path d="M60 18 V98 M20 50 Q60 44 100 50 M34 22 Q52 58 32 96 M86 22 Q68 58 88 96" />
+        </g>
+      )
+    case 'tennis':
+      return <path d="M28 22 Q54 58 28 96 M92 22 Q66 58 92 96" stroke={a} strokeWidth="3.2" fill="none" strokeLinecap="round" />
+    case 'baseball':
+      return (
+        <g stroke={a} strokeWidth="1.5" fill="none" strokeLinecap="round">
+          <path d="M38 19 Q58 50 32 92 M82 19 Q62 50 88 92" />
+          {[0.08, 0.18, 0.28, 0.38, 0.48, 0.58].map((t) => {
+            // little stitches across the seam (points on the curves above)
+            const y = 19 + 2 * t * (1 - t) * 31 + t * t * 73
+            const dx = 2 * t * (1 - t) * 20 - t * t * 6
+            return <path key={t} d={`M${38 + dx - 3.5} ${y - 2.5} l7 2 M${82 - dx + 3.5} ${y - 2.5} l-7 2`} />
+          })}
+        </g>
+      )
     default:
       return null
   }
@@ -512,6 +600,21 @@ function NeckExtras({ x, sil }) {
           {!sil && <rect x="59.4" y="94" width="1.2" height="2.4" fill="#A07A10" />}
         </g>
       )}
+      {x.pearls && (
+        <g fill={col(x.pearls, '#FFFFFF')}>
+          {Array.from({ length: 9 }, (_, i) => {
+            const t = (i / 8) * Math.PI
+            return <circle key={i} cx={60 - Math.cos(t) * 14.5} cy={89 + Math.sin(t) * 4} r="1.9" />
+          })}
+        </g>
+      )}
+      {x.medal && (
+        <g>
+          <path d="M51 86 L57.5 99 L62.5 99 L69 86 L64 86 L60 94 L56 86 Z" fill={col(x.medal, '#E5343A')} />
+          <circle cx="60" cy="101.5" r="4.6" fill={sil ? SIL_DARK : '#F4C430'} />
+          {!sil && <circle cx="60" cy="101.5" r="2.8" fill="none" stroke="#C99A10" strokeWidth="1" />}
+        </g>
+      )}
       {x.bowtie && (
         <g fill={col(x.bowtie, '#E5343A')}>
           <path d="M60 90 L51 85.5 L51 94.5 Z M60 90 L69 85.5 L69 94.5 Z" />
@@ -561,6 +664,18 @@ function FaceExtras({ x, sil, c }) {
           {!sil && <ellipse cx="58.6" cy="30" rx="1.4" ry="0.8" fill="#FFFFFF" opacity="0.6" />}
         </g>
       )}
+      {x.goggles && (
+        <g>
+          <path d="M25 35 Q60 22 95 35" stroke={col(x.goggles, '#2B2B2B')} strokeWidth="3" fill="none" />
+          {[49, 71].map((cx) => (
+            <g key={cx}>
+              <circle cx={cx} cy="29.5" r="6.4" fill={sil ? SIL_DARK : '#BFE7FF'} stroke={col(x.goggles, '#2B2B2B')} strokeWidth="2.4" />
+              {!sil && <circle cx={cx - 2} cy="27.5" r="1.6" fill="#FFFFFF" opacity="0.8" />}
+            </g>
+          ))}
+        </g>
+      )}
+      {x.starfish && <path d={starPath(84, 24, 7, 3.2)} fill={col(x.starfish, '#FF8C2E')} strokeLinejoin="round" />}
       {x.bow && (
         <g fill={col(x.bow, '#FF6F91')}>
           <path d="M84 24 C76 15 71 29 84 24 Z M84 24 C92 15 97 29 84 24 Z" />

@@ -399,4 +399,7 @@ export default {
   "Pick one of your duplicates to offer:": "Kies een van je dubbele figuurtjes om aan te bieden:",
   "Missed difference": "Gemist verschil",
   "The differences you missed are marked in orange.": "De verschillen die je miste zijn oranje gemarkeerd.",
+  "Seashells, pearls and a splash of magic.": "Schelpjes, parels en een vleugje magie.",
+  "Start your engines — ready, set, go!": "Start je motoren — klaar voor de start, af!",
+  "Warm up, team up and go for gold!": "Opwarmen, samenspelen en gaan voor goud!",
 }

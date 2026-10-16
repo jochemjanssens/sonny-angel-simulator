@@ -21,7 +21,7 @@ function shade(hex, f) {
 }
 
 // Headgear that shows the accent colour somewhere (inner ears, leaves, fins...).
-const ACCENT_HATS = new Set(['longEars', 'roundEars', 'pointyEars', 'bigEars', 'floppyEars', 'mane', 'leaf', 'sprout', 'fin', 'tuft', 'heart', 'cream', 'calyx', 'antennae', 'crest', 'lollipop', 'witchHat', 'shell', 'petals', 'unicorn', 'topHat'])
+const ACCENT_HATS = new Set(['longEars', 'roundEars', 'pointyEars', 'bigEars', 'floppyEars', 'mane', 'leaf', 'sprout', 'fin', 'tuft', 'heart', 'cream', 'calyx', 'antennae', 'crest', 'lollipop', 'witchHat', 'shell', 'petals', 'unicorn', 'topHat', 'mermaid', 'helmet', 'cap'])
 // Patterns around the eyes: changing them reads as "the eyes are different", which isn't fair.
 const EYE_PATTERNS = new Set(['panda', 'mask'])
 const accentVisible = (f) => ACCENT_HATS.has(f.hat) || (f.pattern && f.pattern !== 'blaze' && !EYE_PATTERNS.has(f.pattern))
