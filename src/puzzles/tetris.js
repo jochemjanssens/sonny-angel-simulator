@@ -17,12 +17,12 @@ const SHAPES = {
 
 export const emptyBoard = () => Array.from({ length: ROWS }, () => Array(COLS).fill(null))
 
-// From level 5 (the 5th puzzle of the day), a round starts with rows of grey
-// junk blocks, each with one gap: one more every two puzzles. It only stops
-// when 6 rows are left at the top, so a new piece still has room to appear.
+// From the 7th puzzle of the day, a round starts with rows of grey junk blocks,
+// each with one gap: one more every four puzzles, at most six. (The falling
+// speed keeps increasing without a limit.)
 export function startBoard(level, seed) {
   const board = emptyBoard()
-  const rows = level < 4 ? 0 : Math.min(ROWS - 6, 1 + Math.floor((level - 4) / 2))
+  const rows = level < 6 ? 0 : Math.min(6, 1 + Math.floor((level - 6) / 4))
   const r = makeRandom(`${seed}:junk`)
   for (let i = 0; i < rows; i++) {
     const gap = r.int(COLS)
