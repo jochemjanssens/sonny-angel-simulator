@@ -14,7 +14,7 @@ export default function TetrisGame({ puzzle, onSolved }) {
 
   const newGame = useCallback(() => {
     const next = makeBag(`${seed}:${round.current++}`)
-    game.current = { board: startBoard(level, seed), piece: next(), next, lines: 0, score: 0, over: false, won: false }
+    game.current = { board: startBoard(level, seed), piece: next(), queued: next(), next, lines: 0, score: 0, over: false, won: false }
     redraw((x) => x + 1)
   }, [seed, level])
 
@@ -23,7 +23,8 @@ export default function TetrisGame({ puzzle, onSolved }) {
   }, [newGame])
 
   const spawn = (g) => {
-    g.piece = g.next()
+    g.piece = g.queued
+    g.queued = g.next()
     if (!fits(g.board, g.piece)) g.over = true
   }
 
@@ -69,8 +70,8 @@ export default function TetrisGame({ puzzle, onSolved }) {
   // gravity: a little faster with every line cleared
   const lines = game.current?.lines ?? 0
   useEffect(() => {
-    // harder levels start faster
-    const speed = Math.max(110, 700 - lines * 35 - level * 60)
+    // harder levels start a bit faster, but it never gets frantic
+    const speed = Math.max(250, 850 - lines * 20 - level * 40)
     const t = setInterval(() => act('down'), speed)
     return () => clearInterval(t)
   }, [act, lines, level])
@@ -98,6 +99,17 @@ export default function TetrisGame({ puzzle, onSolved }) {
       <div className="tet__stats">
         <span>
           {t('Lines')} <strong>{Math.min(g.lines, target)}</strong>/{target}
+        </span>
+        <span className="tet__next" aria-label={t('Next piece')}>
+          {t('Next')}
+          <span className="tet__next-grid">
+            {Array.from({ length: 2 }, (_, y) =>
+              Array.from({ length: 4 }, (_, x) => {
+                const on = g.queued.cells.some(([cx, cy]) => cx === x && cy === y)
+                return <span key={`${x},${y}`} className="tet__next-cell" style={on ? { background: g.queued.color } : undefined} />
+              }),
+            )}
+          </span>
         </span>
         <span>
           {t('Score')} <strong>{g.score}</strong>

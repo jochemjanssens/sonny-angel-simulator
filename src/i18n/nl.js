@@ -402,4 +402,6 @@ export default {
   "Seashells, pearls and a splash of magic.": "Schelpjes, parels en een vleugje magie.",
   "Start your engines — ready, set, go!": "Start je motoren — klaar voor de start, af!",
   "Warm up, team up and go for gold!": "Opwarmen, samenspelen en gaan voor goud!",
+  "Next": "Volgende",
+  "Next piece": "Volgend blokje",
 }

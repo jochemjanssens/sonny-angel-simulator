@@ -17,10 +17,11 @@ const SHAPES = {
 
 export const emptyBoard = () => Array.from({ length: ROWS }, () => Array(COLS).fill(null))
 
-// From level 3, a round starts with a few rows of grey junk blocks, each with one gap.
+// From level 6 (the 6th puzzle of the day), a round starts with a few rows of
+// grey junk blocks, each with one gap: at most three.
 export function startBoard(level, seed) {
   const board = emptyBoard()
-  const rows = Math.min(6, Math.max(0, level - 2))
+  const rows = Math.min(3, Math.max(0, level - 4))
   const r = makeRandom(`${seed}:junk`)
   for (let i = 0; i < rows; i++) {
     const gap = r.int(COLS)
