@@ -71,7 +71,7 @@ export default function TetrisGame({ puzzle, onSolved }) {
   const lines = game.current?.lines ?? 0
   useEffect(() => {
     // harder levels start a bit faster, but it never gets frantic
-    const speed = Math.max(250, 850 - lines * 20 - level * 40)
+    const speed = Math.max(170, 775 - lines * 28 - level * 50)
     const t = setInterval(() => act('down'), speed)
     return () => clearInterval(t)
   }, [act, lines, level])
