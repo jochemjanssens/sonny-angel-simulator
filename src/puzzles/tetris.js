@@ -18,11 +18,11 @@ const SHAPES = {
 export const emptyBoard = () => Array.from({ length: ROWS }, () => Array(COLS).fill(null))
 
 // From the 7th puzzle of the day, a round starts with rows of grey junk blocks,
-// each with one gap: one more every four puzzles, at most six. (The falling
+// each with one gap: one more every four puzzles, at most eight. (The falling
 // speed keeps increasing without a limit.)
 export function startBoard(level, seed) {
   const board = emptyBoard()
-  const rows = level < 6 ? 0 : Math.min(6, 1 + Math.floor((level - 6) / 4))
+  const rows = level < 6 ? 0 : Math.min(8, 1 + Math.floor((level - 6) / 4))
   const r = makeRandom(`${seed}:junk`)
   for (let i = 0; i < rows; i++) {
     const gap = r.int(COLS)
