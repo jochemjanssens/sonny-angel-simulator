@@ -70,8 +70,9 @@ export default function TetrisGame({ puzzle, onSolved }) {
   // gravity: a little faster with every line cleared
   const lines = game.current?.lines ?? 0
   useEffect(() => {
-    // harder levels start a bit faster, but it never gets frantic
-    const speed = Math.max(170, 775 - lines * 28 - level * 50)
+    // every puzzle of the day starts 7% faster and every line adds 3.5%, with
+    // no upper limit: it keeps speeding up (but never reaches zero)
+    const speed = 775 * 0.93 ** level * 0.965 ** lines
     const t = setInterval(() => act('down'), speed)
     return () => clearInterval(t)
   }, [act, lines, level])
