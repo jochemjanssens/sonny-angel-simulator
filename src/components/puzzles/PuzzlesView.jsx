@@ -50,7 +50,7 @@ const gridLabel = (t, kind, size, level = 0) => {
 const rewardLabel = (t, kind, size) =>
   kind === 'tables' ? t('{amount} per sum', { amount: euro(TABLES_SIZES[size].reward) }) : euro(PUZZLE_REWARDS[size])
 
-// level: puzzles solved today (0 = first puzzle of the day). Each one makes the
+// level: puzzles of this kind and size solved today (0 = the first one). Each one makes the
 // next harder; the count resets at midnight UTC.
 function build(kind, category, size, seed, level) {
   if (kind === 'wordsearch') return makeWordSearch(CATEGORY_BY_ID[category], size, seed, level)
@@ -72,17 +72,23 @@ export default function PuzzlesView({ userId, notify, onEarned, onProfile }) {
   const [session, setSession] = useState(null) // { id, kind, category, size, puzzle, startedAt }
   const [result, setResult] = useState(null)
   const [busy, setBusy] = useState(false)
-  const [today, setToday] = useState(0)
+  // puzzles solved today per game and size, e.g. { 'tetris:small': 3 }
+  const [solvedToday, setSolvedToday] = useState({})
   const [, tick] = useState(0)
+  const today = Object.values(solvedToday).reduce((a, n) => a + n, 0)
+  const levelOf = (k, s) => solvedToday[`${k}:${s}`] || 0
 
   const loadToday = useCallback(async () => {
     const start = new Date().toISOString().slice(0, 10) + 'T00:00:00Z'
-    const { count } = await supabase
+    const { data } = await supabase
       .from('puzzle_sessions')
-      .select('id', { count: 'exact', head: true })
+      .select('kind, size')
       .eq('user_id', userId)
       .gte('finished_at', start)
-    setToday(count || 0)
+      .limit(5000)
+    const counts = {}
+    for (const r of data || []) counts[`${r.kind}:${r.size}`] = (counts[`${r.kind}:${r.size}`] || 0) + 1
+    setSolvedToday(counts)
   }, [userId])
 
   useEffect(() => {
@@ -100,7 +106,8 @@ export default function PuzzlesView({ userId, notify, onEarned, onProfile }) {
     setBusy(true)
     try {
       const id = await rpc('start_puzzle', { p_kind: kind, p_size: size })
-      setSession({ id, kind, category, size, level: today, puzzle: build(kind, category, size, id, today), startedAt: Date.now() })
+      const level = levelOf(kind, size)
+      setSession({ id, kind, category, size, level, puzzle: build(kind, category, size, id, level), startedAt: Date.now() })
       setResult(null)
     } catch (err) {
       notify(err.message)
@@ -110,7 +117,9 @@ export default function PuzzlesView({ userId, notify, onEarned, onProfile }) {
 
   const paid = (amount, tally) => {
     setResult({ amount, tally })
-    setToday((n) => n + 1) // the next puzzle is one level harder straight away
+    // the next puzzle of this game and size is one level harder straight away
+    const key = `${session.kind}:${session.size}`
+    setSolvedToday((c) => ({ ...c, [key]: (c[key] || 0) + 1 }))
     notify(t('Puzzle solved! +{amount}', { amount: euro(amount) }))
     onEarned()
     loadToday()
@@ -242,8 +251,7 @@ export default function PuzzlesView({ userId, notify, onEarned, onProfile }) {
             {t(today === 1 ? "You've solved {n} puzzle today." : "You've solved {n} puzzles today.", { n: today })}
           </p>
           <p className="puzzles__level">
-            <strong>{t('Level {n}', { n: today + 1 })}</strong>{' '}
-            {t('Every puzzle you solve today makes the next one harder. Back to level 1 at midnight (UTC).')}
+            {t('Every game and size has its own level: each one you solve today makes the next one of the same kind harder. Back to level 1 at midnight (UTC).')}
           </p>
         </div>
       </div>
@@ -277,8 +285,9 @@ export default function PuzzlesView({ userId, notify, onEarned, onProfile }) {
         {Object.keys(PUZZLE_REWARDS).map((s) => (
           <button key={s} className={`choice ${size === s ? 'is-active' : ''}`} onClick={() => setSize(s)}>
             <strong>{t(SIZE_LABEL[s])}</strong>
-            <span>{gridLabel(t, kind, s, today)}</span>
+            <span>{gridLabel(t, kind, s, levelOf(kind, s))}</span>
             <span className="choice__reward">{rewardLabel(t, kind, s)}</span>
+            <span className="choice__level">{t('Level {n}', { n: levelOf(kind, s) + 1 })}</span>
           </button>
         ))}
       </div>

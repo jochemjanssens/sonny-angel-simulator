@@ -1979,7 +1979,13 @@ h3 {
 .choice__icon {
   font-size: 1.8rem;
 }
-.choice .choice__reward {
+.choice .choice__level {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--red);
+  opacity: 0.8;
+}
+.choice__reward {
   color: var(--red);
   font-family: var(--font-display);
   font-weight: 700;
