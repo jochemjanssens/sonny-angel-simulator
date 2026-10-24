@@ -1,9 +1,11 @@
+import { useState } from 'react'
 import Angel from './Angel'
 import { FIGURE_BY_ID, SERIES, euro } from '../data/collections'
 import { useT } from '../i18n'
 
 export default function ShelfView({ inventory, stats, onFigure, onGoShop, onGoMarket }) {
   const { t } = useT()
+  const [dupesOnly, setDupesOnly] = useState(false)
 
   const entries = Object.entries(inventory).filter(([, n]) => n > 0)
   const totalFigures = entries.reduce((s, [, n]) => s + n, 0)
@@ -50,8 +52,16 @@ export default function ShelfView({ inventory, stats, onFigure, onGoShop, onGoMa
         </button>
       </div>
 
+      <div className="shelf-filter">
+        <label className="toggle">
+          <input type="checkbox" checked={dupesOnly} onChange={(e) => setDupesOnly(e.target.checked)} />
+          <span>{t('Only duplicates')}</span>
+        </label>
+      </div>
+      {dupesOnly && !dupeCount && <p className="market__empty">{t('You have no duplicates right now.')}</p>}
+
       {SERIES.map((s) => {
-        const figs = [...s.figures, s.secret].filter((f) => inventory[f.id])
+        const figs = [...s.figures, s.secret].filter((f) => inventory[f.id] > (dupesOnly ? 1 : 0))
         if (!figs.length) return null
         return (
           <div key={s.id} className="shelf" style={{ '--theme': s.theme }}>

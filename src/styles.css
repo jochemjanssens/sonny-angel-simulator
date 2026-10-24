@@ -651,6 +651,11 @@ h3 {
   color: var(--muted);
 }
 
+.shelf-filter {
+  display: flex;
+  justify-content: flex-end;
+  margin: -6px 0 12px;
+}
 .shelf-actions {
   display: flex;
   align-items: center;

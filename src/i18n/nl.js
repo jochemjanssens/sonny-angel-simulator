@@ -405,4 +405,6 @@ export default {
   "Next": "Volgende",
   "Next piece": "Volgend blokje",
   "Every game and size has its own level: each one you solve today makes the next one of the same kind harder. Back to level 1 at midnight (UTC).": "Elk spel en elke grootte heeft een eigen level: elke puzzel die je vandaag oplost, maakt de volgende van dezelfde soort moeilijker. Om middernacht (UTC) begin je weer op level 1.",
+  "Only duplicates": "Alleen dubbele",
+  "You have no duplicates right now.": "Je hebt op dit moment geen dubbele figuurtjes.",
 }
