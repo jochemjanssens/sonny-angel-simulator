@@ -651,6 +651,26 @@ h3 {
   color: var(--muted);
 }
 
+.shelf-actions__buttons {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.shelf-actions__confirm {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: #fff;
+  border-radius: 14px;
+  padding: 10px 14px;
+}
+.shelf-actions__confirm p {
+  margin: 0;
+  font-weight: 700;
+}
 .shelf-filter {
   display: flex;
   justify-content: flex-end;

@@ -543,6 +543,24 @@ begin
   return pay;
 end $$;
 
+-- Sells every extra copy to the bank in one go: one of each figure stays on the shelf.
+create or replace function public.sell_duplicates_to_bank() returns jsonb
+language plpgsql security definer set search_path = public as $$
+declare u uuid := public._uid();
+  n int;
+  pay numeric;
+begin
+  perform 1 from public.inventory where user_id = u and count > 1 for update;
+  select coalesce(sum(i.count - 1), 0), coalesce(sum(round(f.value * c.bank_rate, 2) * (i.count - 1)), 0)
+    into n, pay
+    from public.inventory i join public.figures f on f.id = i.figure_id cross join public.game_config c
+    where i.user_id = u and i.count > 1;
+  if n = 0 then raise exception 'You have no duplicates to sell'; end if;
+  update public.inventory set count = 1 where user_id = u and count > 1;
+  update public.players set wallet = wallet + pay, earned = earned + pay where id = u;
+  return jsonb_build_object('sold', n, 'amount', pay);
+end $$;
+
 -- Daily lucky wheel: one spin per player per UTC day (plus any bonus spins),
 -- drawn on the server.
 create table if not exists public.wheel_prizes (
@@ -741,6 +759,7 @@ grant execute on function
   public.finish_tables(uuid, int, int),
   public.tables_highscores(text),
   public.sell_to_bank(text),
+  public.sell_duplicates_to_bank(),
   public.spin_wheel(),
   public.open_box(text),
   public.import_local_save(numeric, jsonb, jsonb),

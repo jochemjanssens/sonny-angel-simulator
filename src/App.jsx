@@ -120,6 +120,9 @@ function Game({ userId }) {
     if (ok && (state.inventory[id] || 0) <= 1) setFigureId(null)
   }
 
+  const sellDuplicates = ({ n, amount }) =>
+    act('sell_duplicates_to_bank', {}, t('Sold {n} duplicates to the bank for {amount}', { n, amount: euro(amount) }))
+
   // Opens a player's profile; "back" returns to where you came from.
   const openProfile = (id) => {
     setProfileFrom(tab === 'profile' ? profileFrom : tab)
@@ -177,6 +180,7 @@ function Game({ userId }) {
             onFigure={setFigureId}
             onGoShop={() => setTab('collections')}
             onGoMarket={() => setTab('market')}
+            onSellDupes={sellDuplicates}
           />
         )}
         {tab === 'market' && <MarketView market={market} wallet={state.wallet} inventory={state.inventory} act={act} onProfile={openProfile} />}
@@ -189,6 +193,7 @@ function Game({ userId }) {
             listings={market.active}
             onBack={() => setTab(profileFrom)}
             onGoMarket={() => setTab('market')}
+            onSellDupes={sellDuplicates}
           />
         )}
         {tab === 'puzzles' && <PuzzlesView userId={userId} notify={notify} onEarned={game.refresh} onProfile={openProfile} />}
