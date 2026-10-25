@@ -3434,3 +3434,54 @@ h3 {
 :root[data-theme='dark'] .opener--secret.opener--reveal {
   background: radial-gradient(circle at 50% 42%, #4a4020 0, #262214 55%, #0d0f15 100%);
 }
+
+/* ---------- switch between the Sonny Angel and Smiski simulators ---------- */
+
+.brand-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 32px;
+  padding: 0 10px 0 6px;
+  border-radius: 999px;
+  border: 2px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  font-weight: 800;
+  font-size: 0.78rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.brand-switch:hover {
+  border-color: var(--red);
+}
+.brand-switch .logo__wings {
+  width: 26px;
+  height: 16px;
+}
+.brand-switch--sonny .logo__wings {
+  fill: #fff;
+  stroke: #e4002b;
+}
+.brand-switch--smiski .logo__smiski {
+  height: 20px;
+  width: 24px;
+  fill: #e2ebc0;
+  stroke: #5f9a3a;
+}
+@media (max-width: 420px) {
+  .brand-switch__name {
+    display: none;
+  }
+  .brand-switch {
+    padding: 0 6px;
+  }
+}
+@media (max-width: 420px) {
+  .landing__navlink {
+    display: none;
+  }
+  .landing__navright {
+    gap: 8px;
+  }
+}

@@ -414,4 +414,5 @@ export default {
   "You have no duplicates to sell": "Je hebt geen dubbele figuurtjes om te verkopen",
   "Lights on": "Licht aan",
   "Lights off — watch them glow": "Licht uit — kijk ze gloeien",
+  "Switch to {name}": "Wissel naar {name}",
 }

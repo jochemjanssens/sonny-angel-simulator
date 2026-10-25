@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { BRAND_NAME, isSmiski } from '../brand'
-import { ThemeToggle } from '../theme'
+import { BrandSwitch, ThemeToggle } from '../theme'
 import Angel from './Angel'
 import BoxArt from './BoxArt'
 import { SERIES, euro } from '../data/collections'
@@ -90,6 +90,7 @@ export function LoginScreen() {
           <a className="landing__navlink" href="#how">
             {t('How it works')}
           </a>
+          <BrandSwitch />
           <ThemeToggle />
           <LanguageSwitch />
         </span>

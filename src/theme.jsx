@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { isSmiski } from './brand'
+import { BRAND, isSmiski } from './brand'
 import { useT } from './i18n'
 
 // Light or dark mode (Smiski build only): in the dark the figures glow.
@@ -51,8 +51,8 @@ export function ThemeToggle() {
 }
 
 // Small logo mark: Sonny Angel wings or a Smiski head.
-export function LogoMark() {
-  if (isSmiski) {
+export function LogoMark({ brand = BRAND }) {
+  if (brand === 'smiski') {
     return (
       <svg className="logo__wings logo__smiski" viewBox="0 0 40 30" aria-hidden>
         <ellipse cx="20" cy="15" rx="13" ry="12" />
@@ -66,5 +66,21 @@ export function LogoMark() {
       <path d="M18 14 C8 2 0 8 2 14 C4 20 12 20 18 16 Z" />
       <path d="M22 14 C32 2 40 8 38 14 C36 20 28 20 22 16 Z" />
     </svg>
+  )
+}
+
+// Link to the other simulator. The Sonny Angel one lives at the root of the
+// site and the Smiski one in /smiski/ (same account, so you stay signed in).
+export function BrandSwitch() {
+  const { t } = useT()
+  const other = isSmiski ? 'sonny' : 'smiski'
+  const name = isSmiski ? 'Sonny Angel' : 'Smiski'
+  const dir = window.location.pathname.replace(/[^/]*$/, '')
+  const href = isSmiski ? dir.replace(/smiski\/$/, '') : `${dir}smiski/`
+  return (
+    <a className={`brand-switch brand-switch--${other}`} href={href} title={t('Switch to {name}', { name })} aria-label={t('Switch to {name}', { name })}>
+      <LogoMark brand={other} />
+      <span className="brand-switch__name">{name}</span>
+    </a>
   )
 }

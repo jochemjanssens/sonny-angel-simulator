@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { DAILY_ALLOWANCE, euro } from '../data/collections'
 import { LanguageSwitch, useT } from '../i18n'
 import { BRAND_NAME } from '../brand'
-import { LogoMark, ThemeToggle } from '../theme'
+import { BrandSwitch, LogoMark, ThemeToggle } from '../theme'
 
 // The allowance resets at midnight UTC, the same clock the server uses.
 function untilMidnight() {
@@ -78,6 +78,7 @@ export default function Header({ tab, setTab, wallet, canClaim, onClaim, canSpin
               {t('Log out')}
             </button>
           </div>
+          <BrandSwitch />
           <ThemeToggle />
           <LanguageSwitch />
         </div>

@@ -35,9 +35,10 @@ export function LanguageProvider({ children }) {
   const t = useCallback(
     (text, vars) => {
       let s = lang === 'nl' ? (NL[text] ?? text) : text
-      if (vars) s = s.replace(/\{(\w+)\}/g, (_, k) => (vars[k] ?? ''))
-      // the Smiski build reuses every text, with its own name in it
+      // the Smiski build reuses every text, with its own name in it (not in the
+      // filled-in values, so "Switch to {name}" can still name Sonny Angel)
       if (isSmiski) s = s.replace(/Sonny Angel/g, 'Smiski').replace(/\bangels\b/g, 'Smiskis').replace(/\bangel\b/g, 'Smiski')
+      if (vars) s = s.replace(/\{(\w+)\}/g, (_, k) => (vars[k] ?? ''))
       return s
     },
     [lang],
