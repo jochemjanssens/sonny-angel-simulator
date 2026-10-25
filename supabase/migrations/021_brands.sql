@@ -74,3 +74,6 @@ end $$;
 
 revoke execute on function public.spin_wheel(text), public.sell_duplicates_to_bank(text) from public, anon;
 grant execute on function public.spin_wheel(text), public.sell_duplicates_to_bank(text) to authenticated;
+
+-- let the API see the new column and functions straight away
+notify pgrst, 'reload schema';
