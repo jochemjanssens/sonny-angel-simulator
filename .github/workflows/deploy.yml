@@ -24,8 +24,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      # the Sonny Angel simulator at the root, the Smiski one under /smiski/
-      - run: npm run build && npm run build:smiski
+      # one app for both simulators (the brand is picked inside the app)
+      - run: npm run build
         env:
           # public project URL and anon key, set as GitHub repository variables
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}

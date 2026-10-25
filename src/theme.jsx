@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { BRAND, isSmiski } from './brand'
+import { BRAND, isSmiski, otherBrandUrl } from './brand'
 import { useT } from './i18n'
 
 // Light or dark mode (Smiski build only): in the dark the figures glow.
@@ -69,16 +69,13 @@ export function LogoMark({ brand = BRAND }) {
   )
 }
 
-// Link to the other simulator. The Sonny Angel one lives at the root of the
-// site and the Smiski one in /smiski/ (same account, so you stay signed in).
+// Switches the app between Sonny Angel and Smiski (same account, so you stay signed in).
 export function BrandSwitch() {
   const { t } = useT()
   const other = isSmiski ? 'sonny' : 'smiski'
   const name = isSmiski ? 'Sonny Angel' : 'Smiski'
-  const dir = window.location.pathname.replace(/[^/]*$/, '')
-  const href = isSmiski ? dir.replace(/smiski\/$/, '') : `${dir}smiski/`
   return (
-    <a className={`brand-switch brand-switch--${other}`} href={href} title={t('Switch to {name}', { name })} aria-label={t('Switch to {name}', { name })}>
+    <a className={`brand-switch brand-switch--${other}`} href={otherBrandUrl()} title={t('Switch to {name}', { name })} aria-label={t('Switch to {name}', { name })}>
       <LogoMark brand={other} />
       <span className="brand-switch__name">{name}</span>
     </a>

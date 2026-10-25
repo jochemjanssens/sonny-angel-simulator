@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smiski Simulator</title>
+    <script>
+      // The Smiski simulator is now part of the main app: remember the choice,
+      // remove the old separate app's service worker and caches, and go there.
+      try { localStorage.setItem('brand', 'smiski') } catch (e) {}
+      var go = function () { location.replace('../?brand=smiski' + location.hash) }
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function (regs) {
+          return Promise.all(regs.filter(function (r) { return /\/smiski\/$/.test(r.scope) }).map(function (r) { return r.unregister() }))
+        }).then(function () {
+          return window.caches ? caches.keys().then(function (keys) { return Promise.all(keys.filter(function (k) { return k.indexOf('app-smiski-') === 0 }).map(function (k) { return caches.delete(k) })) }) : null
+        }).then(go, go)
+      } else go()
+    </script>
+  </head>
+  <body></body>
+</html>

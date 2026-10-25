@@ -9,6 +9,32 @@ const hex = (h) => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), pa
 // Shapes are in a 100×100 space. Everything important stays inside the middle
 // 80%, so Android can crop the icon to a circle or squircle ("maskable").
 const ICONS = {
+  // the app icon: a Sonny Angel on red next to a glowing Smiski in the dark
+  combo: {
+    bg: '#E4002B',
+    shapes: [
+      { rect: [50, 0, 100, 100], color: '#11131B' },
+      { glow: [68, 54, 24], color: '#D6FF7A', alpha: 0.55 },
+      { ellipse: [68, 70, 9.5, 8.5, 0], color: '#DDF7A0' },
+      { ellipse: [68, 50, 14.5, 13.5, 0], color: '#E6FFB0' },
+      { ellipse: [63.8, 51.6, 1.4, 1.8, 0], color: '#2B2626' },
+      { ellipse: [72.2, 51.6, 1.4, 1.8, 0], color: '#2B2626' },
+      { ellipse: [60.5, 55, 2.6, 1.5, 0], color: '#FFA3B5', alpha: 0.4 },
+      { ellipse: [75.5, 55, 2.6, 1.5, 0], color: '#FFA3B5', alpha: 0.4 },
+      { ellipse: [27, 34, 4.3, 8.5, -14], color: '#FFFFFF' },
+      { ellipse: [27, 35, 2.1, 5.8, -14], color: '#F7B6C2' },
+      { ellipse: [41, 34, 4.3, 8.5, 14], color: '#FFFFFF' },
+      { ellipse: [41, 35, 2.1, 5.8, 14], color: '#F7B6C2' },
+      { ellipse: [34, 54, 18, 17.4, 0], color: '#FFFFFF' },
+      { ellipse: [34, 58, 13, 11.8, 0], color: '#F8D5BE' },
+      { ellipse: [29.6, 57.4, 2.3, 2.7, 0], color: '#2B1F1F' },
+      { ellipse: [38.4, 57.4, 2.3, 2.7, 0], color: '#2B1F1F' },
+      { ellipse: [30.4, 56.4, 0.9, 0.9, 0], color: '#FFFFFF' },
+      { ellipse: [39.2, 56.4, 0.9, 0.9, 0], color: '#FFFFFF' },
+      { ellipse: [26.2, 62, 2.6, 2, 0], color: '#FF8FA3', alpha: 0.6 },
+      { ellipse: [41.8, 62, 2.6, 2, 0], color: '#FF8FA3', alpha: 0.6 },
+    ],
+  },
   sonny: {
     bg: '#E4002B',
     shapes: [
@@ -71,6 +97,9 @@ function render({ bg, shapes }, size) {
               const [gx, gy, r] = s.glow
               const d = Math.hypot(x - gx, y - gy) / r
               a = d < 1 ? (1 - d) ** 2 * s.alpha : 0
+            } else if (s.rect) {
+              const [x0, y0, x1, y1] = s.rect
+              a = x >= x0 && x < x1 && y >= y0 && y < y1 ? 1 : 0
             } else if (inEllipse(x, y, s.ellipse)) a = s.alpha ?? 1
             if (a) c = c.map((v, k) => v + (cols[i][k] - v) * a)
           })

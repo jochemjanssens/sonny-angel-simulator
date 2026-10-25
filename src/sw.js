@@ -2,9 +2,8 @@
 // when it's there (so updates show straight away), with the last copy as an
 // offline fallback. Built files have a hash in their name, so those are served
 // from the cache. Supabase and other sites are never touched.
-// both simulators share this site's cache storage, so each only cleans up its own
-const PREFIX = 'app-__BRAND__-'
-const CACHE = `${PREFIX}__BUILD__`
+// one app for both simulators; older versions had a cache per brand
+const CACHE = 'app-__BUILD__'
 
 self.addEventListener('install', () => self.skipWaiting())
 
@@ -12,7 +11,7 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches
       .keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE && k.startsWith(PREFIX)).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE && k.startsWith('app-')).map((k) => caches.delete(k))))
       .then(() => self.clients.claim()),
   )
 })
@@ -20,10 +19,9 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const req = event.request
   const url = new URL(req.url)
-  // only this app's own files: each simulator has its own service worker, and
-  // the Smiski one lives in /smiski/ inside the Sonny Angel one's folder
+  // only this app's own files; /smiski/ is just a forward to the app (old links)
   const scope = new URL('./', self.location).pathname
-  const own = url.pathname.startsWith(scope) && !(url.pathname.startsWith(`${scope}smiski/`) && !scope.endsWith('/smiski/'))
+  const own = url.pathname.startsWith(scope) && !url.pathname.startsWith(`${scope}smiski/`)
   if (req.method !== 'GET' || url.origin !== self.location.origin || !own) return
 
   if (req.mode === 'navigate') {

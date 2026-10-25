@@ -26,17 +26,18 @@ Progress is saved in `localStorage`. Use "Reset game" in the footer to start ove
 
 ## Smiski version
 
-The same code also builds a Smiski simulator (`npm run dev:smiski`, `npm run build:smiski`),
-deployed under `/smiski/` next to the Sonny Angel one. Both versions share accounts, wallets,
-puzzles and the market, but each only shows its own brand's figures. The Smiski version has a
-dark mode in which the figures glow in the dark. Smiski series live in `src/data/smiski.js`.
+The app also contains a Smiski simulator: the button in the header switches between the two
+(`?brand=smiski` or `?brand=sonny` in the URL does the same, and the choice is remembered).
+Both share accounts, wallets, puzzles and the market, but each only shows its own brand's
+figures. Smiski has a dark mode in which the figures glow. Smiski series live in
+`src/data/smiski.js`. The old `/smiski/` link forwards to the app.
 
 ## Install as an app
 
-Both simulators are installable web apps (PWA): on Android, open the site in Chrome and tap
-"Install app" (or the banner in the app). Each gets its own icon, name and theme colour. The
-manifest and service worker are generated per brand in `vite.config.js` (the worker is
-`src/sw.js`); the icons in `public/icons/` come from `npm run gen:icons`.
+The site is an installable web app (PWA), one app for both simulators: on Android, open it in
+Chrome and tap "Install app" (or the banner in the app). Long-press the app icon for shortcuts
+to Sonny Angel and Smiski. The manifest and service worker are generated in `vite.config.js`
+(the worker is `src/sw.js`); the icons in `public/icons/` come from `npm run gen:icons`.
 
 ## Online setup (Supabase)
 

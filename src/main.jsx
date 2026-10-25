@@ -9,6 +9,8 @@ import './styles.css'
 
 document.documentElement.dataset.brand = BRAND
 document.title = `${BRAND_NAME} Simulator`
+// the phone's status bar follows the brand
+document.querySelector('meta[name="theme-color"]')?.setAttribute('content', BRAND === 'smiski' ? '#11131B' : '#E4002B')
 applyInitialTheme()
 
 // installable app: the service worker gives a quick start and an offline fallback
