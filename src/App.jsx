@@ -10,6 +10,10 @@ import FigureModal from './components/FigureModal'
 import LuckyWheel from './components/LuckyWheel'
 import { LoginScreen, SetupNeeded, UsernameScreen } from './components/AuthScreens'
 import { DAILY_ALLOWANCE, FIGURES, FIGURE_BY_ID, SERIES_BY_ID, euro } from './data/collections'
+import { isSmiski } from './brand'
+
+// The Smiski simulator tells the server which figures to use (Sonny Angel is the default).
+const BRAND_ARGS = isSmiski ? { p_brand: 'smiski' } : {}
 import { rpc, supabase } from './lib/supabase'
 import { readLocalSave } from './lib/localSave'
 import { useOnlineGame, utcTodayKey } from './hooks/useOnlineGame'
@@ -121,7 +125,7 @@ function Game({ userId }) {
   }
 
   const sellDuplicates = ({ n, amount }) =>
-    act('sell_duplicates_to_bank', {}, t('Sold {n} duplicates to the bank for {amount}', { n, amount: euro(amount) }))
+    act('sell_duplicates_to_bank', BRAND_ARGS, t('Sold {n} duplicates to the bank for {amount}', { n, amount: euro(amount) }))
 
   // Opens a player's profile; "back" returns to where you came from.
   const openProfile = (id) => {
@@ -231,7 +235,7 @@ function Game({ userId }) {
           bonusSpins={state.bonusSpins}
           onSpin={async () => {
             try {
-              return await rpc('spin_wheel')
+              return await rpc('spin_wheel', BRAND_ARGS)
             } catch (err) {
               notify(t(err.message))
               return null

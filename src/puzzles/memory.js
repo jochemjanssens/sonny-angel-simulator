@@ -14,7 +14,7 @@ export function makeMemory(size, seed, level = 0) {
     level >= 3
       ? r.shuffle(SERIES.filter((s) => !s.limited)).slice(0, Math.ceil(pairs / 10) + 1).flatMap((s) => s.figures)
       : FIGURES.filter((f) => !f.secret)
-  const figures = r.shuffle(source).slice(0, pairs)
+  const figures = r.shuffle(source.length >= pairs ? source : FIGURES.filter((f) => !f.secret)).slice(0, pairs)
   const cards = r.shuffle(figures.flatMap((f) => [f.id, f.id])).map((figureId, i) => ({ id: i, figureId }))
   return { cols, cards }
 }

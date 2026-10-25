@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { isOwnBrand } from '../data/collections'
 
 const LISTING_FIELDS = 'id, figure_id, price, status, created_at, seller_id, sold_price, sold_figure, seller:profiles!listings_seller_id_fkey(username)'
 
@@ -46,10 +47,12 @@ export function useMarket(userId) {
         .order('created_at', { ascending: false })
         .limit(300),
     ])
-    if (!a.error) setActive(a.data)
-    if (!mineActive.error && !mineHistory.error) setMine([...mineActive.data, ...mineHistory.data])
+    // one market for both simulators: each only shows its own brand's figures
+    const own = (l) => isOwnBrand(l.figure_id)
+    if (!a.error) setActive(a.data.filter(own))
+    if (!mineActive.error && !mineHistory.error) setMine([...mineActive.data, ...mineHistory.data].filter(own))
     if (!openOffers.error && !pastOffers.error) {
-      const all = [...openOffers.data, ...pastOffers.data].sort((x, y) => x.created_at.localeCompare(y.created_at))
+      const all = [...openOffers.data, ...pastOffers.data].filter((o) => o.listing && own(o.listing)).sort((x, y) => x.created_at.localeCompare(y.created_at))
       setOffers(all)
     }
     setLoaded(true)

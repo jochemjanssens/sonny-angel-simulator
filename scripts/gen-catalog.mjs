@@ -1,7 +1,7 @@
 // Generates supabase/catalog.sql from src/data/collections.js so the server
 // knows every series, figure, price and value. Run: npm run gen:catalog
 import { writeFileSync } from 'node:fs'
-import { SERIES, DAILY_ALLOWANCE, STARTING_WALLET, WELCOME_BONUS, BANK_RATE, PUZZLE_REWARDS, WHEEL_PRIZES } from '../src/data/collections.js'
+import { ALL_SERIES as SERIES, DAILY_ALLOWANCE, STARTING_WALLET, WELCOME_BONUS, BANK_RATE, PUZZLE_REWARDS, WHEEL_PRIZES } from '../src/data/collections.js'
 
 const q = (s) => `'${String(s).replace(/'/g, "''")}'`
 const lines = [
@@ -16,8 +16,8 @@ const lines = [
 ]
 for (const s of SERIES) {
   lines.push(
-    `insert into public.series (id, price, secret_odds) values (${q(s.id)}, ${s.price}, ${s.odds})`,
-    '  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds;',
+    `insert into public.series (id, price, secret_odds, brand) values (${q(s.id)}, ${s.price}, ${s.odds}, ${q(s.brand)})`,
+    '  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand;',
   )
   for (const f of [...s.figures, s.secret]) {
     lines.push(

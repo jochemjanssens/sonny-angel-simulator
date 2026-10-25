@@ -1,4 +1,5 @@
 import { useId } from 'react'
+import Smiski from './Smiski'
 
 // Illustrated style: no outlines — soft radial shading gives each shape its volume.
 const SKIN = '#F8D5BE'
@@ -694,7 +695,12 @@ function FaceExtras({ x, sil, c }) {
   )
 }
 
-export default function Angel({ figure, silhouette = false, size = 120, className = '', showHalo = true }) {
+// Smiski figures have their own drawing; everything else is a Sonny Angel.
+export default function Angel(props) {
+  return props.figure?.brand === 'smiski' ? <Smiski {...props} /> : <SonnyAngel {...props} />
+}
+
+function SonnyAngel({ figure, silhouette = false, size = 120, className = '', showHalo = true }) {
   const uid = useId().replace(/:/g, '')
   const sil = silhouette
   const { hat, pattern, secret } = figure

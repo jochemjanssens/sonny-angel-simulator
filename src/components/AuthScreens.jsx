@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { BRAND_NAME, isSmiski } from '../brand'
+import { ThemeToggle } from '../theme'
 import Angel from './Angel'
 import BoxArt from './BoxArt'
 import { SERIES, euro } from '../data/collections'
@@ -14,7 +16,7 @@ function AuthCard({ children }) {
           <LanguageSwitch />
         </div>
         <div className="auth__logo">
-          <span className="logo__name">Sonny Angel</span>
+          <span className="logo__name">{BRAND_NAME}</span>
           <span className="logo__sub">simulator</span>
         </div>
         <div className="auth__art">
@@ -41,14 +43,19 @@ export function SetupNeeded() {
 
 // Figures that float around the hero box and scroll past in the strip.
 const pick = (sid, i) => SERIES.find((x) => x.id === sid).figures[i]
-const FLOATERS = [
-  { fig: pick('animal1', 0), x: '6%', y: '8%', size: 92, delay: 0 },
-  { fig: pick('fruit', 1), x: '74%', y: '2%', size: 84, delay: 0.8 },
-  { fig: pick('cat', 1), x: '82%', y: '52%', size: 96, delay: 1.6 },
-  { fig: pick('flower', 6), x: '0%', y: '56%', size: 86, delay: 2.2 },
-  { fig: pick('sweets', 1), x: '64%', y: '78%', size: 70, delay: 1.1 },
+const SPOTS = [
+  { x: '6%', y: '8%', size: 92, delay: 0 },
+  { x: '74%', y: '2%', size: 84, delay: 0.8 },
+  { x: '82%', y: '52%', size: 96, delay: 1.6 },
+  { x: '0%', y: '56%', size: 86, delay: 2.2 },
+  { x: '64%', y: '78%', size: 70, delay: 1.1 },
 ]
-const PARADE = SERIES.map((x, i) => x.figures[(i * 5) % x.figures.length])
+const FLOATER_FIGURES = isSmiski
+  ? [pick('smiski-living', 0), pick('smiski-bath', 1), pick('smiski-bed', 1), pick('smiski-exercise', 4), pick('smiski-living', 1)]
+  : [pick('animal1', 0), pick('fruit', 1), pick('cat', 1), pick('flower', 6), pick('sweets', 1)]
+const FLOATERS = SPOTS.map((spot, i) => ({ ...spot, fig: FLOATER_FIGURES[i] }))
+// the Smiski series are small, so its strip shows every figure
+const PARADE = isSmiski ? SERIES.flatMap((x) => x.figures) : SERIES.map((x, i) => x.figures[(i * 5) % x.figures.length])
 
 export function LoginScreen() {
   const [email, setEmail] = useState('')
@@ -76,13 +83,14 @@ export function LoginScreen() {
     <div className="landing">
       <header className="landing__nav">
         <span className="logo">
-          <span className="logo__name">Sonny Angel</span>
+          <span className="logo__name">{BRAND_NAME}</span>
           <span className="logo__sub">simulator</span>
         </span>
         <span className="landing__navright">
           <a className="landing__navlink" href="#how">
             {t('How it works')}
           </a>
+          <ThemeToggle />
           <LanguageSwitch />
         </span>
       </header>

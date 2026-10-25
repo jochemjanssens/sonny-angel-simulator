@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import Angel from './Angel'
-import { FIGURE_BY_ID, SERIES, euro } from '../data/collections'
+import { FIGURE_BY_ID, SERIES, euro, isOwnBrand } from '../data/collections'
 import { supabase } from '../lib/supabase'
 import { useT } from '../i18n'
 
@@ -11,7 +11,7 @@ export function useShelf(userId) {
     if (!userId) return setShelf(null)
     let alive = true
     supabase.rpc('public_shelf', { p_user: userId }).then(({ data, error }) => {
-      if (alive) setShelf(error ? {} : Object.fromEntries(data.map((r) => [r.figure_id, r.count])))
+      if (alive) setShelf(error ? {} : Object.fromEntries(data.filter((r) => isOwnBrand(r.figure_id)).map((r) => [r.figure_id, r.count])))
     })
     return () => {
       alive = false

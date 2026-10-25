@@ -26,6 +26,8 @@ create table if not exists public.series (
   price numeric(10, 2) not null,
   secret_odds int not null
 );
+-- which simulator a series belongs to: the Sonny Angel or the Smiski one
+alter table public.series add column if not exists brand text not null default 'sonny' check (brand in ('sonny', 'smiski'));
 
 create table if not exists public.figures (
   id text primary key,
@@ -543,8 +545,10 @@ begin
   return pay;
 end $$;
 
--- Sells every extra copy to the bank in one go: one of each figure stays on the shelf.
-create or replace function public.sell_duplicates_to_bank() returns jsonb
+-- Sells every extra copy (of one brand's figures) to the bank in one go: one of
+-- each figure stays on the shelf.
+drop function if exists public.sell_duplicates_to_bank();
+create or replace function public.sell_duplicates_to_bank(p_brand text default 'sonny') returns jsonb
 language plpgsql security definer set search_path = public as $$
 declare u uuid := public._uid();
   n int;
@@ -553,10 +557,13 @@ begin
   perform 1 from public.inventory where user_id = u and count > 1 for update;
   select coalesce(sum(i.count - 1), 0), coalesce(sum(round(f.value * c.bank_rate, 2) * (i.count - 1)), 0)
     into n, pay
-    from public.inventory i join public.figures f on f.id = i.figure_id cross join public.game_config c
-    where i.user_id = u and i.count > 1;
+    from public.inventory i join public.figures f on f.id = i.figure_id join public.series s on s.id = f.series_id
+      cross join public.game_config c
+    where i.user_id = u and i.count > 1 and s.brand = p_brand;
   if n = 0 then raise exception 'You have no duplicates to sell'; end if;
-  update public.inventory set count = 1 where user_id = u and count > 1;
+  update public.inventory i set count = 1
+    from public.figures f join public.series s on s.id = f.series_id
+    where i.user_id = u and i.count > 1 and f.id = i.figure_id and s.brand = p_brand;
   update public.players set wallet = wallet + pay, earned = earned + pay where id = u;
   return jsonb_build_object('sold', n, 'amount', pay);
 end $$;
@@ -575,7 +582,8 @@ alter table public.wheel_prizes enable row level security;
 drop policy if exists "catalog readable" on public.wheel_prizes;
 create policy "catalog readable" on public.wheel_prizes for select using (true);
 
-create or replace function public.spin_wheel() returns jsonb
+drop function if exists public.spin_wheel();
+create or replace function public.spin_wheel(p_brand text default 'sonny') returns jsonb
 language plpgsql security definer set search_path = public as $$
 declare u uuid := public._uid();
   today date := (now() at time zone 'utc')::date;
@@ -606,7 +614,9 @@ begin
     update public.players set wallet = wallet + p_amount where id = u;
   else
     for i in 1 .. coalesce(p_count, 1) loop
-      select id into f from public.figures where secret = (p_kind = 'secret') order by random() limit 1;
+      -- a figure from the simulator the player is spinning in
+      select f2.id into f from public.figures f2 join public.series s2 on s2.id = f2.series_id
+        where f2.secret = (p_kind = 'secret') and s2.brand = p_brand order by random() limit 1;
       figs := figs || f;
       news := news || public._give(u, f);
     end loop;
@@ -759,8 +769,8 @@ grant execute on function
   public.finish_tables(uuid, int, int),
   public.tables_highscores(text),
   public.sell_to_bank(text),
-  public.sell_duplicates_to_bank(),
-  public.spin_wheel(),
+  public.sell_duplicates_to_bank(text),
+  public.spin_wheel(text),
   public.open_box(text),
   public.import_local_save(numeric, jsonb, jsonb),
   public.create_listing(text, numeric),

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { BRAND_NAME } from '../brand'
 import Angel from './Angel'
 import BoxArt from './BoxArt'
 import Confetti from './Confetti'
@@ -61,7 +62,7 @@ export default function BlindBoxOpener({ series, figure, isNew, canAffordAnother
             <div className="foil foil--right">
               <span className="foil__crimp" />
             </div>
-            <div className="foil__label">Sonny Angel</div>
+            <div className="foil__label">{BRAND_NAME}</div>
           </button>
         )}
 

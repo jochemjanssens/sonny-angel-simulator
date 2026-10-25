@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { setMoneyLocale } from '../data/collections'
+import { isSmiski } from '../brand'
 import NL from './nl.js'
 
 // English text is the key; Dutch translations live in nl.js. Missing
@@ -35,6 +36,8 @@ export function LanguageProvider({ children }) {
     (text, vars) => {
       let s = lang === 'nl' ? (NL[text] ?? text) : text
       if (vars) s = s.replace(/\{(\w+)\}/g, (_, k) => (vars[k] ?? ''))
+      // the Smiski build reuses every text, with its own name in it
+      if (isSmiski) s = s.replace(/Sonny Angel/g, 'Smiski').replace(/\bangels\b/g, 'Smiskis').replace(/\bangel\b/g, 'Smiski')
       return s
     },
     [lang],

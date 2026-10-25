@@ -412,4 +412,6 @@ export default {
   "Yes, sell them": "Ja, verkopen",
   "Sold {n} duplicates to the bank for {amount}": "{n} dubbele aan de bank verkocht voor {amount}",
   "You have no duplicates to sell": "Je hebt geen dubbele figuurtjes om te verkopen",
+  "Lights on": "Licht aan",
+  "Lights off — watch them glow": "Licht uit — kijk ze gloeien",
 }

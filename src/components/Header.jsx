@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { DAILY_ALLOWANCE, euro } from '../data/collections'
 import { LanguageSwitch, useT } from '../i18n'
+import { BRAND_NAME } from '../brand'
+import { LogoMark, ThemeToggle } from '../theme'
 
 // The allowance resets at midnight UTC, the same clock the server uses.
 function untilMidnight() {
@@ -26,11 +28,8 @@ export default function Header({ tab, setTab, wallet, canClaim, onClaim, canSpin
     <header className="header">
       <div className="header__inner">
         <button className="logo" onClick={() => setTab('collections')} aria-label="Home">
-          <svg className="logo__wings" viewBox="0 0 40 24" aria-hidden>
-            <path d="M18 14 C8 2 0 8 2 14 C4 20 12 20 18 16 Z" />
-            <path d="M22 14 C32 2 40 8 38 14 C36 20 28 20 22 16 Z" />
-          </svg>
-          <span className="logo__name">Sonny Angel</span>
+          <LogoMark />
+          <span className="logo__name">{BRAND_NAME}</span>
           <span className="logo__sub">simulator</span>
         </button>
 
@@ -79,6 +78,7 @@ export default function Header({ tab, setTab, wallet, canClaim, onClaim, canSpin
               {t('Log out')}
             </button>
           </div>
+          <ThemeToggle />
           <LanguageSwitch />
         </div>
       </div>

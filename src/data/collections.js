@@ -4,6 +4,9 @@
 // (official odds 1 in 144) are worth more. Each series' average regular value
 // stays under its box price, so blind boxes are a gamble, not a sure profit.
 
+import { BRAND } from '../brand.js'
+import { SMISKI_SERIES } from './smiski.js'
+
 export const DAILY_ALLOWANCE = 40.5
 export const STARTING_WALLET = 60
 export const WELCOME_BONUS = 20 // one-time gift, given on a player's first login
@@ -454,11 +457,14 @@ const RAW_SERIES = [
   },
 ]
 
-export const SERIES = RAW_SERIES.map((s) => {
+// Every series of both brands (the server knows them all); SERIES and FIGURES
+// below only hold the brand this build is about.
+export const ALL_SERIES = [...RAW_SERIES.map((s) => ({ brand: 'sonny', ...s })), ...SMISKI_SERIES].map((s) => {
   const make = (fig, i) => ({
     ...fig,
     id: `${s.id}-${fig.secret ? 'secret' : i}`,
     seriesId: s.id,
+    brand: s.brand,
     secret: !!fig.secret,
   })
   return {
@@ -469,10 +475,15 @@ export const SERIES = RAW_SERIES.map((s) => {
   }
 })
 
-export const SERIES_BY_ID = Object.fromEntries(SERIES.map((s) => [s.id, s]))
+export const SERIES = ALL_SERIES.filter((s) => s.brand === BRAND)
+export const SERIES_BY_ID = Object.fromEntries(ALL_SERIES.map((s) => [s.id, s]))
 
 export const FIGURES = SERIES.flatMap((s) => [...s.figures, s.secret])
-export const FIGURE_BY_ID = Object.fromEntries(FIGURES.map((x) => [x.id, x]))
+export const FIGURE_BY_ID = Object.fromEntries(ALL_SERIES.flatMap((s) => [...s.figures, s.secret]).map((x) => [x.id, x]))
+// Is this figure part of the brand this build shows?
+export const isOwnBrand = (id) => FIGURE_BY_ID[id]?.brand === BRAND
+// Keeps only this brand's figures in an { id: count } map
+export const ownBrandOnly = (map) => Object.fromEntries(Object.entries(map || {}).filter(([id]) => isOwnBrand(id)))
 
 export function drawFigure(series) {
   if (Math.random() < 1 / series.odds) return series.secret

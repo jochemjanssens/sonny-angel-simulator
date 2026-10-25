@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { isOwnBrand } from '../data/collections'
 
 // Daily allowance resets at midnight UTC (same clock as the server).
 export const utcTodayKey = () => new Date().toISOString().slice(0, 10)
@@ -20,7 +21,9 @@ export function useOnlineGame(userId) {
     const p = player.data
     const inventory = {}
     const firstSeen = {}
+    // the account is shared with the other brand's simulator: only show our figures
     for (const row of inv.data) {
+      if (!isOwnBrand(row.figure_id)) continue
       inventory[row.figure_id] = row.count
       firstSeen[row.figure_id] = row.first_seen
     }

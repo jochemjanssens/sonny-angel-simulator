@@ -63,15 +63,19 @@ export function makeDifferences(size, seed, level = 0) {
   const kinds = level >= 4 ? Object.keys(CHANGES) : [...Object.keys(CHANGES), 'swap']
   // a few series only, so the figures look alike
   const series = r.shuffle(SERIES.filter((s) => !s.limited)).slice(0, Math.ceil(cells / 10) + 1)
-  const pool = r.shuffle(series.flatMap((s) => s.figures))
+  let pool = r.shuffle(series.flatMap((s) => s.figures))
+  // small series (Smiski has 6 per series) may not fill a big shelf: repeat figures
+  while (pool.length < cells) pool = [...pool, ...r.shuffle(pool)]
   const left = pool.slice(0, cells).map((f) => ({ id: f.id }))
   const right = left.map((x) => ({ ...x }))
   const spots = r.shuffle([...left.keys()]).slice(0, diffs).sort((a, b) => a - b)
 
   for (const i of spots) {
     const fig = FIGURE_BY_ID[left[i].id]
+    // Smiski figures only have a body colour, a prop colour and their pose
+    const options = fig.brand === 'smiski' ? ['tint', 'swap', ...(fig.prop ? ['accent', 'accent'] : [])] : kinds
     for (let attempt = 0; attempt < 10; attempt++) {
-      const kind = r.pick(kinds)
+      const kind = r.pick(options)
       if (kind === 'swap') {
         // a different figure from the same series
         const sameSeries = SERIES.find((s) => s.id === fig.seriesId).figures.filter((f) => !left.some((l) => l.id === f.id))
@@ -79,7 +83,7 @@ export function makeDifferences(size, seed, level = 0) {
         right[i] = { id: r.pick(sameSeries).id }
         break
       }
-      const over = CHANGES[kind](fig, r)
+      const over = kind === 'accent' && fig.brand === 'smiski' ? { accent: r.pick(ACCENTS.filter((c) => c.toLowerCase() !== fig.accent.toLowerCase())) } : CHANGES[kind](fig, r)
       if (over) {
         right[i] = { id: fig.id, over }
         break

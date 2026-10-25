@@ -24,6 +24,13 @@ Progress is saved in `localStorage`. Use "Reset game" in the footer to start ove
 
 *Not affiliated with Sonny Angel / Dreams Inc. All figure artwork is original SVG.*
 
+## Smiski version
+
+The same code also builds a Smiski simulator (`npm run dev:smiski`, `npm run build:smiski`),
+deployed under `/smiski/` next to the Sonny Angel one. Both versions share accounts, wallets,
+puzzles and the market, but each only shows its own brand's figures. The Smiski version has a
+dark mode in which the figures glow in the dark. Smiski series live in `src/data/smiski.js`.
+
 ## Online setup (Supabase)
 
 Players, shelves, budgets and the market live in a free [Supabase](https://supabase.com) project. All changes go through database functions, so nobody can edit their own budget or rig a box from the browser.
