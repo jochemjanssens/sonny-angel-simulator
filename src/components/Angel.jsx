@@ -744,7 +744,9 @@ function SonnyAngel({ figure, silhouette = false, size = 120, className = '', sh
 
       <BackExtras x={extras} sil={sil} />
 
-      {/* body: long standing toddler with short arms reaching outward */}
+      {/* body: a chubby little toddler with short arms reaching outward,
+          squashed a touch around the neck so the head looks bigger (cuter) */}
+      <g transform="translate(60 88) scale(1.07 0.93) translate(-60 -88)">
       <g fill={skin}>
         <path d="M47 122 C46 132 46 142 47 149 C48 153 58 153 59 149 C59.5 141 59.6 131 60 124 Z" />
         <path d="M73 122 C74 132 74 142 73 149 C72 153 62 153 61 149 C60.5 141 60.4 131 60 124 Z" />
@@ -762,12 +764,15 @@ function SonnyAngel({ figure, silhouette = false, size = 120, className = '', sh
       {!sil && <ellipse cx="60" cy="130.3" rx="2.2" ry="0.9" fill={skinLine} opacity="0.3" />}
 
       <NeckExtras x={extras} sil={sil} />
+      </g>
 
       {/* halo for secrets */}
       {secret && showHalo && !sil && (
         <ellipse cx="60" cy="-8" rx="18" ry="4.5" fill="none" stroke="#F4B73B" strokeWidth="3" className="angel__halo" />
       )}
 
+      {/* the head is drawn a little bigger than it was authored (chibi proportions) */}
+      <g transform="translate(60 88) scale(1.06) translate(-60 -88)">
       {/* headgear: authored on a r=40 circle at (60,58), fitted to a rounded hood */}
       <g transform="translate(60 52) scale(0.875 0.9) translate(-60 -58)">
         <BackFeature hat={hat} c={c} a={a} sil={sil} petal={figure.petal} />
@@ -795,33 +800,36 @@ function SonnyAngel({ figure, silhouette = false, size = 120, className = '', sh
       <ellipse cx="60" cy="63" rx="26" ry="24" fill={skin} />
       {!sil ? (
         <g>
-          {/* little eyebrow arcs */}
-          <path d="M46.5 51 Q49.6 49 52.8 50.4 M67.2 50.4 Q70.4 49 73.5 51" stroke="#8A5A44" strokeWidth="1.3" fill="none" strokeLinecap="round" />
-          {/* big sparkly eyes with lashes */}
-          <ellipse cx="50.5" cy="61.5" rx="4.6" ry="5.2" fill="#1E1416" />
-          <ellipse cx="69.5" cy="61.5" rx="4.6" ry="5.2" fill="#1E1416" />
-          <circle cx="52.2" cy="59.7" r="1.7" fill="#fff" />
-          <circle cx="71.2" cy="59.7" r="1.7" fill="#fff" />
-          <circle cx="49" cy="63.6" r="0.8" fill="#fff" />
-          <circle cx="68" cy="63.6" r="0.8" fill="#fff" />
+          {/* big, shiny eyes with lashes */}
+          <ellipse cx="50.3" cy="62" rx="5.1" ry="5.8" fill="#1E1416" />
+          <ellipse cx="69.7" cy="62" rx="5.1" ry="5.8" fill="#1E1416" />
+          <ellipse cx="50.3" cy="64.6" rx="3.4" ry="2.4" fill="#4A2E3A" opacity="0.6" />
+          <ellipse cx="69.7" cy="64.6" rx="3.4" ry="2.4" fill="#4A2E3A" opacity="0.6" />
+          <circle cx="52.3" cy="59.8" r="2.1" fill="#fff" />
+          <circle cx="71.7" cy="59.8" r="2.1" fill="#fff" />
+          <circle cx="48.6" cy="64.6" r="1" fill="#fff" />
+          <circle cx="68" cy="64.6" r="1" fill="#fff" />
           <path
-            d="M46.1 60 L43.8 58.6 M45.9 61.9 L43.4 61.5 M46.9 58.2 L45.2 56.4 M73.9 60 L76.2 58.6 M74.1 61.9 L76.6 61.5 M73.1 58.2 L74.8 56.4"
+            d="M45.4 60.2 L43.1 58.8 M45.2 62.2 L42.7 61.8 M46.2 58.3 L44.6 56.4 M74.6 60.2 L76.9 58.8 M74.8 62.2 L77.3 61.8 M73.8 58.3 L75.4 56.4"
             stroke="#1E1416"
             strokeWidth="1"
             strokeLinecap="round"
           />
-          {/* rosy cheeks, tiny nose and a thin smile */}
-          <circle cx="43" cy="70" r="5.5" fill="#F49A9A" opacity="0.5" />
-          <circle cx="77" cy="70" r="5.5" fill="#F49A9A" opacity="0.5" />
-          <ellipse cx="60" cy="68.6" rx="2.6" ry="2" fill="#FFE9DB" />
-          <ellipse cx="60" cy="69.6" rx="2.2" ry="1" fill={skinLine} opacity="0.25" />
-          <path d="M56 73.6 Q60 76.8 64 73.6" stroke="#7A3E34" strokeWidth="1.3" fill="none" strokeLinecap="round" />
+          {/* rosy round cheeks, tiny nose and a small smile */}
+          <ellipse cx="42.5" cy="70.5" rx="6.2" ry="5" fill="#FF8FA3" opacity="0.45" />
+          <ellipse cx="77.5" cy="70.5" rx="6.2" ry="5" fill="#FF8FA3" opacity="0.45" />
+          <circle cx="44" cy="69.2" r="1.1" fill="#fff" opacity="0.7" />
+          <circle cx="79" cy="69.2" r="1.1" fill="#fff" opacity="0.7" />
+          <ellipse cx="60" cy="68.8" rx="2.2" ry="1.7" fill="#FFE9DB" />
+          <ellipse cx="60" cy="69.6" rx="1.9" ry="0.9" fill={skinLine} opacity="0.25" />
+          <path d="M57.2 73.6 Q60 76.2 62.8 73.6" stroke="#7A3E34" strokeWidth="1.3" fill="none" strokeLinecap="round" />
         </g>
       ) : (
         <text x="60" y="72" textAnchor="middle" fontSize="26" fontFamily="Fredoka, sans-serif" fontWeight="700" fill="#fff">
           ?
         </text>
       )}
+      </g>
     </svg>
   )
 }
