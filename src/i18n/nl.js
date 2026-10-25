@@ -415,4 +415,8 @@ export default {
   "Lights on": "Licht aan",
   "Lights off — watch them glow": "Licht uit — kijk ze gloeien",
   "Switch to {name}": "Wissel naar {name}",
+  "Install the app": "Installeer de app",
+  "Put {name} on your home screen, full screen and one tap away.": "Zet {name} op je beginscherm: schermvullend en met één tik open.",
+  "Install": "Installeren",
+  "Not now": "Niet nu",
 }

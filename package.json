@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "gen:catalog": "node scripts/gen-catalog.mjs",
     "build:smiski": "VITE_BRAND=smiski vite build --outDir dist/smiski",
-    "dev:smiski": "VITE_BRAND=smiski vite --port 5174"
+    "dev:smiski": "VITE_BRAND=smiski vite --port 5174",
+    "gen:icons": "node scripts/gen-icons.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",

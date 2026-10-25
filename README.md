@@ -31,6 +31,13 @@ deployed under `/smiski/` next to the Sonny Angel one. Both versions share accou
 puzzles and the market, but each only shows its own brand's figures. The Smiski version has a
 dark mode in which the figures glow in the dark. Smiski series live in `src/data/smiski.js`.
 
+## Install as an app
+
+Both simulators are installable web apps (PWA): on Android, open the site in Chrome and tap
+"Install app" (or the banner in the app). Each gets its own icon, name and theme colour. The
+manifest and service worker are generated per brand in `vite.config.js` (the worker is
+`src/sw.js`); the icons in `public/icons/` come from `npm run gen:icons`.
+
 ## Online setup (Supabase)
 
 Players, shelves, budgets and the market live in a free [Supabase](https://supabase.com) project. All changes go through database functions, so nobody can edit their own budget or rig a box from the browser.
