@@ -2640,13 +2640,24 @@ h3 {
 }
 
 .tet {
-  max-width: 360px;
+  max-width: 100%;
+  width: 360px;
   margin: 0 auto;
+}
+/* no keyboard on a touchscreen */
+@media (pointer: coarse) {
+  .tet__keys {
+    display: none;
+  }
 }
 .tet__stats {
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  gap: 6px;
   font-weight: 800;
+  font-size: 0.85rem;
+  white-space: nowrap;
   margin-bottom: 8px;
 }
 .tet__stats strong {
@@ -2694,7 +2705,12 @@ h3 {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 8px;
-  margin-top: 12px;
+  margin-top: 10px;
+  /* as wide as the screen allows, even when the board is narrower */
+  width: min(calc(100vw - 32px), 400px);
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
 }
 .tet__btn {
   border: 0;

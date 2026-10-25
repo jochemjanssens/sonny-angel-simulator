@@ -1,14 +1,60 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { COLS, ROWS, cellsOf, fits, lock, makeBag, rotate, startBoard } from '../../puzzles/tetris.js'
 import { useT } from '../../i18n'
 
 // Tetris: clear the target number of lines. Arrow keys on a computer,
 // big buttons on a phone. Game over just starts a new round.
+// Width that lets the board, the stats and the buttons all fit on screen below
+// the sticky header (phones), at most 360px.
+function useFitWidth(ref, ready) {
+  const [width, setWidth] = useState(null)
+  useLayoutEffect(() => {
+    const measure = () => {
+      const el = ref.current
+      if (!el) return
+      const avail = el.parentElement.clientWidth
+      const header = document.querySelector('.header')?.offsetHeight || 0
+      const stats = el.querySelector('.tet__stats')?.offsetHeight || 30
+      const controls = el.querySelector('.tet__controls')?.offsetHeight || 60
+      const boardH = window.innerHeight - header - stats - controls - 44
+      // the board is 10×18 cells plus a border and padding of ~12px
+      const fromHeight = ((boardH - 12) * COLS) / ROWS + 12
+      const w = Math.floor(Math.max(180, Math.min(360, avail, fromHeight)))
+      setWidth((old) => (old === w ? old : w))
+    }
+    measure()
+    const raf = requestAnimationFrame(measure)
+    window.addEventListener('resize', measure)
+    window.visualViewport?.addEventListener('resize', measure)
+    return () => {
+      cancelAnimationFrame(raf)
+      window.removeEventListener('resize', measure)
+      window.visualViewport?.removeEventListener('resize', measure)
+    }
+  }, [ref, ready])
+  return width
+}
+
 export default function TetrisGame({ puzzle, onSolved }) {
   const { t } = useT()
+  const rootRef = useRef(null)
+
+
   const { target, seed, level = 0 } = puzzle
   const game = useRef(null)
   const [, redraw] = useState(0)
+  const width = useFitWidth(rootRef, !!game.current)
+
+  // bring the game into view just below the sticky header (after it got its size)
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => {
+      const el = rootRef.current
+      if (!el) return
+      const header = document.querySelector('.header')?.offsetHeight || 0
+      window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - header - 8 })
+    })
+    return () => cancelAnimationFrame(raf)
+  }, [width])
   const solvedSent = useRef(false)
   const round = useRef(0)
 
@@ -89,14 +135,14 @@ export default function TetrisGame({ puzzle, onSolved }) {
   }, [act])
 
   const g = game.current
-  if (!g) return null
+  if (!g) return <div className="tet" ref={rootRef} />
   const active = new Map(cellsOf(g.piece).map(([x, y]) => [`${x},${y}`, g.piece.color]))
   let ghost = g.piece
   while (fits(g.board, { ...ghost, y: ghost.y + 1 })) ghost = { ...ghost, y: ghost.y + 1 }
   const ghostCells = new Set(cellsOf(ghost).map(([x, y]) => `${x},${y}`))
 
   return (
-    <div className="tet">
+    <div className="tet" ref={rootRef} style={width ? { width } : undefined}>
       <div className="tet__stats">
         <span>
           {t('Lines')} <strong>{Math.min(g.lines, target)}</strong>/{target}
@@ -158,7 +204,7 @@ export default function TetrisGame({ puzzle, onSolved }) {
           ⤓
         </button>
       </div>
-      <p className="puzzle__hint">{t('Arrow keys to move, ↑ to rotate, space to drop — or use the buttons.')}</p>
+      <p className="puzzle__hint tet__keys">{t('Arrow keys to move, ↑ to rotate, space to drop — or use the buttons.')}</p>
     </div>
   )
 }
