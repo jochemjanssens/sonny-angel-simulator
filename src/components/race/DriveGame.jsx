@@ -144,6 +144,8 @@ export default function DriveGame({ trackId, car, onFinish, onQuit }) {
     }
     fit()
     window.addEventListener('resize', fit)
+    // lets an automated test see where the car is (development only)
+    if (import.meta.env.DEV) window.__drive = { c, samples }
     raf = requestAnimationFrame(loop)
     return () => {
       cancelAnimationFrame(raf)

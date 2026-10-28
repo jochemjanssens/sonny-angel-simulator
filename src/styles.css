@@ -396,6 +396,11 @@ h3 {
 .boxart__window .angel {
   margin-top: 18%;
 }
+/* a car sits low in its drawing: lift it into the window */
+.boxart__window .angel.car {
+  margin-top: 0;
+  transform: translateY(-30%) scale(1.2);
+}
 .boxart__series {
   font-family: var(--font-display);
   font-weight: 600;
