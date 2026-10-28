@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import CarStatsMini from './race/CarStatsMini'
 import Angel from './Angel'
 import PriceInput, { formatPrice, parsePrice } from './PriceInput'
 import { FIGURE_BY_ID, SERIES, SERIES_BY_ID, euro } from '../data/collections'
@@ -67,6 +68,7 @@ function FigureCell({ figureId, size = 64 }) {
         <strong>{fig.name}</strong>
         <span>{series.name}</span>
         <span className="listing__value">{t('Market value {value}', { value: euro(fig.value) })}</span>
+        <CarStatsMini figure={fig} />
       </div>
     </div>
   )

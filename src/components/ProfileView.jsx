@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import CarStatsMini from './race/CarStatsMini'
 import Angel from './Angel'
 import { FIGURE_BY_ID, SERIES, euro } from '../data/collections'
 import { supabase } from '../lib/supabase'
@@ -76,6 +77,7 @@ export default function ProfileView({ userId, meId, myInventory, listings, onBac
               <button key={l.id} className="profile__listing" onClick={onGoMarket}>
                 <Angel figure={FIGURE_BY_ID[l.figure_id]} size={48} />
                 <span>{FIGURE_BY_ID[l.figure_id].name}</span>
+                <CarStatsMini figure={FIGURE_BY_ID[l.figure_id]} />
                 <strong>{euro(l.price)}</strong>
                 {!isMe && !(myInventory[l.figure_id] > 0) && <span className="have have--no">{t('Missing')}</span>}
               </button>
@@ -108,6 +110,7 @@ export default function ProfileView({ userId, meId, myInventory, listings, onBac
                   <div className="shelf__figure">
                     <Angel figure={f} size={78} />
                     <span className="shelf__name">{f.name}</span>
+                    <CarStatsMini figure={f} />
                   </div>
                   {!isMe && !(myInventory[f.id] > 0) ? (
                     <span className="shelf__sell shelf__sell--missing">{t('Missing')}</span>

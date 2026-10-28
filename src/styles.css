@@ -4001,3 +4001,40 @@ h3 {
 .hs__car .angel {
   margin-bottom: -2px;
 }
+
+/* a car's stats on one line: ⚡ 8 🚀 7 🛞 6 ⚖️ 4 */
+.car-mini {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2px 6px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+.car-mini__stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  white-space: nowrap;
+}
+.listing__figure .car-mini {
+  justify-content: flex-start;
+  margin-top: 3px;
+}
+
+.reveal__stats .car-mini {
+  font-size: 0.95rem;
+  gap: 4px 12px;
+  margin-bottom: 10px;
+}
+/* narrow cards (shelves, line-up, swap picker): two stats per row */
+.shelf__figure .car-mini,
+.lineup__item .car-mini,
+.picker__item .car-mini {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 1px 6px;
+}

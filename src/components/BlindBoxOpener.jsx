@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import CarStatsMini from './race/CarStatsMini'
 import { BRAND_NAME } from '../brand'
 import Angel from './Angel'
 import BoxArt from './BoxArt'
@@ -96,6 +97,11 @@ export default function BlindBoxOpener({ series, figure, isNew, canAffordAnother
             <p className="reveal__value">
               {t('Market value')} <strong>{euro(figure.value)}</strong>
             </p>
+            {figure.stats && (
+              <div className="reveal__stats">
+                <CarStatsMini figure={figure} />
+              </div>
+            )}
             <div className="reveal__actions">
               <button className="btn btn--ghost" onClick={onClose}>
                 {t('Put on my shelf')}

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import CarStatsMini from './race/CarStatsMini'
 import Angel from './Angel'
 import { BANK_RATE, FIGURE_BY_ID, SERIES, euro } from '../data/collections'
 import { useT } from '../i18n'
@@ -115,6 +116,7 @@ export default function ShelfView({ inventory, stats, onFigure, onGoShop, onGoMa
                   <button className="shelf__figure" onClick={() => onFigure(f.id)} title={t('{name} — details', { name: f.name })}>
                     <Angel figure={f} size={78} />
                     <span className="shelf__name">{f.name}</span>
+                    <CarStatsMini figure={f} />
                   </button>
                   <button
                     className={`shelf__sell ${inventory[f.id] > 1 ? '' : 'shelf__sell--muted'}`}

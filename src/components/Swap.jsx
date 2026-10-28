@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import CarStatsMini from './race/CarStatsMini'
 import Angel from './Angel'
 import { FIGURE_BY_ID, SERIES, euro, isOwnBrand } from '../data/collections'
 import { supabase } from '../lib/supabase'
@@ -75,6 +76,7 @@ export function FigurePicker({ shelf, receiver, value, onChange }) {
           >
             <Angel figure={f} size={44} />
             <span className="picker__name">{f.name}</span>
+            <CarStatsMini figure={f} />
             <span className="picker__value">
               {euro(f.value)} · ×{shelf[id]}
             </span>

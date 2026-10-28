@@ -1,4 +1,5 @@
 import Angel from './Angel'
+import CarStatsMini from './race/CarStatsMini'
 import BoxArt from './BoxArt'
 import { SERIES, euro } from '../data/collections'
 import { useT } from '../i18n'
@@ -111,6 +112,7 @@ export function SeriesDetail({ series, inventory, seen = {}, listed = new Set(),
               <Angel figure={f} silhouette={!count && !sold} size={84} />
               <span className="lineup__name">{f.name}</span>
               <span className="lineup__value">{isSeen(f) ? euro(f.value) : '€ ?'}</span>
+              {isSeen(f) && <CarStatsMini figure={f} />}
             </button>
           )
         })}
