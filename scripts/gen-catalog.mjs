@@ -1,6 +1,7 @@
 // Generates supabase/catalog.sql from src/data/collections.js so the server
 // knows every series, figure, price and value. Run: npm run gen:catalog
 import { writeFileSync } from 'node:fs'
+import { TRACKS } from '../src/data/cars.js'
 import { ALL_SERIES as SERIES, DAILY_ALLOWANCE, STARTING_WALLET, WELCOME_BONUS, BANK_RATE, PUZZLE_REWARDS, WHEEL_PRIZES } from '../src/data/collections.js'
 
 const q = (s) => `'${String(s).replace(/'/g, "''")}'`
@@ -20,11 +21,23 @@ for (const s of SERIES) {
     '  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand;',
   )
   for (const f of [...s.figures, s.secret]) {
+    // cars also carry their race stats
+    const st = f.stats ? [f.stats.speed, f.stats.accel, f.stats.grip, f.stats.weight].join(', ') : 'null, null, null, null'
     lines.push(
-      `insert into public.figures (id, series_id, value, secret) values (${q(f.id)}, ${q(s.id)}, ${f.value}, ${f.secret})`,
-      '  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret;',
+      `insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight) values (${q(f.id)}, ${q(s.id)}, ${f.value}, ${f.secret}, ${st})`,
+      '  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,',
+      '    speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight;',
     )
   }
+}
+for (const t of TRACKS) {
+  const w = t.weights
+  const r = t.risk
+  lines.push(
+    `insert into public.tracks (id, w_speed, w_accel, w_grip, w_weight, risk_stat, risk_below, risk_chance) values (${q(t.id)}, ${w.speed}, ${w.accel}, ${w.grip}, ${w.weight}, ${r ? q(r.stat) : 'null'}, ${r ? r.below : 'null'}, ${r ? r.chance : 'null'})`,
+    '  on conflict (id) do update set w_speed = excluded.w_speed, w_accel = excluded.w_accel, w_grip = excluded.w_grip, w_weight = excluded.w_weight,',
+    '    risk_stat = excluded.risk_stat, risk_below = excluded.risk_below, risk_chance = excluded.risk_chance;',
+  )
 }
 lines.push('delete from public.wheel_prizes;')
 WHEEL_PRIZES.forEach((p, i) => {

@@ -1,6 +1,12 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { setMoneyLocale } from '../data/collections'
-import { isSmiski } from '../brand'
+import { BRAND } from '../brand'
+
+// the other brands reuse every text, with their own words in it
+const BRAND_WORDS = {
+  smiski: { en: [[/Sonny Angel/g, 'Smiski'], [/\bangels\b/g, 'Smiskis'], [/\bangel\b/g, 'Smiski']] },
+  cars: { en: [[/Sonny Angel/g, 'Turbo Minis'], [/\bangels\b/g, 'cars'], [/\bangel\b/g, 'car']], nl: [[/Sonny Angel/g, 'Turbo Minis'], [/\bangels\b/g, "auto's"]] },
+}
 import NL from './nl.js'
 
 // English text is the key; Dutch translations live in nl.js. Missing
@@ -35,9 +41,10 @@ export function LanguageProvider({ children }) {
   const t = useCallback(
     (text, vars) => {
       let s = lang === 'nl' ? (NL[text] ?? text) : text
-      // the Smiski build reuses every text, with its own name in it (not in the
-      // filled-in values, so "Switch to {name}" can still name Sonny Angel)
-      if (isSmiski) s = s.replace(/Sonny Angel/g, 'Smiski').replace(/\bangels\b/g, 'Smiskis').replace(/\bangel\b/g, 'Smiski')
+      // brand words go in before the values are filled in, so "Switch to {name}"
+      // can still name Sonny Angel
+      const words = BRAND_WORDS[BRAND]
+      for (const [from, to] of words?.[lang] || words?.en || []) s = s.replace(from, to)
       if (vars) s = s.replace(/\{(\w+)\}/g, (_, k) => (vars[k] ?? ''))
       return s
     },

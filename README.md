@@ -26,11 +26,21 @@ Progress is saved in `localStorage`. Use "Reset game" in the footer to start ove
 
 ## Smiski version
 
-The app also contains a Smiski simulator: the button in the header switches between the two
-(`?brand=smiski` or `?brand=sonny` in the URL does the same, and the choice is remembered).
+The app also contains a Smiski simulator (and Turbo Minis, below): the brand menu in the header
+switches between them (`?brand=smiski`, `?brand=cars` or `?brand=sonny` in the URL does the same,
+and the choice is remembered).
 Both share accounts, wallets, puzzles and the market, but each only shows its own brand's
 figures. Smiski has a dark mode in which the figures glow. Smiski series live in
 `src/data/smiski.js`. The old `/smiski/` link forwards to the app.
+
+## Turbo Minis (race cars)
+
+The third collection: race cars in blind boxes (`src/data/cars.js`, drawn by
+`src/components/Car.jsx`). Every car has speed, acceleration, grip and weight, and the
+**Race** tab lets you race on four tracks: against the computer for a little pocket money, or
+by posting a challenge other players can accept, for money or for each other's car. The server
+decides every race (`race_cpu`, `create_race_challenge`, `accept_race_challenge` in
+`supabase/schema.sql`, migration `022_cars.sql`).
 
 ## Install as an app
 

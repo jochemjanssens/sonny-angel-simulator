@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { BRAND, isSmiski, otherBrandUrl } from './brand'
+import { BRAND, BRANDS, brandUrl, isSmiski } from './brand'
 import { useT } from './i18n'
 
 // Light or dark mode (Smiski build only): in the dark the figures glow.
@@ -52,6 +52,15 @@ export function ThemeToggle() {
 
 // Small logo mark: Sonny Angel wings or a Smiski head.
 export function LogoMark({ brand = BRAND }) {
+  if (brand === 'cars') {
+    return (
+      <svg className="logo__wings logo__car" viewBox="0 0 40 24" aria-hidden>
+        <path d="M3 17 L4 12 Q6 10 11 10 L15 6 Q20 4 26 6 L31 10 Q37 11 37 15 L37 17 Z" />
+        <circle cx="11" cy="18" r="3.2" className="logo__wheel" />
+        <circle cx="29" cy="18" r="3.2" className="logo__wheel" />
+      </svg>
+    )
+  }
   if (brand === 'smiski') {
     return (
       <svg className="logo__wings logo__smiski" viewBox="0 0 40 30" aria-hidden>
@@ -69,15 +78,46 @@ export function LogoMark({ brand = BRAND }) {
   )
 }
 
-// Switches the app between Sonny Angel and Smiski (same account, so you stay signed in).
+// Menu to switch the app between Sonny Angel, Smiski and Turbo Minis (same
+// account, so you stay signed in).
 export function BrandSwitch() {
   const { t } = useT()
-  const other = isSmiski ? 'sonny' : 'smiski'
-  const name = isSmiski ? 'Sonny Angel' : 'Smiski'
+  const [open, setOpen] = useState(false)
+  useEffect(() => {
+    if (!open) return
+    const close = () => setOpen(false)
+    window.addEventListener('click', close)
+    return () => window.removeEventListener('click', close)
+  }, [open])
   return (
-    <a className={`brand-switch brand-switch--${other}`} href={otherBrandUrl()} title={t('Switch to {name}', { name })} aria-label={t('Switch to {name}', { name })}>
-      <LogoMark brand={other} />
-      <span className="brand-switch__name">{name}</span>
-    </a>
+    <div className="brand-switch-wrap">
+      <button
+        className="brand-switch"
+        onClick={(e) => {
+          e.stopPropagation()
+          setOpen((o) => !o)
+        }}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        title={t('Switch collection')}
+        aria-label={t('Switch collection')}
+      >
+        <LogoMark brand={BRAND} />
+        <span className="brand-switch__caret" aria-hidden>
+          ▾
+        </span>
+      </button>
+      {open && (
+        <div className="brand-menu" role="menu">
+          {Object.entries(BRANDS).map(([b, info]) => (
+            <a key={b} role="menuitem" href={brandUrl(b)} className={`brand-menu__item brand-switch--${b} ${b === BRAND ? 'is-active' : ''}`}>
+              <LogoMark brand={b} />
+              <span>{info.name}</span>
+              {b === BRAND && <span aria-hidden>✓</span>}
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
   )
 }

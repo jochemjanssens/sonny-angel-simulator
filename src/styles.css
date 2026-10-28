@@ -32,6 +32,20 @@
   --dot: rgba(95, 154, 58, 0.09);
 }
 
+/* Turbo Minis: race-track orange and racing blue */
+:root[data-brand='cars'] {
+  --red: #f25c05;
+  --red-dark: #c24700;
+  --cream: #f7f9fc;
+  --pink: #ffe8d6;
+  --sky: #e2ecff;
+  --ink: #1f2a3c;
+  --muted: #6a7487;
+  --line: #e1e7f0;
+  --shadow: 0 10px 30px -12px rgba(20, 40, 80, 0.25);
+  --dot: rgba(31, 111, 235, 0.08);
+}
+
 /* dark mode (lights off, so the Smiski figures glow) */
 :root[data-theme='dark'] {
   --red: #5d9e35;
@@ -3530,4 +3544,286 @@ h3 {
   line-height: 1;
   color: var(--muted);
   padding: 4px;
+}
+
+/* ---------- brand menu (Sonny Angel / Smiski / Turbo Minis) ---------- */
+
+.brand-switch-wrap {
+  position: relative;
+}
+.brand-switch__caret {
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+.brand-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 40;
+  min-width: 190px;
+  background: var(--paper);
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+}
+.brand-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  color: var(--ink);
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 0.9rem;
+}
+.brand-menu__item span:first-of-type {
+  flex: 1;
+}
+.brand-menu__item:hover,
+.brand-menu__item.is-active {
+  background: var(--pink);
+}
+.brand-menu .logo__wings {
+  width: 26px;
+  height: 18px;
+}
+.logo__car {
+  fill: var(--red);
+  stroke: none;
+}
+.logo__car .logo__wheel {
+  fill: #25252b;
+}
+.brand-switch--cars .logo__car {
+  fill: #f25c05;
+}
+
+/* ---------- race day (Turbo Minis) ---------- */
+
+.car-stats {
+  display: grid;
+  gap: 3px;
+  width: 100%;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+.car-stats__row {
+  display: grid;
+  grid-template-columns: 74px 1fr 16px;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+}
+.car-stats__row.is-key {
+  color: var(--ink);
+}
+.car-stats__bar {
+  height: 7px;
+  border-radius: 99px;
+  background: var(--line);
+  overflow: hidden;
+}
+.car-stats__bar span {
+  display: block;
+  height: 100%;
+  border-radius: 99px;
+  background: #9fb0c8;
+}
+.car-stats__row.is-key .car-stats__bar span {
+  background: var(--red);
+}
+.modal__card .car-stats {
+  max-width: 260px;
+  margin: 6px auto 12px;
+}
+.car-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+.car-picker__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0 10px 10px;
+  border: 2px solid var(--line);
+  border-radius: 16px;
+  background: var(--paper);
+  overflow: hidden;
+}
+.car-picker__item .angel {
+  margin: -46px 0 -10px;
+}
+.car-picker__item.is-active {
+  border-color: var(--red);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--red) 25%, transparent);
+}
+.car-picker__name {
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+.race__actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+  margin: 18px 0 8px;
+}
+.race__box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  background: var(--paper);
+  border: 2px solid var(--line);
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+.race__box h3 {
+  margin: 0;
+  font-family: var(--font-display);
+}
+.race__box p {
+  margin: 0;
+  color: var(--muted);
+}
+.race__list {
+  display: grid;
+  gap: 10px;
+}
+.race-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  background: var(--paper);
+  border: 2px solid var(--line);
+  border-radius: 16px;
+  padding: 0 14px;
+  overflow: hidden;
+}
+.race-card > .angel {
+  margin: -40px 0 -14px;
+}
+.race-card__info {
+  flex: 1;
+  min-width: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 0;
+}
+.race-card__stake {
+  font-weight: 800;
+  color: var(--red);
+}
+.race-card__wait {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.race-card__accept {
+  flex-basis: 100%;
+  padding-bottom: 12px;
+}
+.race-card--done.is-won {
+  border-color: #8ccb5e;
+}
+.race-card--done.is-lost {
+  opacity: 0.8;
+}
+.race__stage {
+  background: var(--paper);
+  border: 2px solid var(--line);
+  border-radius: 20px;
+  padding: 6px 14px 14px;
+  margin-bottom: 18px;
+  box-shadow: var(--shadow);
+}
+.race-track__svg {
+  display: block;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  overflow: visible;
+}
+.race-track__road {
+  fill: none;
+  stroke: #3a4256;
+  stroke-width: 32;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.race-track__line {
+  fill: none;
+  stroke: #ffd34d;
+  stroke-width: 1.6;
+  stroke-dasharray: 6 6;
+}
+.race-track__finish rect:nth-child(odd) {
+  fill: #fff;
+}
+.race-track__finish rect:nth-child(even) {
+  fill: #1f2a3c;
+}
+.race-track__names {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-weight: 800;
+  margin-top: 6px;
+}
+.race-track__name em {
+  color: var(--red);
+}
+.race__result {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  text-align: center;
+  animation: popIn 0.3s ease-out;
+}
+.race__result.is-won {
+  background: #eaf7e4;
+}
+.race__result.is-lost {
+  background: var(--pink);
+}
+.race__result strong {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+}
+
+.race-track__dot {
+  stroke: #fff;
+  stroke-width: 1.2;
+}
+.race-track__dot--0,
+.race-track__name--0::before {
+  fill: #f25c05;
+  background: #f25c05;
+}
+.race-track__dot--1,
+.race-track__name--1::before {
+  fill: #2f6fdb;
+  background: #2f6fdb;
+}
+.race-track__name::before {
+  content: '';
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 5px;
+  vertical-align: 0;
 }

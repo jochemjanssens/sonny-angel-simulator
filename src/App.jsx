@@ -5,15 +5,16 @@ import ShelfView from './components/ShelfView'
 import ProfileView from './components/ProfileView'
 import MarketView from './components/MarketView'
 import PuzzlesView from './components/puzzles/PuzzlesView'
+import RaceView from './components/race/RaceView'
 import BlindBoxOpener from './components/BlindBoxOpener'
 import FigureModal from './components/FigureModal'
 import LuckyWheel from './components/LuckyWheel'
 import { LoginScreen, SetupNeeded, UsernameScreen } from './components/AuthScreens'
 import { DAILY_ALLOWANCE, FIGURES, FIGURE_BY_ID, SERIES_BY_ID, euro } from './data/collections'
-import { isSmiski } from './brand'
+import { BRAND } from './brand'
 
-// The Smiski simulator tells the server which figures to use (Sonny Angel is the default).
-const BRAND_ARGS = isSmiski ? { p_brand: 'smiski' } : {}
+// The Smiski and Turbo Minis simulators tell the server which figures to use (Sonny Angel is the default).
+const BRAND_ARGS = BRAND === 'sonny' ? {} : { p_brand: BRAND }
 import { rpc, supabase } from './lib/supabase'
 import { readLocalSave } from './lib/localSave'
 import { useOnlineGame, utcTodayKey } from './hooks/useOnlineGame'
@@ -211,6 +212,9 @@ function Game({ userId }) {
           />
         )}
         {tab === 'puzzles' && <PuzzlesView userId={userId} notify={notify} onEarned={game.refresh} onProfile={openProfile} />}
+        {tab === 'race' && (
+          <RaceView userId={userId} inventory={inventory} wallet={state.wallet} notify={notify} onChanged={game.refresh} onProfile={openProfile} />
+        )}
       </main>
 
       <footer className="footer">

@@ -21,9 +21,9 @@ import { PUZZLE_REWARDS, euro } from '../../data/collections'
 import { rpc, supabase } from '../../lib/supabase'
 import { useT } from '../../i18n'
 
-import { isSmiski } from '../../brand'
+import { BRAND } from '../../brand'
 
-// the colouring pages are drawn with Sonny Angels, so the Smiski build skips them
+// the colouring pages are drawn with Sonny Angels, so the other brands skip them
 const ALL_KINDS = [
   { id: 'wordsearch', name: 'Word search', icon: '🔎', text: 'Find the hidden Dutch words in the letter grid.', words: true },
   { id: 'swedish', name: 'Swedish puzzle', icon: '✏️', text: 'An arrow-word crossword with Dutch clues.', words: false },
@@ -34,7 +34,7 @@ const ALL_KINDS = [
   { id: 'coloring', name: 'Colouring page', icon: '🖍️', text: 'Colour in a Sonny Angel picture.', words: false },
   { id: 'tables', name: 'Times table champion', icon: '✖️', text: 'Solve as many times tables as you can in one minute.', words: false },
 ]
-const KINDS = ALL_KINDS.filter((k) => !(isSmiski && k.id === 'coloring'))
+const KINDS = ALL_KINDS.filter((k) => !(BRAND !== 'sonny' && k.id === 'coloring'))
 const SIZE_LABEL = { small: 'Small', medium: 'Medium', large: 'Large' }
 const STATIC_GRID = {
   wordsearch: { small: '8×8', medium: '11×11', large: '14×14' },

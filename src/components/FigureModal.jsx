@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { CarStats } from './race/RaceView'
 import Angel from './Angel'
 import PriceInput, { formatPrice, parsePrice } from './PriceInput'
 import { BANK_RATE, SERIES_BY_ID, euro } from '../data/collections'
@@ -43,6 +44,7 @@ export default function FigureModal({ figure, count, onList, onBank, onClose }) 
         {figure.secret && <span className="badge badge--secret">{t('★ Secret figure ★')}</span>}
         <h2>{figure.name}</h2>
         <p className="modal__series">{series.name}</p>
+        {figure.stats && <CarStats car={figure} />}
         <dl className="facts facts--compact">
           <div>
             <dt>{t('Market value')}</dt>

@@ -9,6 +9,25 @@ const hex = (h) => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), pa
 // Shapes are in a 100×100 space. Everything important stays inside the middle
 // 80%, so Android can crop the icon to a circle or squircle ("maskable").
 const ICONS = {
+  // Turbo Minis: an orange race car on racing blue
+  cars: {
+    bg: '#1F4FB5',
+    shapes: [
+      { glow: [50, 55, 42], color: '#FFFFFF', alpha: 0.18 },
+      { rect: [10, 66, 90, 70], color: '#163A85' },
+      { ellipse: [52, 46, 18, 11, 0], color: '#F25C05' },
+      { ellipse: [52, 46, 12, 7, 0], color: '#BFE3F7' },
+      { rect: [14, 48, 88, 62], color: '#F25C05' },
+      { ellipse: [16, 55, 5, 7, 0], color: '#F25C05' },
+      { ellipse: [86, 55, 5, 7, 0], color: '#F25C05' },
+      { rect: [14, 53, 88, 56], color: '#FFD34D' },
+      { ellipse: [31, 63, 9, 9, 0], color: '#25252B' },
+      { ellipse: [31, 63, 4.5, 4.5, 0], color: '#D7DAE0' },
+      { ellipse: [71, 63, 9, 9, 0], color: '#25252B' },
+      { ellipse: [71, 63, 4.5, 4.5, 0], color: '#D7DAE0' },
+      { ellipse: [89, 52, 2, 2.4, 0], color: '#FFF3B0' },
+    ],
+  },
   // the app icon: a Sonny Angel on red next to a glowing Smiski in the dark
   combo: {
     bg: '#E4002B',

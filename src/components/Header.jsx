@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { DAILY_ALLOWANCE, euro } from '../data/collections'
 import { LanguageSwitch, useT } from '../i18n'
-import { BRAND_NAME } from '../brand'
+import { BRAND_NAME, isCars } from '../brand'
 import { BrandSwitch, LogoMark, ThemeToggle } from '../theme'
 
 // The allowance resets at midnight UTC, the same clock the server uses.
@@ -46,6 +46,11 @@ export default function Header({ tab, setTab, wallet, canClaim, onClaim, canSpin
           <button className={`tabs__tab ${tab === 'puzzles' ? 'is-active' : ''}`} onClick={() => setTab('puzzles')}>
             {t('Puzzles')}
           </button>
+          {isCars && (
+            <button className={`tabs__tab ${tab === 'race' ? 'is-active' : ''}`} onClick={() => setTab('race')}>
+              {t('Race')}
+            </button>
+          )}
         </nav>
 
         <div className="wallet">

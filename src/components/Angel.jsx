@@ -1,5 +1,6 @@
 import { useId } from 'react'
 import Smiski from './Smiski'
+import Car from './Car'
 
 // Illustrated style: no outlines — soft radial shading gives each shape its volume.
 const SKIN = '#F8D5BE'
@@ -695,9 +696,11 @@ function FaceExtras({ x, sil, c }) {
   )
 }
 
-// Smiski figures have their own drawing; everything else is a Sonny Angel.
+// Smiski figures and Turbo Minis cars have their own drawing; everything else is a Sonny Angel.
 export default function Angel(props) {
-  return props.figure?.brand === 'smiski' ? <Smiski {...props} /> : <SonnyAngel {...props} />
+  if (props.figure?.brand === 'smiski') return <Smiski {...props} />
+  if (props.figure?.brand === 'cars') return <Car {...props} />
+  return <SonnyAngel {...props} />
 }
 
 function SonnyAngel({ figure, silhouette = false, size = 120, className = '', showHalo = true }) {

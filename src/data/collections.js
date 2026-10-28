@@ -6,6 +6,7 @@
 
 import { BRAND } from '../brand.js'
 import { SMISKI_SERIES } from './smiski.js'
+import { CAR_SERIES } from './cars.js'
 
 export const DAILY_ALLOWANCE = 40.5
 export const STARTING_WALLET = 60
@@ -459,7 +460,7 @@ const RAW_SERIES = [
 
 // Every series of both brands (the server knows them all); SERIES and FIGURES
 // below only hold the brand this build is about.
-export const ALL_SERIES = [...RAW_SERIES.map((s) => ({ brand: 'sonny', ...s })), ...SMISKI_SERIES].map((s) => {
+export const ALL_SERIES = [...RAW_SERIES.map((s) => ({ brand: 'sonny', ...s })), ...SMISKI_SERIES, ...CAR_SERIES].map((s) => {
   const make = (fig, i) => ({
     ...fig,
     id: `${s.id}-${fig.secret ? 'secret' : i}`,

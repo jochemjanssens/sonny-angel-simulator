@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { BRAND_NAME, isSmiski } from '../brand'
+import { BRAND, BRAND_NAME } from '../brand'
 import { BrandSwitch, ThemeToggle } from '../theme'
 import Angel from './Angel'
 import BoxArt from './BoxArt'
@@ -50,12 +50,14 @@ const SPOTS = [
   { x: '0%', y: '56%', size: 86, delay: 2.2 },
   { x: '64%', y: '78%', size: 70, delay: 1.1 },
 ]
-const FLOATER_FIGURES = isSmiski
-  ? [pick('smiski-living', 0), pick('smiski-bath', 1), pick('smiski-bed', 1), pick('smiski-exercise', 4), pick('smiski-living', 1)]
-  : [pick('animal1', 0), pick('fruit', 1), pick('cat', 1), pick('flower', 6), pick('sweets', 1)]
+const FLOATER_FIGURES = {
+  smiski: () => [pick('smiski-living', 0), pick('smiski-bath', 1), pick('smiski-bed', 1), pick('smiski-exercise', 4), pick('smiski-living', 1)],
+  cars: () => [pick('cars-street', 0), pick('cars-offroad', 1), pick('cars-raceday', 0), pick('cars-city', 3), pick('cars-street', 6)],
+  sonny: () => [pick('animal1', 0), pick('fruit', 1), pick('cat', 1), pick('flower', 6), pick('sweets', 1)],
+}[BRAND]()
 const FLOATERS = SPOTS.map((spot, i) => ({ ...spot, fig: FLOATER_FIGURES[i] }))
 // the Smiski series are small, so its strip shows every figure
-const PARADE = isSmiski ? SERIES.flatMap((x) => x.figures) : SERIES.map((x, i) => x.figures[(i * 5) % x.figures.length])
+const PARADE = BRAND === 'sonny' ? SERIES.map((x, i) => x.figures[(i * 5) % x.figures.length]) : SERIES.flatMap((x) => x.figures)
 
 export function LoginScreen() {
   const [email, setEmail] = useState('')

@@ -36,6 +36,7 @@ function pwa() {
         shortcuts: [
           { name: 'Sonny Angel', url: './?brand=sonny', icons: [icon('sonny', 192)] },
           { name: 'Smiski', url: './?brand=smiski', icons: [icon('smiski', 192)] },
+          { name: 'Turbo Minis', url: './?brand=cars', icons: [icon('cars', 192)] },
         ],
       }
       this.emitFile({ type: 'asset', fileName: 'manifest.webmanifest', source: JSON.stringify(manifest, null, 2) })

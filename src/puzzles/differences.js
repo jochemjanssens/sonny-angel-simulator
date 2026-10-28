@@ -72,8 +72,10 @@ export function makeDifferences(size, seed, level = 0) {
 
   for (const i of spots) {
     const fig = FIGURE_BY_ID[left[i].id]
-    // Smiski figures only have a body colour, a prop colour and their pose
-    const options = fig.brand === 'smiski' ? ['tint', 'swap', ...(fig.prop ? ['accent', 'accent'] : [])] : kinds
+    // Smiski figures and cars only have a body colour, an accent colour and their shape
+    const simple = fig.brand === 'smiski' || fig.brand === 'cars'
+    const accentShows = fig.brand === 'cars' ? !!fig.pattern : !!fig.prop
+    const options = simple ? ['tint', 'swap', ...(accentShows ? ['accent', 'accent'] : [])] : kinds
     for (let attempt = 0; attempt < 10; attempt++) {
       const kind = r.pick(options)
       if (kind === 'swap') {
@@ -83,7 +85,7 @@ export function makeDifferences(size, seed, level = 0) {
         right[i] = { id: r.pick(sameSeries).id }
         break
       }
-      const over = kind === 'accent' && fig.brand === 'smiski' ? { accent: r.pick(ACCENTS.filter((c) => c.toLowerCase() !== fig.accent.toLowerCase())) } : CHANGES[kind](fig, r)
+      const over = kind === 'accent' && simple ? { accent: r.pick(ACCENTS.filter((c) => c.toLowerCase() !== fig.accent.toLowerCase())) } : CHANGES[kind](fig, r)
       if (over) {
         right[i] = { id: fig.id, over }
         break
