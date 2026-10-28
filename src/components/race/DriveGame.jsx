@@ -83,14 +83,19 @@ export default function DriveGame({ trackId, car, onFinish, onQuit }) {
       ctx.save()
       ctx.translate(c.x, c.y)
       ctx.rotate(c.a)
-      ctx.fillStyle = 'rgba(0,0,0,0.25)'
-      ctx.fillRect(-19, -8, 40, 20)
+      // a soft shadow that always falls the same way on the track (light from
+      // the top left), however the car turns: canvas shadow offsets ignore rotation
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.35)'
+      ctx.shadowBlur = 6 * s
+      ctx.shadowOffsetX = 5 * s
+      ctx.shadowOffsetY = 6 * s
       ctx.fillStyle = '#25252B'
       ;[[-14, -12], [8, -12], [-14, 8], [8, 8]].forEach(([x, y]) => ctx.fillRect(x, y, 9, 4))
       ctx.fillStyle = car.color
       ctx.beginPath()
       ctx.roundRect(-19, -10, 38, 20, 7)
       ctx.fill()
+      ctx.shadowColor = 'transparent'
       ctx.fillStyle = car.accent
       ctx.fillRect(-19, -2.5, 38, 5)
       ctx.fillStyle = '#BFE3F7'
