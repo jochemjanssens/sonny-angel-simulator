@@ -968,13 +968,7 @@ insert into public.figures (id, series_id, value, secret, speed, accel, grip, we
 insert into public.tracks (id, w_speed, w_accel, w_grip, w_weight, risk_stat, risk_below, risk_chance, min_ms) values ('drag', 0.5, 0.5, 0, 0, null, null, null, 10837)
   on conflict (id) do update set w_speed = excluded.w_speed, w_accel = excluded.w_accel, w_grip = excluded.w_grip, w_weight = excluded.w_weight,
     risk_stat = excluded.risk_stat, risk_below = excluded.risk_below, risk_chance = excluded.risk_chance, min_ms = excluded.min_ms;
-insert into public.tracks (id, w_speed, w_accel, w_grip, w_weight, risk_stat, risk_below, risk_chance, min_ms) values ('loop', 0.45, 0.35, 0.2, 0, 'speed', 6, 0.35, 9123)
-  on conflict (id) do update set w_speed = excluded.w_speed, w_accel = excluded.w_accel, w_grip = excluded.w_grip, w_weight = excluded.w_weight,
-    risk_stat = excluded.risk_stat, risk_below = excluded.risk_below, risk_chance = excluded.risk_chance, min_ms = excluded.min_ms;
-insert into public.tracks (id, w_speed, w_accel, w_grip, w_weight, risk_stat, risk_below, risk_chance, min_ms) values ('jump', 0.35, 0.15, 0.15, 0.35, 'weight', 4, 0.3, 9521)
-  on conflict (id) do update set w_speed = excluded.w_speed, w_accel = excluded.w_accel, w_grip = excluded.w_grip, w_weight = excluded.w_weight,
-    risk_stat = excluded.risk_stat, risk_below = excluded.risk_below, risk_chance = excluded.risk_chance, min_ms = excluded.min_ms;
-insert into public.tracks (id, w_speed, w_accel, w_grip, w_weight, risk_stat, risk_below, risk_chance, min_ms) values ('canyon', 0.15, 0.3, 0.55, 0, 'grip', 5, 0.3, 14751)
+insert into public.tracks (id, w_speed, w_accel, w_grip, w_weight, risk_stat, risk_below, risk_chance, min_ms) values ('canyon', 0.15, 0.3, 0.55, 0, null, null, null, 14751)
   on conflict (id) do update set w_speed = excluded.w_speed, w_accel = excluded.w_accel, w_grip = excluded.w_grip, w_weight = excluded.w_weight,
     risk_stat = excluded.risk_stat, risk_below = excluded.risk_below, risk_chance = excluded.risk_chance, min_ms = excluded.min_ms;
 delete from public.wheel_prizes;

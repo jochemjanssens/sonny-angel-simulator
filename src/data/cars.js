@@ -92,44 +92,24 @@ export const CAR_SERIES = [
   },
 ]
 
-// The tracks every player can race on. Each one weighs the four stats
-// differently; a car that misses `risk` may spin out (costs time).
+// The tracks you drive yourself (the layouts are in race/trackGeometry.js). The
+// weights only mark which stats matter most on each track.
 export const TRACKS = [
   {
     id: 'drag',
     name: 'Drag Strip',
     icon: '🏁',
-    text: 'Dead straight: pure speed and a fast start.',
+    text: 'A wide, fast oval: top speed and a quick start win.',
     weights: { speed: 0.5, accel: 0.5, grip: 0, weight: 0 },
     risk: null,
-  },
-  {
-    id: 'loop',
-    name: 'Loop the Loop',
-    icon: '🌀',
-    text: 'A giant loop. Too slow and you fall off!',
-    weights: { speed: 0.45, accel: 0.35, grip: 0.2, weight: 0 },
-    risk: { stat: 'speed', below: 6, chance: 0.35, text: 'fell off the loop' },
-  },
-  {
-    id: 'jump',
-    name: 'Big Jump',
-    icon: '🦘',
-    text: 'Fly over the gap. Heavy cars land safely.',
-    weights: { speed: 0.35, accel: 0.15, grip: 0.15, weight: 0.35 },
-    risk: { stat: 'weight', below: 4, chance: 0.3, text: 'bounced on the landing' },
   },
   {
     id: 'canyon',
     name: 'Canyon Curves',
     icon: '⛰️',
-    text: 'Tight bends all the way down. Grip is king.',
+    text: 'Narrow bends between canyon walls. Grip is king.',
     weights: { speed: 0.15, accel: 0.3, grip: 0.55, weight: 0 },
-    risk: { stat: 'grip', below: 5, chance: 0.3, text: 'spun out in a bend' },
+    risk: null,
   },
 ]
 export const TRACK_BY_ID = Object.fromEntries(TRACKS.map((t) => [t.id, t]))
-
-// Racing against the computer pays a little, a few times a day.
-export const CPU_PRIZE = 2
-export const CPU_PAID_WINS = 5

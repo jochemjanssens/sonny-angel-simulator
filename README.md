@@ -36,17 +36,11 @@ figures. Smiski has a dark mode in which the figures glow. Smiski series live in
 ## Turbo Minis (race cars)
 
 The third collection: race cars in blind boxes (`src/data/cars.js`, drawn by
-`src/components/Car.jsx`). Every car has speed, acceleration, grip and weight, and the
-**Race** tab lets you race on four tracks: against the computer for a little pocket money, or
-by posting a challenge other players can accept, for money or for each other's car. The server
-decides every race (`race_cpu`, `create_race_challenge`, `accept_race_challenge` in
-`supabase/schema.sql`, migration `022_cars.sql`).
-
-You can also **drive a track yourself** (time trial): a top-down race with the car you pick,
-where its stats set the handling (`src/race/driveSim.js`, tracks in `src/race/trackGeometry.js`).
-The fastest time per track each week wins free wheel spins (3/2/1), like the times-table
-highscores; the server refuses times faster than the track allows or than the real clock
-(migration `023_time_trials.sql`).
+`src/components/Car.jsx`). Every car has speed, acceleration, grip and weight. In the **Race**
+tab you drive a track yourself (top-down, `src/race/driveSim.js`, tracks in
+`src/race/trackGeometry.js`): the car's stats set the handling. The fastest time per track each
+week wins free wheel spins (3/2/1), like the times-table highscores; the server refuses times
+faster than the track allows or than the real clock (migration `023_time_trials.sql`).
 
 ## Install as an app
 

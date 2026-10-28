@@ -510,4 +510,7 @@ export default {
   "That time is not possible": "Die tijd is niet mogelijk",
   "Race not found": "Race niet gevonden",
   "This race was already saved": "Deze race is al opgeslagen",
+  "Pick a track and one of your cars, and drive it yourself. The fastest time of the week on each track wins free wheel spins.": "Kies een baan en een van je auto's en rijd zelf. De snelste tijd van de week op elke baan wint gratis draaien aan het rad.",
+  "A wide, fast oval: top speed and a quick start win.": "Een breed, snel ovaal: topsnelheid en een snelle start winnen.",
+  "Narrow bends between canyon walls. Grip is king.": "Smalle bochten tussen de rotswanden. Grip is koning.",
 }

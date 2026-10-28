@@ -18,12 +18,12 @@ export default function DriveGame({ trackId, car, onFinish, onQuit }) {
 
   useEffect(() => {
     const sim = createSim(trackId, car.stats)
-    const { track, samples, jump, tangent } = sim
+    const { track, samples, tangent } = sim
     const c = sim.car
     const s0 = samples[0]
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d')
-    const MESSAGES = { lap: () => t('Lap {n}!', { n: c.lap }), jump: () => t('Jump!'), fell: () => t('Too slow — you fell in!'), bump: () => t('Bumpy landing!') }
+    const MESSAGES = { lap: () => t('Lap {n}!', { n: c.lap }) }
     let start = null // when the GO! light went on
     let raf
     let last = performance.now()
@@ -62,22 +62,6 @@ export default function DriveGame({ trackId, car, onFinish, onQuit }) {
       road(track.width, '#3A4256')
       road(3, '#FFD34D', [18, 16])
 
-      // the gap of the jump, with an orange ramp in front of it
-      if (jump) {
-        ctx.beginPath()
-        for (let i = jump.from + 2; i <= jump.to; i++) ctx.lineTo(samples[i].x, samples[i].y)
-        ctx.lineWidth = track.width + 12
-        ctx.strokeStyle = '#2A1A10'
-        ctx.stroke()
-        const r = samples[jump.from]
-        ctx.save()
-        ctx.translate(r.x, r.y)
-        ctx.rotate(tangent(jump.from))
-        ctx.fillStyle = '#FF7A00'
-        ctx.fillRect(-14, -track.width / 2, 16, track.width)
-        ctx.restore()
-      }
-
       // start / finish line
       ctx.save()
       ctx.translate(s0.x, s0.y)
@@ -91,12 +75,10 @@ export default function DriveGame({ trackId, car, onFinish, onQuit }) {
       }
       ctx.restore()
 
-      // the car, from above (bigger while flying, shrinking when it falls)
-      const lift = c.air > 0 ? 1.25 : c.fallen > 0 ? Math.max(0.2, c.fallen / 1.5) : 1
+      // the car, from above
       ctx.save()
       ctx.translate(c.x, c.y)
       ctx.rotate(c.a)
-      ctx.scale(lift, lift)
       ctx.fillStyle = 'rgba(0,0,0,0.25)'
       ctx.fillRect(-19, -8, 40, 20)
       ctx.fillStyle = '#25252B'

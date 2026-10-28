@@ -3,19 +3,6 @@
 // Catmull-Rom spline. Shared by the game and the catalog script (which works
 // out the fastest possible time per track for the server's sanity check).
 
-const lemniscate = (cx, cy, rx, ry, n) =>
-  Array.from({ length: n }, (_, i) => {
-    const t = (i / n) * Math.PI * 2
-    const d = 1 + Math.sin(t) ** 2
-    return [cx + (rx * Math.cos(t)) / d, cy + (ry * Math.sin(t) * Math.cos(t)) / d]
-  })
-
-const ellipse = (cx, cy, rx, ry, n) =>
-  Array.from({ length: n }, (_, i) => {
-    const t = (i / n) * Math.PI * 2 - Math.PI / 2
-    return [cx + rx * Math.cos(t), cy + ry * Math.sin(t)]
-  })
-
 export const TRIAL_TRACKS = {
   // a wide, fast oval: pure speed
   drag: {
@@ -23,21 +10,6 @@ export const TRIAL_TRACKS = {
     width: 130,
     ground: '#7DBB5A',
     points: [[220, 170], [980, 170], [1120, 260], [1120, 540], [980, 630], [220, 630], [80, 540], [80, 260]],
-  },
-  // a figure eight that crosses itself
-  loop: {
-    laps: 2,
-    width: 110,
-    ground: '#8CC9E8',
-    points: lemniscate(600, 400, 520, 330, 28),
-  },
-  // an oval with a gap over the top: go fast enough to fly over it
-  jump: {
-    laps: 2,
-    width: 120,
-    ground: '#E9C98C',
-    points: ellipse(600, 420, 500, 280, 24),
-    jump: { from: 0.45, to: 0.53, minSpeed: 250 },
   },
   // narrow and twisty, with canyon walls instead of grass
   canyon: {
