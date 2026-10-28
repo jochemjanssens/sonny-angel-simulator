@@ -4055,8 +4055,14 @@ h3 {
   font-size: 0.62rem;
   margin-left: 1px;
 }
+/* one shared grid for all four rows, so the bars line up: label and number
+   take what they need, the bar gets the rest */
+.car-stats {
+  grid-template-columns: max-content minmax(36px, 1fr) max-content;
+  column-gap: 6px;
+}
 .car-stats__row {
-  grid-template-columns: 74px 1fr 26px;
+  display: contents;
 }
 .garage {
   margin-top: 26px;
@@ -4140,4 +4146,34 @@ h3 {
 }
 .upgrade-open.rarity--legendary {
   box-shadow: 0 0 0 4px #f4b73b, var(--shadow);
+}
+
+.race__medals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: var(--ink) !important;
+}
+.race__medal {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.2rem;
+  margin-bottom: 2px;
+}
+.race__reward {
+  font-family: var(--font-display);
+  color: #2f9e44;
+}
+.race__reward.is-none {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.race__left {
+  display: block;
+  color: var(--muted);
+  font-weight: 700;
 }

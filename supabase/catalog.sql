@@ -968,21 +968,27 @@ insert into public.figures (id, series_id, value, secret, speed, accel, grip, we
 insert into public.tracks (id, w_speed, w_accel, w_grip, w_weight, risk_stat, risk_below, risk_chance, min_ms) values ('drag', 0.5, 0.5, 0, 0, null, null, null, 10837)
   on conflict (id) do update set w_speed = excluded.w_speed, w_accel = excluded.w_accel, w_grip = excluded.w_grip, w_weight = excluded.w_weight,
     risk_stat = excluded.risk_stat, risk_below = excluded.risk_below, risk_chance = excluded.risk_chance, min_ms = excluded.min_ms;
+update public.tracks set gold_ms = 14500, silver_ms = 17600, bronze_ms = 21200 where id = 'drag';
 insert into public.tracks (id, w_speed, w_accel, w_grip, w_weight, risk_stat, risk_below, risk_chance, min_ms) values ('canyon', 0.15, 0.3, 0.55, 0, null, null, null, 14751)
   on conflict (id) do update set w_speed = excluded.w_speed, w_accel = excluded.w_accel, w_grip = excluded.w_grip, w_weight = excluded.w_weight,
     risk_stat = excluded.risk_stat, risk_below = excluded.risk_below, risk_chance = excluded.risk_chance, min_ms = excluded.min_ms;
+update public.tracks set gold_ms = 24600, silver_ms = 29900, bronze_ms = 35900 where id = 'canyon';
 insert into public.tracks (id, w_speed, w_accel, w_grip, w_weight, risk_stat, risk_below, risk_chance, min_ms) values ('city', 0.2, 0.45, 0.35, 0, null, null, null, 11413)
   on conflict (id) do update set w_speed = excluded.w_speed, w_accel = excluded.w_accel, w_grip = excluded.w_grip, w_weight = excluded.w_weight,
     risk_stat = excluded.risk_stat, risk_below = excluded.risk_below, risk_chance = excluded.risk_chance, min_ms = excluded.min_ms;
+update public.tracks set gold_ms = 25300, silver_ms = 30700, bronze_ms = 36900 where id = 'city';
 insert into public.tracks (id, w_speed, w_accel, w_grip, w_weight, risk_stat, risk_below, risk_chance, min_ms) values ('beach', 0.4, 0.3, 0.3, 0, null, null, null, 10804)
   on conflict (id) do update set w_speed = excluded.w_speed, w_accel = excluded.w_accel, w_grip = excluded.w_grip, w_weight = excluded.w_weight,
     risk_stat = excluded.risk_stat, risk_below = excluded.risk_below, risk_chance = excluded.risk_chance, min_ms = excluded.min_ms;
+update public.tracks set gold_ms = 14500, silver_ms = 17500, bronze_ms = 21000 where id = 'beach';
 insert into public.tracks (id, w_speed, w_accel, w_grip, w_weight, risk_stat, risk_below, risk_chance, min_ms) values ('snow', 0.2, 0.2, 0.6, 0, null, null, null, 11635)
   on conflict (id) do update set w_speed = excluded.w_speed, w_accel = excluded.w_accel, w_grip = excluded.w_grip, w_weight = excluded.w_weight,
     risk_stat = excluded.risk_stat, risk_below = excluded.risk_below, risk_chance = excluded.risk_chance, min_ms = excluded.min_ms;
+update public.tracks set gold_ms = 17600, silver_ms = 21300, bronze_ms = 25600 where id = 'snow';
 insert into public.tracks (id, w_speed, w_accel, w_grip, w_weight, risk_stat, risk_below, risk_chance, min_ms) values ('forest', 0.1, 0.4, 0.5, 0, null, null, null, 12976)
   on conflict (id) do update set w_speed = excluded.w_speed, w_accel = excluded.w_accel, w_grip = excluded.w_grip, w_weight = excluded.w_weight,
     risk_stat = excluded.risk_stat, risk_below = excluded.risk_below, risk_chance = excluded.risk_chance, min_ms = excluded.min_ms;
+update public.tracks set gold_ms = 20300, silver_ms = 24600, bronze_ms = 29500 where id = 'forest';
 update public.game_config set upgrade_box_price = 7.95;
 insert into public.upgrade_parts (id, speed, accel, grip, weight, draw) values ('engine', 1, 0, 0, 0, 175)
   on conflict (id) do update set speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, draw = excluded.draw;

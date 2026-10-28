@@ -3,8 +3,8 @@ import Angel from '../Angel'
 import DriveGame from './DriveGame'
 import TrialHighscores, { seconds } from './TrialHighscores'
 import Garage, { useGarage } from './Garage'
-import { FIGURE_BY_ID, SERIES } from '../../data/collections'
-import { TRACKS, TRACK_BY_ID, tunedStats } from '../../data/cars'
+import { FIGURE_BY_ID, SERIES, euro } from '../../data/collections'
+import { FINISH_REWARD, MEDALS, PAID_RACES_PER_DAY, TRACKS, TRACK_BY_ID, tunedStats } from '../../data/cars'
 import { rpc } from '../../lib/supabase'
 import { useT } from '../../i18n'
 
@@ -97,6 +97,7 @@ export default function RaceView({ userId, inventory, wallet, notify, onChanged,
         const r = await rpc('finish_time_trial', { p_session: run.session, p_time_ms: ms })
         setTrial({ ...r, track: run.track })
         setHsKey((k) => k + 1)
+        onChanged() // the reward went into your budget
         return
       } catch (err) {
         if (attempt === 1 || !/fetch|network|load failed/i.test(err.message)) {
@@ -115,6 +116,15 @@ export default function RaceView({ userId, inventory, wallet, notify, onChanged,
         <div>
           <h1 className="hero__title">{t('Race day!')}</h1>
           <p className="hero__text">{t('Pick a track and one of your cars, and drive it yourself. The fastest time of the week on each track wins free wheel spins.')}</p>
+          <p className="hero__text">
+            {t('Every race earns a medal and pocket money: gold {gold}, silver {silver}, bronze {bronze}, finished {finish} (the first {n} races of the day).', {
+              gold: euro(MEDALS[0].reward),
+              silver: euro(MEDALS[1].reward),
+              bronze: euro(MEDALS[2].reward),
+              finish: euro(FINISH_REWARD),
+              n: PAID_RACES_PER_DAY,
+            })}
+          </p>
         </div>
       </div>
 
@@ -139,6 +149,13 @@ export default function RaceView({ userId, inventory, wallet, notify, onChanged,
           <div className="race__box race__box--drive">
             <h3>{t('Drive it yourself')}</h3>
             <p>{t('Steer {name} around the track yourself and set the fastest time of the week.', { name: selected.name })}</p>
+            <p className="race__medals">
+              {MEDALS.map((m) => (
+                <span key={m.id} title={t(m.name)}>
+                  {m.icon} {t('under {time}', { time: seconds(TRACK_BY_ID[track].medals[m.id]) })}
+                </span>
+              ))}
+            </p>
             <button className="btn btn--primary" onClick={drive} disabled={busy}>
               🎮 {t('Drive!')}
             </button>
@@ -148,8 +165,16 @@ export default function RaceView({ userId, inventory, wallet, notify, onChanged,
                   t(trial.error)
                 ) : (
                   <>
-                    <strong>{seconds(trial.time_ms)}</strong>{' '}
+                    <span className="race__medal">
+                      {MEDALS.find((m) => m.id === trial.medal)?.icon || '🏁'} <strong>{seconds(trial.time_ms)}</strong>
+                      {Number(trial.reward) > 0 ? (
+                        <span className="race__reward">+{euro(Number(trial.reward))}</span>
+                      ) : (
+                        <span className="race__reward is-none">{t('No more prize money today')}</span>
+                      )}
+                    </span>
                     {trial.new_best ? t('New personal best! You are #{rank} this week.', { rank: trial.rank }) : t('Your best this week: {time} (#{rank})', { time: seconds(trial.best), rank: trial.rank })}
+                    {Number(trial.reward) > 0 && <small className="race__left">{t('{n} paid races left today', { n: trial.paid_left })}</small>}
                   </>
                 )}
               </div>

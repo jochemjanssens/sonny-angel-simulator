@@ -547,4 +547,11 @@ export default {
   "Slick Tyres": "Slicks",
   "Heavy Chassis": "Zwaar chassis",
   "Tuning Kit": "Tuningkit",
+  "Every race earns a medal and pocket money: gold {gold}, silver {silver}, bronze {bronze}, finished {finish} (the first {n} races of the day).": "Elke race levert een medaille en zakgeld op: goud {gold}, zilver {silver}, brons {bronze}, uitgereden {finish} (de eerste {n} races van de dag).",
+  "under {time}": "onder {time}",
+  "No more prize money today": "Vandaag geen prijzengeld meer",
+  "{n} paid races left today": "Vandaag nog {n} betaalde races",
+  "Gold": "Goud",
+  "Silver": "Zilver",
+  "Bronze": "Brons",
 }

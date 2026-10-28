@@ -39,6 +39,8 @@ for (const t of TRACKS) {
     `insert into public.tracks (id, w_speed, w_accel, w_grip, w_weight, risk_stat, risk_below, risk_chance, min_ms) values (${q(t.id)}, ${w.speed}, ${w.accel}, ${w.grip}, ${w.weight}, ${r ? q(r.stat) : 'null'}, ${r ? r.below : 'null'}, ${r ? r.chance : 'null'}, ${minTimeMs(t.id)})`,
     '  on conflict (id) do update set w_speed = excluded.w_speed, w_accel = excluded.w_accel, w_grip = excluded.w_grip, w_weight = excluded.w_weight,',
     '    risk_stat = excluded.risk_stat, risk_below = excluded.risk_below, risk_chance = excluded.risk_chance, min_ms = excluded.min_ms;',
+    // medal times for the time-trial rewards
+    `update public.tracks set gold_ms = ${t.medals.gold}, silver_ms = ${t.medals.silver}, bronze_ms = ${t.medals.bronze} where id = ${q(t.id)};`,
   )
 }
 // upgrade boxes: the price and the parts that can come out

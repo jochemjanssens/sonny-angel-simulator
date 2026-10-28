@@ -97,6 +97,7 @@ export const CAR_SERIES = [
 export const TRACKS = [
   {
     id: 'drag',
+    medals: { gold: 14500, silver: 17600, bronze: 21200 }, // ms
     name: 'Drag Strip',
     icon: '🏁',
     text: 'A wide, fast oval: top speed and a quick start win.',
@@ -105,6 +106,7 @@ export const TRACKS = [
   },
   {
     id: 'canyon',
+    medals: { gold: 24600, silver: 29900, bronze: 35900 }, // ms
     name: 'Canyon Curves',
     icon: '⛰️',
     text: 'Narrow bends between canyon walls. Grip is king.',
@@ -113,6 +115,7 @@ export const TRACKS = [
   },
   {
     id: 'city',
+    medals: { gold: 25300, silver: 30700, bronze: 36900 }, // ms
     name: 'City Streets',
     icon: '🏙️',
     text: 'Right-angle corners between the buildings. Brake, turn, full gas!',
@@ -121,6 +124,7 @@ export const TRACKS = [
   },
   {
     id: 'beach',
+    medals: { gold: 14500, silver: 17500, bronze: 21000 }, // ms
     name: 'Beach Bay',
     icon: '🏖️',
     text: 'Long, flowing bends along the sea. Stay off the sand!',
@@ -129,6 +133,7 @@ export const TRACKS = [
   },
   {
     id: 'snow',
+    medals: { gold: 17600, silver: 21300, bronze: 25600 }, // ms
     name: 'Snowy Peaks',
     icon: '❄️',
     text: 'Packed snow: slippery, so brake early for the bends.',
@@ -137,6 +142,7 @@ export const TRACKS = [
   },
   {
     id: 'forest',
+    medals: { gold: 20300, silver: 24600, bronze: 29500 }, // ms
     name: 'Forest Hairpins',
     icon: '🌲',
     text: 'A zigzag of hairpins between the hedges.',
@@ -172,3 +178,14 @@ export function tunedStats(car, upgrade) {
   for (const k of ['speed', 'accel', 'grip', 'weight']) out[k] = Math.min(MAX_STAT, car.stats[k] + (upgrade?.[k] || 0))
   return out
 }
+
+// Every finished drive-yourself race earns a medal (by the track's medal times,
+// set from good test laps) and a reward, for the first 10 races of the day. The
+// server works this out the same way (finish_time_trial).
+export const MEDALS = [
+  { id: 'gold', icon: '🥇', name: 'Gold', reward: 3 },
+  { id: 'silver', icon: '🥈', name: 'Silver', reward: 2 },
+  { id: 'bronze', icon: '🥉', name: 'Bronze', reward: 1 },
+]
+export const FINISH_REWARD = 0.5
+export const PAID_RACES_PER_DAY = 10
