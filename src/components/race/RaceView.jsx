@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import Angel from '../Angel'
 import RaceTrack from './RaceTrack'
+import DriveGame from './DriveGame'
+import TrialHighscores, { seconds } from './TrialHighscores'
 import PriceInput, { parsePrice } from '../PriceInput'
 import { FIGURE_BY_ID, SERIES, euro } from '../../data/collections'
 import { CPU_PAID_WINS, CPU_PRIZE, TRACKS, TRACK_BY_ID } from '../../data/cars'
@@ -60,6 +62,9 @@ export default function RaceView({ userId, inventory, wallet, notify, onChanged,
   const [accepting, setAccepting] = useState(null) // challenge being accepted
   const [acceptCar, setAcceptCar] = useState(null)
   const [busy, setBusy] = useState(false)
+  const [driving, setDriving] = useState(null) // { session, track, car } while you drive yourself
+  const [trial, setTrial] = useState(null) // result of your last drive: { time_ms, best, rank, new_best } or { error }
+  const [hsKey, setHsKey] = useState(0)
 
   useEffect(() => {
     if (car && !cars.some((c) => c.id === car)) setCar(null)
@@ -99,6 +104,39 @@ export default function RaceView({ userId, inventory, wallet, notify, onChanged,
       notify(t(err.message))
     }
     setBusy(false)
+  }
+
+  // drive the track yourself, against the clock
+  const drive = async () => {
+    if (!car) return
+    setBusy(true)
+    try {
+      const session = await rpc('start_time_trial', { p_track: track, p_car: car })
+      setTrial(null)
+      setDriving({ session, track, car })
+    } catch (err) {
+      notify(t(err.message))
+    }
+    setBusy(false)
+  }
+
+  const finishDrive = async (ms) => {
+    const run = driving
+    setDriving(null)
+    // save the time (one retry if the connection hiccups)
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const r = await rpc('finish_time_trial', { p_session: run.session, p_time_ms: ms })
+        setTrial({ ...r, track: run.track })
+        setHsKey((k) => k + 1)
+        return
+      } catch (err) {
+        if (attempt === 1 || !/fetch|network|load failed/i.test(err.message)) {
+          setTrial({ error: err.message, time_ms: ms, track: run.track })
+          return
+        }
+      }
+    }
   }
 
   const challenge = async () => {
@@ -219,8 +257,29 @@ export default function RaceView({ userId, inventory, wallet, notify, onChanged,
       <h2 className="section-title">{t('2. Pick your car')}</h2>
       <CarPicker cars={cars} value={car} onChange={setCar} track={track} />
 
+      {driving && <DriveGame trackId={driving.track} car={FIGURE_BY_ID[driving.car]} onFinish={finishDrive} onQuit={() => setDriving(null)} />}
+
       {selected && (
         <div className="race__actions">
+          <div className="race__box race__box--drive">
+            <h3>{t('Drive it yourself')}</h3>
+            <p>{t('Steer {name} around the track yourself and set the fastest time of the week.', { name: selected.name })}</p>
+            <button className="btn btn--primary" onClick={drive} disabled={busy}>
+              🎮 {t('Drive!')}
+            </button>
+            {trial && trial.track === track && (
+              <div className={`race__trial ${trial.error ? 'is-error' : ''}`}>
+                {trial.error ? (
+                  t(trial.error)
+                ) : (
+                  <>
+                    <strong>{seconds(trial.time_ms)}</strong>{' '}
+                    {trial.new_best ? t('New personal best! You are #{rank} this week.', { rank: trial.rank }) : t('Your best this week: {time} (#{rank})', { time: seconds(trial.best), rank: trial.rank })}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
           <div className="race__box">
             <h3>{t('Race the computer')}</h3>
             <p>{t('A random car takes you on. Wins pay {prize}.', { prize: euro(CPU_PRIZE) })}</p>
@@ -249,6 +308,8 @@ export default function RaceView({ userId, inventory, wallet, notify, onChanged,
           </div>
         </div>
       )}
+
+      <TrialHighscores userId={userId} track={track} refreshKey={hsKey} onProfile={onProfile} />
 
       <h2 className="section-title">{t('Open challenges')}</h2>
       {!open.length && <p className="market__empty">{t('No open challenges right now. Post one yourself!')}</p>}

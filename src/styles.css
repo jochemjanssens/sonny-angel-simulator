@@ -3827,3 +3827,172 @@ h3 {
   margin-right: 5px;
   vertical-align: 0;
 }
+
+/* ---------- time trial: drive yourself ---------- */
+
+.drive {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  background: #1a1f2b;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.drive__screen {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+.drive__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.drive__hud {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(20, 24, 34, 0.75);
+  color: #fff;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.drive__hud strong {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  min-width: 4.5ch;
+  text-align: center;
+}
+.drive__speed {
+  width: 70px;
+  height: 8px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+}
+.drive__speed span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #8ccb5e, #ffd34d, #f25c05);
+}
+.drive__count,
+.drive__msg {
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+  white-space: nowrap;
+}
+.drive__count {
+  font-size: 6rem;
+  animation: popIn 0.3s ease-out;
+}
+.drive__msg {
+  font-size: 2rem;
+}
+.drive__quit {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(20, 24, 34, 0.75);
+  color: #fff;
+  font-size: 1.4rem;
+}
+.drive__controls {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
+  background: #121620;
+}
+.drive__pair {
+  display: flex;
+  gap: 10px;
+}
+.drive__btn {
+  width: 74px;
+  height: 64px;
+  border: 0;
+  border-radius: 18px;
+  background: #2c3346;
+  color: #fff;
+  font-size: 1.6rem;
+  box-shadow: 0 4px 0 #0c0f16;
+  touch-action: none;
+}
+.drive__btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #0c0f16;
+}
+.drive__btn--gas {
+  background: #2f9e44;
+}
+.drive__btn--brake {
+  background: #b8001f;
+}
+.drive__keys {
+  margin: 0;
+  padding: 6px;
+  background: #121620;
+  color: #98a0b5;
+}
+/* touch screens use the buttons; keyboards don't need them */
+@media (pointer: fine) {
+  .drive__controls {
+    display: none;
+  }
+}
+@media (pointer: coarse) {
+  .drive__keys {
+    display: none;
+  }
+}
+
+.race__box--drive {
+  border-color: var(--red);
+}
+.race__trial {
+  font-weight: 700;
+  background: #eaf7e4;
+  border-radius: 12px;
+  padding: 8px 12px;
+}
+.race__trial strong {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+}
+.race__trial.is-error {
+  background: var(--pink);
+  color: var(--red);
+}
+.hs__car {
+  display: inline-flex;
+  width: 34px;
+  height: 22px;
+  overflow: hidden;
+  align-items: flex-end;
+}
+.hs__car .angel {
+  margin-bottom: -2px;
+}

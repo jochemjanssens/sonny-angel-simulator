@@ -2,6 +2,7 @@
 // knows every series, figure, price and value. Run: npm run gen:catalog
 import { writeFileSync } from 'node:fs'
 import { TRACKS } from '../src/data/cars.js'
+import { minTimeMs } from '../src/race/trackGeometry.js'
 import { ALL_SERIES as SERIES, DAILY_ALLOWANCE, STARTING_WALLET, WELCOME_BONUS, BANK_RATE, PUZZLE_REWARDS, WHEEL_PRIZES } from '../src/data/collections.js'
 
 const q = (s) => `'${String(s).replace(/'/g, "''")}'`
@@ -34,9 +35,10 @@ for (const t of TRACKS) {
   const w = t.weights
   const r = t.risk
   lines.push(
-    `insert into public.tracks (id, w_speed, w_accel, w_grip, w_weight, risk_stat, risk_below, risk_chance) values (${q(t.id)}, ${w.speed}, ${w.accel}, ${w.grip}, ${w.weight}, ${r ? q(r.stat) : 'null'}, ${r ? r.below : 'null'}, ${r ? r.chance : 'null'})`,
+    // min_ms: the fastest time trial anyone could drive (the server refuses faster times)
+    `insert into public.tracks (id, w_speed, w_accel, w_grip, w_weight, risk_stat, risk_below, risk_chance, min_ms) values (${q(t.id)}, ${w.speed}, ${w.accel}, ${w.grip}, ${w.weight}, ${r ? q(r.stat) : 'null'}, ${r ? r.below : 'null'}, ${r ? r.chance : 'null'}, ${minTimeMs(t.id)})`,
     '  on conflict (id) do update set w_speed = excluded.w_speed, w_accel = excluded.w_accel, w_grip = excluded.w_grip, w_weight = excluded.w_weight,',
-    '    risk_stat = excluded.risk_stat, risk_below = excluded.risk_below, risk_chance = excluded.risk_chance;',
+    '    risk_stat = excluded.risk_stat, risk_below = excluded.risk_below, risk_chance = excluded.risk_chance, min_ms = excluded.min_ms;',
   )
 }
 lines.push('delete from public.wheel_prizes;')
