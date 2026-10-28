@@ -15,8 +15,12 @@ export default function DriveGame({ trackId, car, onFinish, onQuit }) {
   const canvasRef = useRef(null)
   const input = useRef({ gas: false, brake: false, left: false, right: false })
   const [hud, setHud] = useState({ lap: 1, time: 0, speed: 0, count: 3, msg: null })
+  // the latest props, read by the running game without restarting it
+  const latest = useRef({ car, onFinish, t })
+  latest.current = { car, onFinish, t }
 
   useEffect(() => {
+    const { car, t } = latest.current
     const sim = createSim(trackId, car.stats)
     const { track, samples, tangent } = sim
     const c = sim.car
@@ -111,7 +115,7 @@ export default function DriveGame({ trackId, car, onFinish, onQuit }) {
       const time = start === null ? 0 : now - start
       setHud({ lap: c.lap, time, speed: c.v / sim.vmax, count: start === null ? 3 - Math.floor(sinceCount) : 0, msg })
       if (event === 'finish') {
-        onFinish(Math.round(time))
+        latest.current.onFinish(Math.round(time))
         return
       }
       raf = requestAnimationFrame(loop)
@@ -133,8 +137,8 @@ export default function DriveGame({ trackId, car, onFinish, onQuit }) {
       cancelAnimationFrame(raf)
       window.removeEventListener('resize', fit)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [trackId, car])
+    // only a different track or car starts the race over
+  }, [trackId, car.id])
 
   useEffect(() => {
     const down = (e) => {

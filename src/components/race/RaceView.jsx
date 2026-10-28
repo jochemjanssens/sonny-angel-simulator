@@ -79,7 +79,9 @@ export default function RaceView({ userId, inventory, wallet, notify, onChanged,
     try {
       const session = await rpc('start_time_trial', { p_track: track, p_car: car })
       setTrial(null)
-      setDriving({ session, track, car })
+      // the car as it drives this race, with your upgrades (fixed for the whole race)
+      const fig = FIGURE_BY_ID[car]
+      setDriving({ session, track, car: { ...fig, stats: tunedStats(fig, garage.upgrades[car]) } })
     } catch (err) {
       notify(t(err.message))
     }
@@ -116,15 +118,7 @@ export default function RaceView({ userId, inventory, wallet, notify, onChanged,
         </div>
       </div>
 
-      {driving && (
-        <DriveGame
-          trackId={driving.track}
-          // your upgrades make the car handle better
-          car={{ ...FIGURE_BY_ID[driving.car], stats: tunedStats(FIGURE_BY_ID[driving.car], garage.upgrades[driving.car]) }}
-          onFinish={finishDrive}
-          onQuit={() => setDriving(null)}
-        />
-      )}
+      {driving && <DriveGame trackId={driving.track} car={driving.car} onFinish={finishDrive} onQuit={() => setDriving(null)} />}
 
       <h2 className="section-title">{t('1. Pick a track')}</h2>
       <div className="choice-grid">
