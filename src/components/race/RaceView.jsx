@@ -2,34 +2,44 @@ import { useEffect, useMemo, useState } from 'react'
 import Angel from '../Angel'
 import DriveGame from './DriveGame'
 import TrialHighscores, { seconds } from './TrialHighscores'
+import Garage, { useGarage } from './Garage'
 import { FIGURE_BY_ID, SERIES } from '../../data/collections'
-import { TRACKS, TRACK_BY_ID } from '../../data/cars'
+import { TRACKS, TRACK_BY_ID, tunedStats } from '../../data/cars'
 import { rpc } from '../../lib/supabase'
 import { useT } from '../../i18n'
 
 const STAT_NAMES = { speed: 'Speed', accel: 'Acceleration', grip: 'Grip', weight: 'Weight' }
 
-// The four stat bars of a car.
-export function CarStats({ car, track }) {
+// The four stat bars of a car; with your upgrades, the tuned part of each bar
+// is shown in green with its +bonus.
+export function CarStats({ car, track, upgrade }) {
   const { t } = useT()
   const w = track ? TRACK_BY_ID[track].weights : null
+  const tuned = tunedStats(car, upgrade)
   return (
     <div className="car-stats">
-      {Object.entries(STAT_NAMES).map(([k, label]) => (
-        <div key={k} className={`car-stats__row ${w && w[k] >= 0.3 ? 'is-key' : ''}`}>
-          <span>{t(label)}</span>
-          <span className="car-stats__bar">
-            <span style={{ width: `${car.stats[k] * 10}%` }} />
-          </span>
-          <b>{car.stats[k]}</b>
-        </div>
-      ))}
+      {Object.entries(STAT_NAMES).map(([k, label]) => {
+        const plus = tuned[k] - car.stats[k]
+        return (
+          <div key={k} className={`car-stats__row ${w && w[k] >= 0.3 ? 'is-key' : ''}`}>
+            <span>{t(label)}</span>
+            <span className="car-stats__bar">
+              <span style={{ width: `${car.stats[k] * 10}%` }} />
+              {plus > 0 && <span className="car-stats__tuned" style={{ width: `${plus * 10}%` }} />}
+            </span>
+            <b>
+              {tuned[k]}
+              {plus > 0 && <small className="car-stats__plus">+{plus}</small>}
+            </b>
+          </div>
+        )
+      })}
     </div>
   )
 }
 
 // Pick one of your cars.
-function CarPicker({ cars, value, onChange, track }) {
+function CarPicker({ cars, value, onChange, track, upgrades = {} }) {
   const { t } = useT()
   if (!cars.length) return <p className="market__empty">{t('You have no cars yet. Open a Turbo Minis box first!')}</p>
   return (
@@ -38,7 +48,7 @@ function CarPicker({ cars, value, onChange, track }) {
         <button key={f.id} type="button" role="radio" aria-checked={value === f.id} className={`car-picker__item ${value === f.id ? 'is-active' : ''}`} onClick={() => onChange(f.id)}>
           <Angel figure={f} size={86} />
           <span className="car-picker__name">{f.name}</span>
-          <CarStats car={f} track={track} />
+          <CarStats car={f} track={track} upgrade={upgrades[f.id]} />
         </button>
       ))}
     </div>
@@ -47,7 +57,7 @@ function CarPicker({ cars, value, onChange, track }) {
 
 // Race day: drive one of your cars around a track yourself, against the clock.
 // The fastest time of the week on each track wins free wheel spins.
-export default function RaceView({ userId, inventory, notify, onProfile }) {
+export default function RaceView({ userId, inventory, wallet, notify, onChanged, onProfile }) {
   const { t } = useT()
   const cars = useMemo(() => SERIES.flatMap((s) => [...s.figures, s.secret]).filter((f) => inventory[f.id] > 0), [inventory])
   const [track, setTrack] = useState(TRACKS[0].id)
@@ -56,6 +66,7 @@ export default function RaceView({ userId, inventory, notify, onProfile }) {
   const [driving, setDriving] = useState(null) // { session, track, car } while you drive
   const [trial, setTrial] = useState(null) // result of your last drive: { time_ms, best, rank, new_best } or { error }
   const [hsKey, setHsKey] = useState(0)
+  const garage = useGarage(userId)
 
   useEffect(() => {
     if (car && !cars.some((c) => c.id === car)) setCar(null)
@@ -105,7 +116,15 @@ export default function RaceView({ userId, inventory, notify, onProfile }) {
         </div>
       </div>
 
-      {driving && <DriveGame trackId={driving.track} car={FIGURE_BY_ID[driving.car]} onFinish={finishDrive} onQuit={() => setDriving(null)} />}
+      {driving && (
+        <DriveGame
+          trackId={driving.track}
+          // your upgrades make the car handle better
+          car={{ ...FIGURE_BY_ID[driving.car], stats: tunedStats(FIGURE_BY_ID[driving.car], garage.upgrades[driving.car]) }}
+          onFinish={finishDrive}
+          onQuit={() => setDriving(null)}
+        />
+      )}
 
       <h2 className="section-title">{t('1. Pick a track')}</h2>
       <div className="choice-grid">
@@ -119,7 +138,7 @@ export default function RaceView({ userId, inventory, notify, onProfile }) {
       </div>
 
       <h2 className="section-title">{t('2. Pick your car')}</h2>
-      <CarPicker cars={cars} value={car} onChange={setCar} track={track} />
+      <CarPicker cars={cars} value={car} onChange={setCar} track={track} upgrades={garage.upgrades} />
 
       {selected && (
         <div className="race__actions">
@@ -146,6 +165,8 @@ export default function RaceView({ userId, inventory, notify, onProfile }) {
       )}
 
       <TrialHighscores userId={userId} track={track} refreshKey={hsKey} onProfile={onProfile} />
+
+      <Garage car={selected} garage={garage} wallet={wallet} notify={notify} onChanged={onChanged} />
     </section>
   )
 }

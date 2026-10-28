@@ -41,6 +41,9 @@ tab you drive a track yourself (top-down, `src/race/driveSim.js`, tracks in
 `src/race/trackGeometry.js`): the car's stats set the handling. The fastest time per track each
 week wins free wheel spins (3/2/1), like the times-table highscores; the server refuses times
 faster than the track allows or than the real clock (migration `023_time_trials.sql`).
+**Upgrade boxes** (in the garage on the Race tab) hold one tuning part each — engines, turbos,
+tyres, ballast, or a rare tuning kit — which you fit on one of your car models to raise its
+stats, never above 10 (migration `025_upgrades.sql`, parts in `src/data/cars.js`).
 
 ## Install as an app
 

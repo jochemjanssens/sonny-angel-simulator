@@ -145,3 +145,30 @@ export const TRACKS = [
   },
 ]
 export const TRACK_BY_ID = Object.fromEntries(TRACKS.map((t) => [t.id, t]))
+
+// Upgrade boxes: a blind box with one tuning part. Fit it on one of your car
+// models in the garage to raise its stats (never above 10). Upgrades belong to
+// you and that model; other players see the standard stats.
+export const UPGRADE_BOX_PRICE = 7.95
+export const MAX_STAT = 10
+// draw: chance out of 1000
+export const PARTS = [
+  { id: 'engine', name: 'V8 Engine', icon: '⚙️', rarity: 'common', bonus: { speed: 1 }, draw: 175 },
+  { id: 'turbo', name: 'Turbo', icon: '💨', rarity: 'common', bonus: { accel: 1 }, draw: 175 },
+  { id: 'tyres', name: 'Racing Tyres', icon: '🛞', rarity: 'common', bonus: { grip: 1 }, draw: 175 },
+  { id: 'ballast', name: 'Ballast', icon: '🧱', rarity: 'common', bonus: { weight: 1 }, draw: 175 },
+  { id: 'engine2', name: 'Super V8', icon: '🔥', rarity: 'rare', bonus: { speed: 2 }, draw: 65 },
+  { id: 'turbo2', name: 'Twin Turbo', icon: '🌪️', rarity: 'rare', bonus: { accel: 2 }, draw: 65 },
+  { id: 'tyres2', name: 'Slick Tyres', icon: '🏎️', rarity: 'rare', bonus: { grip: 2 }, draw: 60 },
+  { id: 'ballast2', name: 'Heavy Chassis', icon: '🏗️', rarity: 'rare', bonus: { weight: 2 }, draw: 60 },
+  { id: 'kit', name: 'Tuning Kit', icon: '🧰', rarity: 'legendary', bonus: { speed: 1, accel: 1, grip: 1, weight: 1 }, draw: 50 },
+]
+export const PART_BY_ID = Object.fromEntries(PARTS.map((p) => [p.id, p]))
+
+// A car's stats with your upgrades added (each capped at MAX_STAT).
+export function tunedStats(car, upgrade) {
+  if (!car.stats) return null
+  const out = {}
+  for (const k of ['speed', 'accel', 'grip', 'weight']) out[k] = Math.min(MAX_STAT, car.stats[k] + (upgrade?.[k] || 0))
+  return out
+}

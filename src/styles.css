@@ -4038,3 +4038,106 @@ h3 {
   grid-template-columns: auto auto;
   gap: 1px 6px;
 }
+
+/* ---------- garage: upgrade boxes and parts ---------- */
+
+.car-stats__bar {
+  display: flex;
+}
+.car-stats__tuned {
+  display: block;
+  height: 100%;
+  background: #2f9e44 !important;
+  border-radius: 0 99px 99px 0;
+}
+.car-stats__plus {
+  color: #2f9e44;
+  font-size: 0.62rem;
+  margin-left: 1px;
+}
+.car-stats__row {
+  grid-template-columns: 74px 1fr 26px;
+}
+.garage {
+  margin-top: 26px;
+}
+.garage__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+}
+.garage__parts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  display: grid;
+  gap: 6px;
+}
+.garage__parts li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: 12px;
+  background: var(--cream);
+  border-left: 4px solid #9fb0c8;
+}
+.garage__parts li.rarity--rare {
+  border-left-color: #6e9be8;
+}
+.garage__parts li.rarity--legendary {
+  border-left-color: #f4b73b;
+}
+.garage__part-icon {
+  font-size: 1.4rem;
+}
+.garage__part-name {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  font-weight: 800;
+}
+.garage__part-name small {
+  font-weight: 700;
+  color: var(--muted);
+}
+.upgrade-open {
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.upgrade-open__crate {
+  font-size: 6rem;
+  padding: 30px 0;
+  animation: wiggle 0.35s ease-in-out infinite;
+}
+.upgrade-open__icon {
+  font-size: 5rem;
+  animation: popIn 0.4s ease-out;
+}
+.upgrade-open__rarity {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: #e3e8ef;
+}
+.upgrade-open__rarity.rarity--rare {
+  background: #dbe7ff;
+  color: #2f5fc4;
+}
+.upgrade-open__rarity.rarity--legendary {
+  background: #fff1c2;
+  color: #a06b00;
+}
+.upgrade-open__bonus {
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+.upgrade-open.rarity--legendary {
+  box-shadow: 0 0 0 4px #f4b73b, var(--shadow);
+}
