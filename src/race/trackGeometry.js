@@ -22,6 +22,47 @@ export const TRIAL_TRACKS = {
       [1110, 420], [920, 520], [1060, 660], [720, 720], [600, 580], [400, 690], [150, 630], [270, 430], [120, 330],
     ],
   },
+  // right-angle corners between the buildings
+  city: {
+    laps: 2,
+    width: 100,
+    ground: '#A7AFBA',
+    walls: true,
+    wallColor: '#5E6673',
+    points: [
+      [150, 150], [600, 150], [640, 180], [640, 330], [680, 360], [1050, 360], [1080, 400], [1080, 650],
+      [1050, 680], [500, 680], [460, 650], [460, 520], [420, 490], [180, 490], [150, 460],
+    ],
+  },
+  // long flowing bends along the beach; the sand slows you down
+  beach: {
+    laps: 2,
+    width: 115,
+    ground: '#F2D9A0',
+    points: [[200, 250], [450, 140], [750, 200], [1000, 150], [1120, 330], [980, 480], [1050, 650], [800, 700], [560, 600], [350, 700], [150, 580], [230, 420]],
+  },
+  // packed snow: less grip, so brake before the bends
+  snow: {
+    laps: 2,
+    width: 110,
+    ground: '#EEF4F9',
+    road: '#56607A',
+    grip: 0.7,
+    points: [[160, 200], [420, 120], [620, 260], [820, 120], [1080, 220], [1000, 420], [1100, 600], [860, 690], [640, 560], [420, 690], [180, 620], [300, 420]],
+  },
+  // a zigzag of hairpins between the hedges, back up along the side
+  forest: {
+    laps: 1,
+    width: 76,
+    ground: '#4E8A3E',
+    walls: true,
+    wallColor: '#2F5E2A',
+    points: [
+      [220, 120], [1000, 120], [1090, 190], [1000, 260], [320, 260], [240, 330], [320, 400], [1000, 400], [1090, 470],
+      [1000, 540], [320, 540], [240, 610], [320, 680], [1050, 680], [1120, 760], [1020, 830], [130, 830], [60, 740],
+      [60, 200], [120, 130],
+    ],
+  },
 }
 
 // Samples the closed Catmull-Rom spline: [{ x, y, len }] with cumulative length.

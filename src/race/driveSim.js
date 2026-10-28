@@ -15,21 +15,24 @@ export function createSim(trackId, stats) {
   const half = track.width / 2
   const vmax = topSpeed(stats.speed)
   const accel = 90 + 28 * stats.accel
-  const turnRate = 2.1 + 0.13 * stats.grip
-  const gripLimit = 330 + 55 * stats.grip // how much turning at speed the tyres hold
+  // some surfaces (snow) hold the tyres less well
+  const surface = track.grip ?? 1
+  const turnRate = (2.1 + 0.13 * stats.grip) * (0.85 + 0.15 * surface)
+  const gripLimit = (330 + 55 * stats.grip) * surface // how much turning at speed the tyres hold
 
   const tangent = (i) => {
     const a = samples[(i + N) % N]
     const b = samples[(i + 1 + N) % N]
     return Math.atan2(b.y - a.y, b.x - a.x)
   }
-  const c = { x: samples[0].x, y: samples[0].y, a: tangent(0), v: 0, idx: 0, lap: 1, half: false }
+  const c = { x: samples[0].x, y: samples[0].y, a: tangent(0), v: 0, idx: 0, lap: 1, half: false, off: false }
 
   const nearest = () => {
-    // search near the last known position, so the figure-eight crossing can't confuse it
+    // search near the last known position, so a nearby part of the track can't
+    // be mistaken for this one; off the road you can't skip ahead (no cutting corners)
     let best = c.idx
     let bestD = Infinity
-    for (let k = -25; k <= 60; k++) {
+    for (let k = -25; k <= (c.off ? 8 : 60); k++) {
       const i = (c.idx + k + N) % N
       const d = (samples[i].x - c.x) ** 2 + (samples[i].y - c.y) ** 2
       if (d < bestD) {
@@ -49,7 +52,9 @@ export function createSim(trackId, stats) {
     c.v = Math.max(0, Math.min(vmax, c.v))
     const steer = (inp.right ? 1 : 0) - (inp.left ? 1 : 0)
     if (steer) {
-      c.a += steer * turnRate * Math.min(1, c.v / 110) * dt
+      // you steer more as you go faster; with the gas on you can always turn a
+      // little, so you never get stuck facing a wall
+      c.a += steer * turnRate * Math.min(1, Math.max(c.v / 110, inp.gas ? 0.4 : 0)) * dt
       // too fast for the grip: the tyres scrub off speed
       if (c.v * turnRate > gripLimit) c.v *= 1 - 1.4 * dt
     }
@@ -72,6 +77,7 @@ export function createSim(trackId, stats) {
     c.idx = i
 
     // off the road: grass slows you down, canyon walls push you back
+    c.off = d > half
     if (d > half) {
       const p = samples[i]
       if (track.walls) {

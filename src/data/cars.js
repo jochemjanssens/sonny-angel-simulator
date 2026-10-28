@@ -111,5 +111,37 @@ export const TRACKS = [
     weights: { speed: 0.15, accel: 0.3, grip: 0.55, weight: 0 },
     risk: null,
   },
+  {
+    id: 'city',
+    name: 'City Streets',
+    icon: '🏙️',
+    text: 'Right-angle corners between the buildings. Brake, turn, full gas!',
+    weights: { speed: 0.2, accel: 0.45, grip: 0.35, weight: 0 },
+    risk: null,
+  },
+  {
+    id: 'beach',
+    name: 'Beach Bay',
+    icon: '🏖️',
+    text: 'Long, flowing bends along the sea. Stay off the sand!',
+    weights: { speed: 0.4, accel: 0.3, grip: 0.3, weight: 0 },
+    risk: null,
+  },
+  {
+    id: 'snow',
+    name: 'Snowy Peaks',
+    icon: '❄️',
+    text: 'Packed snow: slippery, so brake early for the bends.',
+    weights: { speed: 0.2, accel: 0.2, grip: 0.6, weight: 0 },
+    risk: null,
+  },
+  {
+    id: 'forest',
+    name: 'Forest Hairpins',
+    icon: '🌲',
+    text: 'A zigzag of hairpins between the hedges.',
+    weights: { speed: 0.1, accel: 0.4, grip: 0.5, weight: 0 },
+    risk: null,
+  },
 ]
 export const TRACK_BY_ID = Object.fromEntries(TRACKS.map((t) => [t.id, t]))

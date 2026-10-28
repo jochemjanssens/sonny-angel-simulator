@@ -57,9 +57,9 @@ export default function DriveGame({ trackId, car, onFinish, onQuit }) {
       // the camera follows the car
       ctx.setTransform(s, 0, 0, s, W / 2 - c.x * s, H / 2 - c.y * s)
 
-      if (track.walls) road(track.width + 46, '#7A4426')
+      if (track.walls) road(track.width + 46, track.wallColor || '#7A4426')
       road(track.width + 10, '#FFFFFF')
-      road(track.width, '#3A4256')
+      road(track.width, track.road || '#3A4256')
       road(3, '#FFD34D', [18, 16])
 
       // start / finish line

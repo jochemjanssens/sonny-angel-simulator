@@ -513,4 +513,12 @@ export default {
   "Pick a track and one of your cars, and drive it yourself. The fastest time of the week on each track wins free wheel spins.": "Kies een baan en een van je auto's en rijd zelf. De snelste tijd van de week op elke baan wint gratis draaien aan het rad.",
   "A wide, fast oval: top speed and a quick start win.": "Een breed, snel ovaal: topsnelheid en een snelle start winnen.",
   "Narrow bends between canyon walls. Grip is king.": "Smalle bochten tussen de rotswanden. Grip is koning.",
+  "City Streets": "Stadsstraten",
+  "Beach Bay": "Strandbaai",
+  "Snowy Peaks": "Besneeuwde Toppen",
+  "Forest Hairpins": "Bos-haarspelden",
+  "Right-angle corners between the buildings. Brake, turn, full gas!": "Haakse bochten tussen de gebouwen. Remmen, sturen, vol gas!",
+  "Long, flowing bends along the sea. Stay off the sand!": "Lange, vloeiende bochten langs de zee. Blijf uit het zand!",
+  "Packed snow: slippery, so brake early for the bends.": "Aangestampte sneeuw: glad, dus rem op tijd voor de bochten.",
+  "A zigzag of hairpins between the hedges.": "Een zigzag van haarspeldbochten tussen de heggen.",
 }
