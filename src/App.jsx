@@ -50,6 +50,10 @@ function Game({ userId }) {
   const [profileFrom, setProfileFrom] = useState('market')
   const [seriesId, setSeriesId] = useState(null)
   const [opening, setOpening] = useState(null)
+  // While a box is being opened, the screens behind it keep showing the shelf as
+  // it was before (the live update can arrive before the animation starts), so
+  // the new figure can't be spotted before its reveal.
+  const [frozen, setFrozen] = useState(null)
   const [figureId, setFigureId] = useState(null)
   const [toast, setToast] = useState(null)
   const [localSave] = useState(readLocalSave)
@@ -100,15 +104,21 @@ function Game({ userId }) {
 
   const buy = async (series) => {
     if (state.wallet < series.price) return notify(t('Not enough budget for this box.'))
+    setFrozen({ inventory: state.inventory, firstSeen: state.firstSeen })
     try {
       const data = await rpc('open_box', { p_series: series.id })
       const row = Array.isArray(data) ? data[0] : data
       setOpening({ seriesId: series.id, figureId: row.fig_id, isNew: row.is_new, key: Date.now() })
       game.refresh()
     } catch (err) {
+      setFrozen(null)
       notify(t(err.message))
     }
   }
+
+  // what the shelf, collections and market screens show
+  const inventory = frozen?.inventory ?? state.inventory
+  const firstSeen = frozen?.firstSeen ?? state.firstSeen
 
   const claim = () => act('claim_daily', {}, t('+{amount} daily allowance added!', { amount: euro(DAILY_ALLOWANCE) }))
 
@@ -135,7 +145,7 @@ function Game({ userId }) {
     window.scrollTo(0, 0)
   }
 
-  const ownedUnique = FIGURES.filter((f) => !f.secret && state.inventory[f.id]).length
+  const ownedUnique = FIGURES.filter((f) => !f.secret && inventory[f.id]).length
   const totalUnique = FIGURES.filter((f) => !f.secret).length
   const series = seriesId && SERIES_BY_ID[seriesId]
 
@@ -166,8 +176,8 @@ function Game({ userId }) {
           (series ? (
             <SeriesDetail
               series={series}
-              inventory={state.inventory}
-              seen={state.firstSeen}
+              inventory={inventory}
+              seen={firstSeen}
               listed={market.listedFigureIds}
               wallet={state.wallet}
               onBack={() => setSeriesId(null)}
@@ -175,11 +185,11 @@ function Game({ userId }) {
               onFigure={setFigureId}
             />
           ) : (
-            <SeriesGrid inventory={state.inventory} onSelect={setSeriesId} />
+            <SeriesGrid inventory={inventory} onSelect={setSeriesId} />
           ))}
         {tab === 'shelf' && (
           <ShelfView
-            inventory={state.inventory}
+            inventory={inventory}
             stats={state.stats}
             onFigure={setFigureId}
             onGoShop={() => setTab('collections')}
@@ -187,13 +197,13 @@ function Game({ userId }) {
             onSellDupes={sellDuplicates}
           />
         )}
-        {tab === 'market' && <MarketView market={market} wallet={state.wallet} inventory={state.inventory} act={act} onProfile={openProfile} />}
+        {tab === 'market' && <MarketView market={market} wallet={state.wallet} inventory={inventory} act={act} onProfile={openProfile} />}
         {tab === 'profile' && profileId && (
           <ProfileView
             key={profileId}
             userId={profileId}
             meId={userId}
-            myInventory={state.inventory}
+            myInventory={inventory}
             listings={market.active}
             onBack={() => setTab(profileFrom)}
             onGoMarket={() => setTab('market')}
@@ -215,7 +225,11 @@ function Game({ userId }) {
           isNew={opening.isNew}
           canAffordAnother={state.wallet >= SERIES_BY_ID[opening.seriesId].price}
           onAgain={() => buy(SERIES_BY_ID[opening.seriesId])}
-          onClose={() => setOpening(null)}
+          onReveal={() => setFrozen(null)}
+          onClose={() => {
+            setOpening(null)
+            setFrozen(null)
+          }}
         />
       )}
 

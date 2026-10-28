@@ -10,7 +10,7 @@ import { useT } from '../i18n'
 const TIMINGS = { shake: 1000, lid: 900, tear: 750 }
 const NEXT = { shake: 'lid', lid: 'foil', tear: 'reveal' }
 
-export default function BlindBoxOpener({ series, figure, isNew, canAffordAnother, onAgain, onClose }) {
+export default function BlindBoxOpener({ series, figure, isNew, canAffordAnother, onAgain, onClose, onReveal }) {
   const [phase, setPhase] = useState('box')
   const { t } = useT()
 
@@ -19,6 +19,11 @@ export default function BlindBoxOpener({ series, figure, isNew, canAffordAnother
     const t = setTimeout(() => setPhase(NEXT[phase]), TIMINGS[phase])
     return () => clearTimeout(t)
   }, [phase])
+
+  // the rest of the app may show the new figure once it's revealed here
+  useEffect(() => {
+    if (phase === 'reveal') onReveal?.()
+  }, [phase, onReveal])
 
   useEffect(() => {
     const onKey = (e) => {
