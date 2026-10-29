@@ -19,17 +19,19 @@ export function CarStats({ car, track, upgrade }) {
   return (
     <div className="car-stats">
       {Object.entries(STAT_NAMES).map(([k, label]) => {
-        const plus = tuned[k] - car.stats[k]
+        const diff = tuned[k] - car.stats[k]
         return (
           <div key={k} className={`car-stats__row ${w && w[k] >= 0.3 ? 'is-key' : ''}`}>
             <span>{t(label)}</span>
             <span className="car-stats__bar">
-              <span style={{ width: `${car.stats[k] * 10}%` }} />
-              {plus > 0 && <span className="car-stats__tuned" style={{ width: `${plus * 10}%` }} />}
+              <span style={{ width: `${Math.min(car.stats[k], tuned[k]) * 10}%` }} />
+              {diff > 0 && <span className="car-stats__tuned" style={{ width: `${diff * 10}%` }} />}
+              {/* lost weight: a light, striped piece where the weight used to be */}
+              {diff < 0 && <span className="car-stats__lost" style={{ width: `${-diff * 10}%` }} />}
             </span>
             <b>
               {tuned[k]}
-              {plus > 0 && <small className="car-stats__plus">+{plus}</small>}
+              {diff !== 0 && <small className="car-stats__plus">{diff > 0 ? `+${diff}` : `−${-diff}`}</small>}
             </b>
           </div>
         )

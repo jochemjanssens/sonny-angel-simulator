@@ -1193,8 +1193,9 @@ begin
   return part;
 end $$;
 
--- Fits a part on one of your car models. Stats never go above 10; a part that
--- wouldn't add anything is refused (and stays in your garage).
+-- Fits a part on one of your car models. Speed, acceleration and grip go up to
+-- at most 10; the light parts lower the weight, to at least 1. A part that
+-- wouldn't change anything is refused (and stays in your garage).
 create or replace function public.apply_upgrade(p_part text, p_car text) returns jsonb
 language plpgsql security definer set search_path = public as $$
 declare u uuid := public._uid();
@@ -1208,11 +1209,12 @@ begin
   select * into pt from public.upgrade_parts where id = p_part;
   if not found then raise exception 'Unknown part'; end if;
   select * into cur from public.car_upgrades where user_id = u and figure_id = p_car for update;
-  -- new bonus per stat, capped so the total stays at most 10
+  -- new bonus per stat: up to 10 for a positive part, down to 1 for a negative one
   s := least(coalesce(cur.speed, 0) + pt.speed, 10 - f.speed);
   a := least(coalesce(cur.accel, 0) + pt.accel, 10 - f.accel);
   g := least(coalesce(cur.grip, 0) + pt.grip, 10 - f.grip);
-  w := least(coalesce(cur.weight, 0) + pt.weight, 10 - f.weight);
+  w := case when pt.weight < 0 then greatest(coalesce(cur.weight, 0) + pt.weight, 1 - f.weight)
+            else least(coalesce(cur.weight, 0) + pt.weight, 10 - f.weight) end;
   if s = coalesce(cur.speed, 0) and a = coalesce(cur.accel, 0) and g = coalesce(cur.grip, 0) and w = coalesce(cur.weight, 0) then
     raise exception 'This car is already maxed out for that part';
   end if;

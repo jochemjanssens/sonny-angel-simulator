@@ -4177,3 +4177,10 @@ h3 {
   color: var(--muted);
   font-weight: 700;
 }
+
+.car-stats__lost {
+  display: block;
+  height: 100%;
+  border-radius: 0 99px 99px 0;
+  background: repeating-linear-gradient(45deg, #b8e6c2 0 3px, transparent 3px 6px) !important;
+}

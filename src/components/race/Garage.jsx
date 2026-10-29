@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import Confetti from '../Confetti'
-import { MAX_STAT, PARTS, PART_BY_ID, UPGRADE_BOX_PRICE } from '../../data/cars'
+import { MAX_STAT, MIN_STAT, PARTS, PART_BY_ID, UPGRADE_BOX_PRICE } from '../../data/cars'
 import { euro } from '../../data/collections'
 import { rpc, supabase } from '../../lib/supabase'
 import { useT } from '../../i18n'
@@ -28,13 +28,17 @@ export function useGarage(userId) {
 
 const bonusText = (part) =>
   Object.entries(part.bonus)
-    .map(([k, v]) => `${STAT_ICONS[k]} +${v}`)
+    .map(([k, v]) => `${STAT_ICONS[k]} ${v > 0 ? '+' : '−'}${Math.abs(v)}`)
     .join(' ')
 
-// How much a part would actually add to a car (stats stop at 10).
+// How much a part would actually change on a car: stats stop at 10, and weight
+// (which the light parts lower) stops at 1.
 export function gain(car, upgrade, part) {
   let total = 0
-  for (const [k, v] of Object.entries(part.bonus)) total += Math.max(0, Math.min(v, MAX_STAT - car.stats[k] - (upgrade?.[k] || 0)))
+  for (const [k, v] of Object.entries(part.bonus)) {
+    const now = car.stats[k] + (upgrade?.[k] || 0)
+    total += v > 0 ? Math.max(0, Math.min(v, MAX_STAT - now)) : Math.max(0, Math.min(-v, now - MIN_STAT))
+  }
   return total
 }
 
@@ -120,7 +124,7 @@ export default function Garage({ car, garage, wallet, notify, onChanged }) {
       <div className="garage__grid">
         <div className="race__box">
           <h3>{t('Upgrade box')}</h3>
-          <p>{t('One tuning part per box: engines, turbos, tyres or ballast. Rare parts give +2, a Tuning Kit +1 on everything.')}</p>
+          <p>{t('One tuning part per box: engines, turbos, tyres or lighter bodies. Rare parts count double, a Tuning Kit improves everything.')}</p>
           <button className="btn btn--primary" onClick={buy} disabled={busy || wallet < UPGRADE_BOX_PRICE}>
             📦 {t('Open an upgrade box · {price}', { price: euro(UPGRADE_BOX_PRICE) })}
           </button>

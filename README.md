@@ -42,8 +42,9 @@ tab you drive a track yourself (top-down, `src/race/driveSim.js`, tracks in
 week wins free wheel spins (3/2/1), like the times-table highscores; the server refuses times
 faster than the track allows or than the real clock (migration `023_time_trials.sql`).
 **Upgrade boxes** (in the garage on the Race tab) hold one tuning part each — engines, turbos,
-tyres, ballast, or a rare tuning kit — which you fit on one of your car models to raise its
-stats, never above 10 (migration `025_upgrades.sql`, parts in `src/data/cars.js`).
+tyres, lighter bodies, or a rare tuning kit — which you fit on one of your car models: more
+speed, acceleration or grip (never above 10) or less weight (never below 1; heavier cars are
+slower). Migrations `025_upgrades.sql` and `027_lighter_parts.sql`, parts in `src/data/cars.js`.
 
 ## Install as an app
 

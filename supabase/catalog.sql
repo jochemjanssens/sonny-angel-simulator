@@ -996,7 +996,7 @@ insert into public.upgrade_parts (id, speed, accel, grip, weight, draw) values (
   on conflict (id) do update set speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, draw = excluded.draw;
 insert into public.upgrade_parts (id, speed, accel, grip, weight, draw) values ('tyres', 0, 0, 1, 0, 175)
   on conflict (id) do update set speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, draw = excluded.draw;
-insert into public.upgrade_parts (id, speed, accel, grip, weight, draw) values ('ballast', 0, 0, 0, 1, 175)
+insert into public.upgrade_parts (id, speed, accel, grip, weight, draw) values ('ballast', 0, 0, 0, -1, 175)
   on conflict (id) do update set speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, draw = excluded.draw;
 insert into public.upgrade_parts (id, speed, accel, grip, weight, draw) values ('engine2', 2, 0, 0, 0, 65)
   on conflict (id) do update set speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, draw = excluded.draw;
@@ -1004,9 +1004,9 @@ insert into public.upgrade_parts (id, speed, accel, grip, weight, draw) values (
   on conflict (id) do update set speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, draw = excluded.draw;
 insert into public.upgrade_parts (id, speed, accel, grip, weight, draw) values ('tyres2', 0, 0, 2, 0, 60)
   on conflict (id) do update set speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, draw = excluded.draw;
-insert into public.upgrade_parts (id, speed, accel, grip, weight, draw) values ('ballast2', 0, 0, 0, 2, 60)
+insert into public.upgrade_parts (id, speed, accel, grip, weight, draw) values ('ballast2', 0, 0, 0, -2, 60)
   on conflict (id) do update set speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, draw = excluded.draw;
-insert into public.upgrade_parts (id, speed, accel, grip, weight, draw) values ('kit', 1, 1, 1, 1, 50)
+insert into public.upgrade_parts (id, speed, accel, grip, weight, draw) values ('kit', 1, 1, 1, -1, 50)
   on conflict (id) do update set speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, draw = excluded.draw;
 delete from public.wheel_prizes;
 insert into public.wheel_prizes (key, kind, amount, count, weight, sort) values ('cash5', 'cash', 5, null, 300, 0);
