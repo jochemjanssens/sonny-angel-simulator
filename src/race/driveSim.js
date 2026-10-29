@@ -2,7 +2,8 @@
 // also run in tests. The car's stats set how it handles:
 //   speed  → top speed           accel  → how fast it pulls away
 //   grip   → how fast it can corner without scrubbing off speed
-//   weight → how much grass and walls slow it down
+//   weight → heavier cars pull away slower and have a slightly lower top
+//            speed, but lose less on grass and against walls
 import { TRIAL_TRACKS, sampleTrack, topSpeed } from './trackGeometry.js'
 
 // an angle difference brought back to -π…π
@@ -13,8 +14,10 @@ export function createSim(trackId, stats) {
   const { samples, total } = sampleTrack(track.points)
   const N = samples.length
   const half = track.width / 2
-  const vmax = topSpeed(stats.speed)
-  const accel = 90 + 28 * stats.accel
+  // weight 1 is the lightest: every point more costs 1.5% top speed and 4% pull
+  const heavy = stats.weight - 1
+  const vmax = topSpeed(stats.speed) * (1 - 0.015 * heavy)
+  const accel = (90 + 28 * stats.accel) * (1 - 0.04 * heavy)
   // some surfaces (snow) hold the tyres less well
   const surface = track.grip ?? 1
   const turnRate = (2.1 + 0.13 * stats.grip) * (0.85 + 0.15 * surface)
