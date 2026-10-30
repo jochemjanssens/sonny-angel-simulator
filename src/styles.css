@@ -2727,11 +2727,33 @@ h3 {
   font-size: 0.85rem;
   white-space: nowrap;
   margin-bottom: 8px;
+  /* as wide as the screen allows, even when the board is narrower */
+  width: min(calc(100vw - 32px), 400px);
+  max-width: 400px;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
 }
 .tet__stats strong {
   color: var(--red);
   font-family: var(--font-display);
   font-size: 1.2rem;
+}
+.tet__pause {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  padding: 0;
+  border: 2px solid var(--line);
+  border-radius: 50%;
+  background: var(--paper);
+  font-size: 0.8rem;
+  line-height: 1;
+}
+.tet__overlay--paused {
+  /* hides the board, so a pause can't be used to think ahead */
+  background: var(--paper);
+  z-index: 1;
 }
 .tet__board {
   position: relative;
@@ -2741,7 +2763,9 @@ h3 {
   border: 3px solid var(--ink);
   border-radius: 12px;
   padding: 3px;
-  touch-action: manipulation;
+  touch-action: none; /* swipes move the piece, not the page */
+  user-select: none;
+  -webkit-user-select: none;
 }
 .tet__cell {
   aspect-ratio: 1;
@@ -2788,7 +2812,9 @@ h3 {
   font-size: 1.4rem;
   padding: 12px 0;
   box-shadow: 0 4px 0 #f1bccb;
-  touch-action: manipulation;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 .tet__btn:active {
   transform: translateY(2px);

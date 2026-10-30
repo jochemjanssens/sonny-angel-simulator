@@ -48,13 +48,14 @@ export function fits(board, piece) {
   return cellsOf(piece).every(([x, y]) => x >= 0 && x < COLS && y < ROWS && (y < 0 || !board[y][x]))
 }
 
-export function rotate(board, piece) {
+// Rotates a piece: dir 1 is clockwise, -1 counter-clockwise.
+export function rotate(board, piece, dir = 1) {
   if (piece.type === 'O') return piece
   const size = piece.type === 'I' ? 4 : 3
-  const cells = piece.cells.map(([x, y]) => [size - 1 - y, x])
-  // try a few sideways nudges so pieces can rotate next to a wall
-  for (const dx of [0, -1, 1, -2, 2]) {
-    const next = { ...piece, cells, x: piece.x + dx }
+  const cells = piece.cells.map(([x, y]) => (dir > 0 ? [size - 1 - y, x] : [y, size - 1 - x]))
+  // try a few nudges so pieces can rotate next to a wall, or on the floor
+  for (const [dx, dy] of [[0, 0], [-1, 0], [1, 0], [-2, 0], [2, 0], [0, -1], [-1, -1], [1, -1], [0, -2]]) {
+    const next = { ...piece, cells, x: piece.x + dx, y: piece.y + dy }
     if (fits(board, next)) return next
   }
   return piece

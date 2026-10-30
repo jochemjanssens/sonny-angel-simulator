@@ -557,4 +557,8 @@ export default {
   "Lightweight Body": "Lichtgewicht carrosserie",
   "Carbon Chassis": "Carbon chassis",
   "One tuning part per box: engines, turbos, tyres or lighter bodies. Rare parts count double, a Tuning Kit improves everything.": "Eén tuningonderdeel per doos: motoren, turbo's, banden of lichtere carrosserieën. Zeldzame onderdelen tellen dubbel, een Tuningkit verbetert alles.",
+  "Pause": "Pauze",
+  "Resume": "Verder",
+  "Paused": "Gepauzeerd",
+  "Arrow keys or WASD to move, ↑ or X to rotate (Z for the other way), space to drop, P to pause.": "Pijltjes of WASD om te bewegen, ↑ of X om te draaien (Z de andere kant op), spatie om te laten vallen, P voor pauze.",
 }
