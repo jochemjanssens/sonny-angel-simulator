@@ -979,6 +979,8 @@ create table if not exists public.time_trials (
   time_ms int
 );
 alter table public.time_trials add column if not exists reward numeric(10, 2) not null default 0;
+-- the time of each lap, in ms
+alter table public.time_trials add column if not exists laps int[];
 -- medal times per track (set by catalog.sql)
 alter table public.tracks add column if not exists gold_ms int not null default 15000;
 alter table public.tracks add column if not exists silver_ms int not null default 20000;
@@ -1051,7 +1053,8 @@ end $$;
 -- faster than the time that really passed since the run was started. Each run
 -- earns a medal (by the track's medal times) and a reward;
 -- the first 10 runs of the day (UTC) pay out.
-create or replace function public.finish_time_trial(p_session uuid, p_time_ms int) returns jsonb
+drop function if exists public.finish_time_trial(uuid, int);
+create or replace function public.finish_time_trial(p_session uuid, p_time_ms int, p_laps int[] default null) returns jsonb
 language plpgsql security definer set search_path = public as $$
 declare u uuid := public._uid();
   s public.time_trials;
@@ -1064,6 +1067,7 @@ declare u uuid := public._uid();
   medal text;
   pay numeric;
   paid int;
+  good_laps boolean;
 begin
   perform public._settle_trial_weeks();
   select * into s from public.time_trials where id = p_session and user_id = u for update;
@@ -1085,7 +1089,10 @@ begin
   select count(*) into paid from public.time_trials t
     where t.user_id = u and t.reward > 0 and t.finished_at >= (now() at time zone 'utc')::date;
   pay := case when paid >= 10 then 0 else case medal when 'gold' then 3 when 'silver' then 2 when 'bronze' then 1 else 0.5 end end;
-  update public.time_trials set finished_at = now(), time_ms = p_time_ms, reward = pay where id = p_session;
+  -- lap times only count if they add up to the total
+  good_laps := coalesce(p_laps <> '{}' and (select bool_and(l > 0) and sum(l) = p_time_ms from unnest(p_laps) l), false);
+  update public.time_trials set finished_at = now(), time_ms = p_time_ms, reward = pay,
+    laps = case when good_laps then p_laps end where id = p_session;
   if pay > 0 then
     update public.players set wallet = wallet + pay where id = u;
   end if;
@@ -1114,14 +1121,14 @@ declare u uuid := public._uid();
 begin
   perform public._settle_trial_weeks();
   with best as (
-    select distinct on (user_id) user_id, time_ms, car, finished_at as at
+    select distinct on (user_id) user_id, time_ms, car, laps, finished_at as at
     from public.time_trials
     where track_id = p_track and time_ms is not null and finished_at >= wk
     order by user_id, time_ms, finished_at
   ), ranked as (
     select * from best order by time_ms, at limit 10
   )
-  select coalesce(jsonb_agg(jsonb_build_object('user_id', r.user_id, 'username', pr.username, 'time_ms', r.time_ms, 'car', r.car) order by r.time_ms, r.at), '[]')
+  select coalesce(jsonb_agg(jsonb_build_object('user_id', r.user_id, 'username', pr.username, 'time_ms', r.time_ms, 'car', r.car, 'laps', r.laps) order by r.time_ms, r.at), '[]')
     into top
   from ranked r left join public.profiles pr on pr.id = r.user_id;
   select min(time_ms) into mine from public.time_trials
@@ -1247,7 +1254,7 @@ grant execute on function
   public.start_time_trial(text, text),
   public.open_upgrade_box(),
   public.apply_upgrade(text, text),
-  public.finish_time_trial(uuid, int),
+  public.finish_time_trial(uuid, int, int[]),
   public.trial_highscores(text),
   public.open_box(text),
   public.import_local_save(numeric, jsonb, jsonb),

@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { createSim } from '../../race/driveSim'
 import { TRIAL_TRACKS } from '../../race/trackGeometry'
+import { MEDALS } from '../../data/cars'
+import { euro } from '../../data/collections'
 import { useT } from '../../i18n'
 
 // Drive-yourself time trial: a top-down race around a track with the car you
@@ -10,14 +12,22 @@ import { useT } from '../../i18n'
 const KEYS = { ArrowUp: 'gas', KeyW: 'gas', ArrowDown: 'brake', KeyS: 'brake', ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right' }
 const VIEW = 430 // world units across the shortest side of the screen
 
-export default function DriveGame({ trackId, car, onFinish, onQuit }) {
+const secs = (ms) => `${(ms / 1000).toFixed(2)}s`
+// a gap to first place: +0.34s behind, −0.12s ahead
+const gapText = (ms) => `${ms > 0 ? '+' : ms < 0 ? '−' : '±'}${(Math.abs(ms) / 1000).toFixed(2)}s`
+
+// leader: first place on this track { name, time_ms, laps, isMe }, or null.
+// result: what the server said about your finished race (medal, reward, rank).
+export default function DriveGame({ trackId, car, leader, result, onFinish, onQuit }) {
   const { t } = useT()
   const canvasRef = useRef(null)
   const input = useRef({ gas: false, brake: false, left: false, right: false })
-  const [hud, setHud] = useState({ lap: 1, time: 0, speed: 0, count: 3, msg: null })
+  const [hud, setHud] = useState({ lap: 1, time: 0, lapTime: 0, speed: 0, count: 3, msg: null })
+  const [laps, setLaps] = useState([]) // finished laps: { ms, gap } (gap to first place at that line)
+  const [finish, setFinish] = useState(null) // { time, gap } once you're over the line
   // the latest props, read by the running game without restarting it
-  const latest = useRef({ car, onFinish, t })
-  latest.current = { car, onFinish, t }
+  const latest = useRef({ car, leader, onFinish, t })
+  latest.current = { car, leader, onFinish, t }
 
   useEffect(() => {
     const { car, t } = latest.current
@@ -27,13 +37,13 @@ export default function DriveGame({ trackId, car, onFinish, onQuit }) {
     const s0 = samples[0]
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d')
-    const MESSAGES = { lap: () => t('Lap {n}!', { n: c.lap }) }
     let start = null // when the GO! light went on
     let raf
     let last = performance.now()
     const countFrom = last
     let msg = null
     let msgUntil = 0
+    const splits = [] // the time of each finished lap
     const say = (text, now, ms = 1200) => {
       msg = text
       msgUntil = now + ms
@@ -114,13 +124,24 @@ export default function DriveGame({ trackId, car, onFinish, onQuit }) {
         say(t('GO!'), now, 700)
       }
       const event = start === null ? null : sim.step(dt, input.current)
-      if (event && MESSAGES[event]) say(MESSAGES[event](), now)
+      const time = start === null ? 0 : Math.round(now - start)
+      const lapStart = splits.reduce((a, b) => a + b, 0)
+      if (event === 'lap' || event === 'finish') {
+        // over the line: this lap's time, and the gap to first place at this point
+        const { leader } = latest.current
+        const lapMs = time - lapStart
+        splits.push(lapMs)
+        const leaderAt = event === 'finish' ? leader?.time_ms : leader?.laps?.length >= splits.length ? leader.laps.slice(0, splits.length).reduce((a, b) => a + b, 0) : null
+        const gap = leaderAt ? time - leaderAt : null
+        setLaps((l) => [...l, { ms: lapMs, gap }])
+        if (event === 'lap') say(`${t('Lap {n}', { n: splits.length })}: ${secs(lapMs)}${gap !== null ? ` · ${gapText(gap)}` : ''}`, now, 2500)
+        else setFinish({ time, gap })
+      }
       if (msg && now > msgUntil) msg = null
       draw()
-      const time = start === null ? 0 : now - start
-      setHud({ lap: c.lap, time, speed: c.v / sim.vmax, count: start === null ? 3 - Math.floor(sinceCount) : 0, msg })
+      setHud({ lap: c.lap, time, lapTime: time - splits.reduce((a, b) => a + b, 0), speed: c.v / sim.vmax, count: start === null ? 3 - Math.floor(sinceCount) : 0, msg })
       if (event === 'finish') {
-        latest.current.onFinish(Math.round(time))
+        latest.current.onFinish(time, splits)
         return
       }
       raf = requestAnimationFrame(loop)
@@ -174,25 +195,83 @@ export default function DriveGame({ trackId, car, onFinish, onQuit }) {
     onContextMenu: (e) => e.preventDefault(),
   })
 
-  const laps = TRIAL_TRACKS[trackId].laps
+  const totalLaps = TRIAL_TRACKS[trackId].laps
   return (
     <div className="drive">
       <div className="drive__screen">
         <canvas ref={canvasRef} className="drive__canvas" />
         <div className="drive__hud">
           <span>
-            {t('Lap')} {Math.min(hud.lap, laps)}/{laps}
+            {t('Lap')} {Math.min(hud.lap, totalLaps)}/{totalLaps}
           </span>
           <strong>{(hud.time / 1000).toFixed(2)}s</strong>
           <span className="drive__speed">
             <span style={{ width: `${Math.round(hud.speed * 100)}%` }} />
           </span>
         </div>
+        {laps.length > 0 && !finish && (
+          <ol className="drive__laps">
+            {laps.map((l, i) => (
+              <li key={i}>
+                {t('Lap {n}', { n: i + 1 })} <b>{secs(l.ms)}</b>
+                {l.gap !== null && <span className={l.gap > 0 ? 'is-behind' : 'is-ahead'}>{gapText(l.gap)}</span>}
+              </li>
+            ))}
+            <li className="is-now">
+              {t('Lap {n}', { n: laps.length + 1 })} <b>{secs(hud.lapTime)}</b>
+            </li>
+          </ol>
+        )}
         {hud.count > 0 && <div className="drive__count">{hud.count}</div>}
-        {hud.msg && hud.count <= 0 && <div className="drive__msg">{hud.msg}</div>}
-        <button className="drive__quit" onClick={onQuit} aria-label={t('Stop')}>
-          ×
-        </button>
+        {hud.msg && hud.count <= 0 && !finish && <div className="drive__msg">{hud.msg}</div>}
+        {!finish && (
+          <button className="drive__quit" onClick={onQuit} aria-label={t('Stop')}>
+            ×
+          </button>
+        )}
+        {finish && (
+          <div className="drive__finish">
+            <div className="drive__finish-card">
+              <h2>{t('Finished!')}</h2>
+              <p className="drive__finish-time">{secs(finish.time)}</p>
+              {!leader ? (
+                <p className="drive__gap is-ahead">{t('First time on the board this week!')}</p>
+              ) : finish.gap > 0 ? (
+                <p className="drive__gap is-behind">
+                  {leader.isMe ? t('{gap} behind your own record', { gap: secs(finish.gap) }) : t('{gap} behind first place (@{user})', { gap: secs(finish.gap), user: leader.name })}
+                </p>
+              ) : (
+                <p className="drive__gap is-ahead">
+                  {leader.isMe ? t('{gap} faster than your own record!', { gap: secs(-finish.gap) }) : t('{gap} faster than @{user}: you are first!', { gap: secs(-finish.gap), user: leader.name })}
+                </p>
+              )}
+              <table className="drive__table">
+                <tbody>
+                  {laps.map((l, i) => (
+                    <tr key={i} className={laps.length > 1 && l.ms === Math.min(...laps.map((x) => x.ms)) ? 'is-best' : ''}>
+                      <td>{t('Lap {n}', { n: i + 1 })}</td>
+                      <td>{secs(l.ms)}</td>
+                      <td className={l.gap === null ? '' : l.gap > 0 ? 'is-behind' : 'is-ahead'}>{l.gap === null ? '' : gapText(l.gap)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {!result ? (
+                <p className="drive__saving">{t('Saving your time…')}</p>
+              ) : result.error ? (
+                <p className="drive__saving is-error">{t(result.error)}</p>
+              ) : (
+                <p className="drive__prize">
+                  {MEDALS.find((m) => m.id === result.medal)?.icon || '🏁'}{' '}
+                  {Number(result.reward) > 0 ? `+${euro(Number(result.reward))}` : t('No more prize money today')} · {t('#{rank} this week', { rank: result.rank })}
+                </p>
+              )}
+              <button className="btn btn--primary" onClick={onQuit}>
+                {t('Continue')}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
       <div className="drive__controls">
         <span className="drive__pair">

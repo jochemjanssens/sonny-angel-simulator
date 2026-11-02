@@ -80,23 +80,31 @@ export default function RaceView({ userId, inventory, wallet, notify, onChanged,
     setBusy(true)
     try {
       const session = await rpc('start_time_trial', { p_track: track, p_car: car })
+      // first place right now, to measure yourself against during the race
+      const top = await rpc('trial_highscores', { p_track: track }).then((d) => d.top[0], () => null)
+      const leader = top ? { name: top.username, time_ms: top.time_ms, laps: top.laps, isMe: top.user_id === userId } : null
       setTrial(null)
       // the car as it drives this race, with your upgrades (fixed for the whole race)
       const fig = FIGURE_BY_ID[car]
-      setDriving({ session, track, car: { ...fig, stats: tunedStats(fig, garage.upgrades[car]) } })
+      setDriving({ session, track, leader, car: { ...fig, stats: tunedStats(fig, garage.upgrades[car]) } })
     } catch (err) {
       notify(t(err.message))
     }
     setBusy(false)
   }
 
-  const finishDrive = async (ms) => {
+  // the finish screen stays up (it shows the result) until you close it
+  const finishDrive = async (ms, laps) => {
     const run = driving
-    setDriving(null)
+    const args = { p_session: run.session, p_time_ms: ms, p_laps: laps }
     // save the time (one retry if the connection hiccups)
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
-        const r = await rpc('finish_time_trial', { p_session: run.session, p_time_ms: ms })
+        // until the lap-times SQL has been run the server doesn't know p_laps yet
+        const r = await rpc('finish_time_trial', args).catch((err) => {
+          if (!/could not find the function/i.test(err.message)) throw err
+          return rpc('finish_time_trial', { p_session: run.session, p_time_ms: ms })
+        })
         setTrial({ ...r, track: run.track })
         setHsKey((k) => k + 1)
         onChanged() // the reward went into your budget
@@ -130,7 +138,7 @@ export default function RaceView({ userId, inventory, wallet, notify, onChanged,
         </div>
       </div>
 
-      {driving && <DriveGame trackId={driving.track} car={driving.car} onFinish={finishDrive} onQuit={() => setDriving(null)} />}
+      {driving && <DriveGame trackId={driving.track} car={driving.car} leader={driving.leader} result={trial} onFinish={finishDrive} onQuit={() => setDriving(null)} />}
 
       <h2 className="section-title">{t('1. Pick a track')}</h2>
       <div className="choice-grid">

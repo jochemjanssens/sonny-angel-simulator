@@ -40,7 +40,9 @@ The third collection: race cars in blind boxes (`src/data/cars.js`, drawn by
 tab you drive a track yourself (top-down, `src/race/driveSim.js`, tracks in
 `src/race/trackGeometry.js`): the car's stats set the handling. The fastest time per track each
 week wins free wheel spins (3/2/1), like the times-table highscores; the server refuses times
-faster than the track allows or than the real clock (migration `023_time_trials.sql`).
+faster than the track allows or than the real clock (migration `023_time_trials.sql`). Lap times are
+saved with each race, so you see your gap to first place at every lap and on the finish screen
+(migration `028_lap_times.sql`).
 **Upgrade boxes** (in the garage on the Race tab) hold one tuning part each — engines, turbos,
 tyres, lighter bodies, or a rare tuning kit — which you fit on one of your car models: more
 speed, acceleration or grip (never above 10) or less weight (never below 1; heavier cars are
