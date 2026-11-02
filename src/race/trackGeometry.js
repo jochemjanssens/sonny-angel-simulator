@@ -96,9 +96,9 @@ export function sampleTrack(points, perSegment = 24) {
 export const topSpeed = (speed) => 200 + 22 * speed
 
 // The fastest time anyone could possibly drive (a perfect lap at the highest top
-// speed, with a margin): the server refuses times below this.
+// speed, which is 12 on a secret car, with a margin): the server refuses times below this.
 export function minTimeMs(trackId) {
   const tr = TRIAL_TRACKS[trackId]
   const { total } = sampleTrack(tr.points)
-  return Math.floor(((total * tr.laps) / topSpeed(10)) * 1000 * 0.8)
+  return Math.floor(((total * tr.laps) / topSpeed(12)) * 1000 * 0.8)
 }

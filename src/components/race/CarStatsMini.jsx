@@ -19,6 +19,7 @@ export default function CarStatsMini({ figure }) {
         <span key={k} className="car-mini__stat">
           <span aria-hidden>{icon}</span>
           {figure.stats[k]}
+          {figure.boost === k && <span className="car-mini__boost">★</span>}
         </span>
       ))}
     </span>

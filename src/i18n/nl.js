@@ -578,4 +578,6 @@ export default {
   "Show all": "Toon alles",
   "Not enough budget for these boxes": "Niet genoeg budget voor deze dozen",
   "You can open at most 10 boxes at once": "Je kunt maximaal 10 dozen tegelijk openen",
+  "Secret car: {stat} can be tuned up to {max}!": "Geheime auto: {stat} kan tot {max} getuned worden!",
+  "Can be tuned up to {max}": "Kan tot {max} getuned worden",
 }

@@ -31,7 +31,7 @@ export const CAR_SERIES = [
       c('Retro Bubble', 'retro', '#7FD0EC', '#FFFFFF', 8, [4, 6, 7, 4]),
       c('Pink Cruiser', 'retro', '#FF8FB1', '#FFFFFF', 9, [5, 5, 7, 4], { pattern: 'flames' }),
     ],
-    secret: c('Golden Comet', 'sports', '#FFE08A', '#E5343A', 150, [10, 9, 8, 4], { pattern: 'flames', secret: true }),
+    secret: c('Golden Comet', 'sports', '#FFE08A', '#E5343A', 150, [10, 9, 8, 4], { pattern: 'flames', secret: true, boost: 'speed' }),
   },
   {
     id: 'cars-offroad',
@@ -50,7 +50,7 @@ export const CAR_SERIES = [
       c('Desert Rally', 'buggy', '#F4C430', '#E5343A', 9, [7, 7, 7, 4], { pattern: 'number' }),
       c('Swamp Thing', 'truck', '#2E8B57', '#B6E36A', 8, [4, 5, 9, 9]),
     ],
-    secret: c('Golden Crusher', 'truck', '#FFE08A', '#2B2B33', 150, [7, 7, 10, 10], { pattern: 'flames', secret: true }),
+    secret: c('Golden Crusher', 'truck', '#FFE08A', '#2B2B33', 150, [7, 7, 10, 10], { pattern: 'flames', secret: true, boost: 'grip' }),
   },
   {
     id: 'cars-raceday',
@@ -69,7 +69,7 @@ export const CAR_SERIES = [
       c('Pace Car', 'muscle', '#FFD34D', '#2B2B33', 7, [7, 6, 6, 6], { pattern: 'checker' }),
       c('Kart Kid', 'buggy', '#FF8FB1', '#FFFFFF', 8, [5, 9, 7, 2], { pattern: 'number' }),
     ],
-    secret: c('Rocket Racer', 'rocket', '#FFE08A', '#FF6A00', 160, [10, 10, 6, 3], { pattern: 'flames', secret: true }),
+    secret: c('Rocket Racer', 'rocket', '#FFE08A', '#FF6A00', 160, [10, 10, 6, 3], { pattern: 'flames', secret: true, boost: 'accel' }),
   },
   {
     id: 'cars-city',
@@ -88,7 +88,7 @@ export const CAR_SERIES = [
       c('Pizza Delivery', 'retro', '#F28A2E', '#FFFFFF', 8, [5, 7, 7, 2], { pattern: 'checker' }),
       c('Mail Van', 'van', '#4D79B5', '#FFD34D', 7, [4, 5, 6, 7], { pattern: 'stripes' }),
     ],
-    secret: c('Golden Limo', 'muscle', '#FFE08A', '#2B2B33', 150, [8, 6, 8, 7], { pattern: 'stripes', secret: true }),
+    secret: c('Golden Limo', 'muscle', '#FFE08A', '#2B2B33', 150, [8, 6, 8, 7], { pattern: 'stripes', secret: true, boost: 'speed' }),
   },
 ]
 
@@ -154,10 +154,13 @@ export const TRACK_BY_ID = Object.fromEntries(TRACKS.map((t) => [t.id, t]))
 
 // Upgrade boxes: a blind box with one tuning part. Fit it on one of your car
 // models in the garage to improve it: more speed, acceleration or grip (never
-// above 10), or less weight (never below 1). Upgrades belong to you and that
+// above 10, or 12 for a secret car's boost stat), or less weight (never below 1). Upgrades belong to you and that
 // model; other players see the standard stats.
 export const UPGRADE_BOX_PRICE = 7.95
 export const MAX_STAT = 10
+export const BOOST_STAT = 12 // every secret car has one stat (`boost`) that can be tuned this far
+// how far a stat of this car can be tuned
+export const statCap = (car, stat) => (car.boost === stat ? BOOST_STAT : MAX_STAT)
 export const MIN_STAT = 1
 // draw: chance out of 1000
 export const PARTS = [
@@ -178,7 +181,7 @@ export const PART_BY_ID = Object.fromEntries(PARTS.map((p) => [p.id, p]))
 export function tunedStats(car, upgrade) {
   if (!car.stats) return null
   const out = {}
-  for (const k of ['speed', 'accel', 'grip', 'weight']) out[k] = Math.max(MIN_STAT, Math.min(MAX_STAT, car.stats[k] + (upgrade?.[k] || 0)))
+  for (const k of ['speed', 'accel', 'grip', 'weight']) out[k] = Math.max(MIN_STAT, Math.min(statCap(car, k), car.stats[k] + (upgrade?.[k] || 0)))
   return out
 }
 

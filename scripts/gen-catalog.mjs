@@ -25,9 +25,9 @@ for (const s of SERIES) {
     // cars also carry their race stats
     const st = f.stats ? [f.stats.speed, f.stats.accel, f.stats.grip, f.stats.weight].join(', ') : 'null, null, null, null'
     lines.push(
-      `insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight) values (${q(f.id)}, ${q(s.id)}, ${f.value}, ${f.secret}, ${st})`,
+      `insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values (${q(f.id)}, ${q(s.id)}, ${f.value}, ${f.secret}, ${st}, ${f.boost ? q(f.boost) : 'null'})`,
       '  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,',
-      '    speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight;',
+      '    speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;',
     )
   }
 }

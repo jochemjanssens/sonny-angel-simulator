@@ -4423,3 +4423,13 @@ h3 {
     min-height: 146px;
   }
 }
+
+/* the stat of a secret car that can be tuned past 10 */
+.car-stats__boost,
+.car-mini__boost {
+  color: var(--gold);
+}
+.garage__boost {
+  color: #a06b00 !important;
+  font-weight: 800;
+}

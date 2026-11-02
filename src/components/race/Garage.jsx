@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import Confetti from '../Confetti'
-import { MAX_STAT, MIN_STAT, PARTS, PART_BY_ID, UPGRADE_BOX_PRICE } from '../../data/cars'
+import { BOOST_STAT, MIN_STAT, PARTS, PART_BY_ID, UPGRADE_BOX_PRICE, statCap } from '../../data/cars'
 import { euro } from '../../data/collections'
 import { rpc, supabase } from '../../lib/supabase'
 import { useT } from '../../i18n'
@@ -31,13 +31,13 @@ const bonusText = (part) =>
     .map(([k, v]) => `${STAT_ICONS[k]} ${v > 0 ? '+' : '−'}${Math.abs(v)}`)
     .join(' ')
 
-// How much a part would actually change on a car: stats stop at 10, and weight
-// (which the light parts lower) stops at 1.
+// How much a part would actually change on a car: stats stop at their cap, and
+// weight (which the light parts lower) stops at 1.
 export function gain(car, upgrade, part) {
   let total = 0
   for (const [k, v] of Object.entries(part.bonus)) {
     const now = car.stats[k] + (upgrade?.[k] || 0)
-    total += v > 0 ? Math.max(0, Math.min(v, MAX_STAT - now)) : Math.max(0, Math.min(-v, now - MIN_STAT))
+    total += v > 0 ? Math.max(0, Math.min(v, statCap(car, k) - now)) : Math.max(0, Math.min(-v, now - MIN_STAT))
   }
   return total
 }
@@ -131,6 +131,7 @@ export default function Garage({ car, garage, wallet, notify, onChanged }) {
         </div>
         <div className="race__box">
           <h3>{t('Your parts')}</h3>
+          {car?.boost && <p className="garage__boost">★ {t('Secret car: {stat} can be tuned up to {max}!', { stat: t({ speed: 'Speed', accel: 'Acceleration', grip: 'Grip' }[car.boost]), max: BOOST_STAT })}</p>}
           {!owned.length ? (
             <p>{t('No parts yet. Open an upgrade box!')}</p>
           ) : (

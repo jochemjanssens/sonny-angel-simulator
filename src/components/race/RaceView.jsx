@@ -4,7 +4,7 @@ import DriveGame from './DriveGame'
 import TrialHighscores, { seconds } from './TrialHighscores'
 import Garage, { useGarage } from './Garage'
 import { FIGURE_BY_ID, SERIES, euro } from '../../data/collections'
-import { FINISH_REWARD, MEDALS, PAID_RACES_PER_DAY, TRACKS, TRACK_BY_ID, tunedStats } from '../../data/cars'
+import { FINISH_REWARD, MEDALS, PAID_RACES_PER_DAY, TRACKS, TRACK_BY_ID, statCap, tunedStats } from '../../data/cars'
 import { rpc } from '../../lib/supabase'
 import { useT } from '../../i18n'
 
@@ -20,14 +20,18 @@ export function CarStats({ car, track, upgrade }) {
     <div className="car-stats">
       {Object.entries(STAT_NAMES).map(([k, label]) => {
         const diff = tuned[k] - car.stats[k]
+        const unit = 100 / statCap(car, k) // the bar is full at this stat's maximum
         return (
           <div key={k} className={`car-stats__row ${w && w[k] >= 0.3 ? 'is-key' : ''}`}>
-            <span>{t(label)}</span>
+            <span>
+              {t(label)}
+              {car.boost === k && <span className="car-stats__boost" title={t('Can be tuned up to {max}', { max: statCap(car, k) })}> ★</span>}
+            </span>
             <span className="car-stats__bar">
-              <span style={{ width: `${Math.min(car.stats[k], tuned[k]) * 10}%` }} />
-              {diff > 0 && <span className="car-stats__tuned" style={{ width: `${diff * 10}%` }} />}
+              <span style={{ width: `${Math.min(car.stats[k], tuned[k]) * unit}%` }} />
+              {diff > 0 && <span className="car-stats__tuned" style={{ width: `${diff * unit}%` }} />}
               {/* lost weight: a light, striped piece where the weight used to be */}
-              {diff < 0 && <span className="car-stats__lost" style={{ width: `${-diff * 10}%` }} />}
+              {diff < 0 && <span className="car-stats__lost" style={{ width: `${-diff * unit}%` }} />}
             </span>
             <b>
               {tuned[k]}
