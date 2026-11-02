@@ -289,6 +289,28 @@ begin
   is_new := public._give(u, fig_id);
 end $$;
 
+-- Several blind boxes at once (at most 10): everything or nothing, so you never
+-- get half of them when your budget runs out. Each box draws like open_box.
+create or replace function public.open_boxes(p_series text, p_count int default 10) returns jsonb
+language plpgsql security definer set search_path = public as $$
+declare u uuid := public._uid();
+  price numeric;
+  r record;
+  drawn jsonb := '[]';
+begin
+  if p_count is null or p_count < 1 or p_count > 10 then raise exception 'You can open at most 10 boxes at once'; end if;
+  select s.price into price from public.series s where s.id = p_series;
+  if not found then raise exception 'Unknown series'; end if;
+  if (select wallet from public.players where id = u for update) < price * p_count then
+    raise exception 'Not enough budget for these boxes';
+  end if;
+  for i in 1 .. p_count loop
+    select * into r from public.open_box(p_series);
+    drawn := drawn || jsonb_build_object('fig_id', r.fig_id, 'is_new', r.is_new);
+  end loop;
+  return drawn;
+end $$;
+
 -- One-time import of a browser save, only before playing online.
 create or replace function public.import_local_save(p_wallet numeric, p_inventory jsonb, p_stats jsonb) returns void
 language plpgsql security definer set search_path = public as $$
@@ -1257,6 +1279,7 @@ grant execute on function
   public.finish_time_trial(uuid, int, int[]),
   public.trial_highscores(text),
   public.open_box(text),
+  public.open_boxes(text, int),
   public.import_local_save(numeric, jsonb, jsonb),
   public.create_listing(text, numeric),
   public.update_listing_price(uuid, numeric),

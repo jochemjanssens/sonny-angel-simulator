@@ -47,7 +47,7 @@ export function SeriesGrid({ inventory, onSelect }) {
   )
 }
 
-export function SeriesDetail({ series, inventory, seen = {}, listed = new Set(), wallet, onBack, onBuy, onFigure }) {
+export function SeriesDetail({ series, inventory, seen = {}, listed = new Set(), wallet, onBack, onBuy, onBuyMany, onFigure }) {
   const owned = series.figures.filter((f) => inventory[f.id]).length
   const canAfford = wallet >= series.price
   // Values stay a mystery until you've pulled that figure at least once.
@@ -85,9 +85,14 @@ export function SeriesDetail({ series, inventory, seen = {}, listed = new Set(),
               <dd>{t('1 in {n}', { n: series.odds })}</dd>
             </div>
           </dl>
-          <button className="btn btn--primary btn--lg" onClick={onBuy} disabled={!canAfford}>
-            {t('Buy a blind box · {price}', { price: euro(series.price) })}
-          </button>
+          <div className="detail__buy">
+            <button className="btn btn--primary btn--lg" onClick={onBuy} disabled={!canAfford}>
+              {t('Buy a blind box · {price}', { price: euro(series.price) })}
+            </button>
+            <button className="btn btn--ghost btn--lg" onClick={onBuyMany} disabled={wallet < series.price * 10}>
+              {t('Buy 10 boxes · {price}', { price: euro(series.price * 10) })}
+            </button>
+          </div>
           {!canAfford && (
             <p className="detail__warn">{t('Not enough budget — come back tomorrow or sell some duplicates.')}</p>
           )}

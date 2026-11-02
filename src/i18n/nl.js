@@ -571,4 +571,11 @@ export default {
   "Saving your time…": "Je tijd wordt opgeslagen…",
   "#{rank} this week": "#{rank} deze week",
   "Continue": "Verder",
+  "Buy 10 boxes · {price}": "Koop 10 dozen · {price}",
+  "{n} blind boxes": "{n} blind boxes",
+  "{new} new · {dupes} duplicates · total value {value}": "{new} nieuw · {dupes} dubbel · totale waarde {value}",
+  "Open {n} more": "Open er nog {n}",
+  "Show all": "Toon alles",
+  "Not enough budget for these boxes": "Niet genoeg budget voor deze dozen",
+  "You can open at most 10 boxes at once": "Je kunt maximaal 10 dozen tegelijk openen",
 }

@@ -4316,3 +4316,110 @@ h3 {
 .drive__saving.is-error {
   color: #c92a2a;
 }
+
+/* ---------- buying several boxes at once ---------- */
+
+.detail__buy {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.multi {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  overflow: hidden auto; /* confetti can't push the page sideways */
+  padding: 16px;
+  background: radial-gradient(circle at 50% 42%, var(--paper) 0, var(--cream) 60%, color-mix(in srgb, var(--theme) 45%, var(--cream)) 100%);
+  animation: fadeIn 0.3s ease;
+}
+.multi__inner {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 680px);
+  margin: auto;
+  text-align: center;
+}
+.multi__title {
+  margin: 0 0 12px;
+  font-family: var(--font-display);
+  color: var(--red);
+}
+.multi__grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+.multi__card {
+  position: relative;
+  min-height: 158px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 6px 4px;
+  border-radius: 14px;
+  background: var(--theme);
+  overflow: hidden;
+}
+.multi__card.is-open {
+  background: var(--paper);
+  border: 2px solid var(--line);
+  animation: popIn 0.25s ease-out;
+}
+.multi__card.is-secret {
+  border-color: var(--gold);
+  background: #fff6d6;
+}
+.multi__card .badge {
+  position: absolute;
+  top: 4px;
+  z-index: 1;
+  font-size: 0.62rem;
+}
+.multi__box {
+  margin: auto;
+  padding: 3px 8px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--red);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+.multi__name {
+  font-weight: 800;
+  font-size: 0.75rem;
+  line-height: 1.15;
+}
+.multi__value {
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 0.72rem;
+}
+.multi__summary {
+  margin: 14px 0 10px;
+  font-weight: 800;
+}
+.multi__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+.multi__skip {
+  position: static;
+  margin-top: 14px;
+}
+:root[data-theme='dark'] .multi__card.is-secret {
+  background: #362f1c;
+}
+@media (max-width: 560px) {
+  .multi__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .multi__card {
+    min-height: 146px;
+  }
+}

@@ -11,6 +11,7 @@ import FigureModal from './components/FigureModal'
 import LuckyWheel from './components/LuckyWheel'
 import { LoginScreen, SetupNeeded, UsernameScreen } from './components/AuthScreens'
 import { DAILY_ALLOWANCE, FIGURES, FIGURE_BY_ID, SERIES_BY_ID, euro } from './data/collections'
+import MultiBoxOpener from './components/MultiBoxOpener'
 import { BRAND } from './brand'
 
 // The Smiski and Turbo Minis simulators tell the server which figures to use (Sonny Angel is the default).
@@ -55,6 +56,7 @@ function Game({ userId }) {
   // it was before (the live update can arrive before the animation starts), so
   // the new figure can't be spotted before its reveal.
   const [frozen, setFrozen] = useState(null)
+  const revealed = useCallback(() => setFrozen(null), [])
   const [figureId, setFigureId] = useState(null)
   const [toast, setToast] = useState(null)
   const [localSave] = useState(readLocalSave)
@@ -110,6 +112,19 @@ function Game({ userId }) {
       const data = await rpc('open_box', { p_series: series.id })
       const row = Array.isArray(data) ? data[0] : data
       setOpening({ seriesId: series.id, figureId: row.fig_id, isNew: row.is_new, key: Date.now() })
+      game.refresh()
+    } catch (err) {
+      setFrozen(null)
+      notify(t(err.message))
+    }
+  }
+
+  const buyMany = async (series, count = 10) => {
+    if (state.wallet < series.price * count) return notify(t('Not enough budget for these boxes'))
+    setFrozen({ inventory: state.inventory, firstSeen: state.firstSeen })
+    try {
+      const results = await rpc('open_boxes', { p_series: series.id, p_count: count })
+      setOpening({ seriesId: series.id, results, key: Date.now() })
       game.refresh()
     } catch (err) {
       setFrozen(null)
@@ -183,6 +198,7 @@ function Game({ userId }) {
               wallet={state.wallet}
               onBack={() => setSeriesId(null)}
               onBuy={() => buy(series)}
+              onBuyMany={() => buyMany(series)}
               onFigure={setFigureId}
             />
           ) : (
@@ -221,7 +237,22 @@ function Game({ userId }) {
         {t('A fan-made simulator for fun · Not affiliated with Sonny Angel or Dreams Inc. · Values are approximate resale prices')}
       </footer>
 
-      {opening && (
+      {opening?.results && (
+        <MultiBoxOpener
+          key={opening.key}
+          series={SERIES_BY_ID[opening.seriesId]}
+          results={opening.results}
+          canAffordAgain={state.wallet >= SERIES_BY_ID[opening.seriesId].price * opening.results.length}
+          onAgain={() => buyMany(SERIES_BY_ID[opening.seriesId], opening.results.length)}
+          onReveal={revealed}
+          onClose={() => {
+            setOpening(null)
+            setFrozen(null)
+          }}
+        />
+      )}
+
+      {opening && !opening.results && (
         <BlindBoxOpener
           key={opening.key}
           series={SERIES_BY_ID[opening.seriesId]}
