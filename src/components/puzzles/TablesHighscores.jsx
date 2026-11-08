@@ -5,11 +5,11 @@ import { useT } from '../../i18n'
 
 const MEDALS = ['🥇', '🥈', '🥉']
 
-const SIZE_LABEL = { small: 'Small', medium: 'Medium', large: 'Large' }
+const SIZE_LABEL = { small: 'Small', medium: 'Medium', large: 'Large', endless: 'Endless Tetris' }
 
-// This week's best times-table scores for one size. The top 3 of the week in
-// each size win free wheel spins (3, 2, 1), given by the server once the week
-// is over (Monday 00:00 UTC).
+// This week's best times-table scores for one size, or with size 'endless' the
+// most lines in endless Tetris. The top 3 of the week win free wheel spins
+// (3, 2, 1), given by the server once the week is over (Monday 00:00 UTC).
 export const PRIZE_SPINS = [3, 2, 1]
 export default function TablesHighscores({ userId, size, refreshKey, onProfile }) {
   const { t } = useT()
@@ -48,7 +48,8 @@ export default function TablesHighscores({ userId, size, refreshKey, onProfile }
         <span className="hs__prize">{t('Top 3 win 3, 2 or 1 free wheel spins')}</span>
       </div>
       <p className="hs__ends">
-        {t(TABLES_SIZES[size].label)} · {t('Ends in {time} (Monday 00:00 UTC)', { time: left })}
+        {size !== 'endless' && `${t(TABLES_SIZES[size].label)} · `}
+        {t('Ends in {time} (Monday 00:00 UTC)', { time: left })}
       </p>
       {data.top.length === 0 ? (
         <p className="hs__empty">{t('No scores yet this week. Be the first!')}</p>
@@ -71,7 +72,7 @@ export default function TablesHighscores({ userId, size, refreshKey, onProfile }
         </ol>
       )}
       <p className="hs__mine">
-        {data.mine ? t('Your best this week: {n} points', { n: data.mine }) : t("You haven't played this week yet.")}
+        {data.mine ? t(size === 'endless' ? 'Your best this week: {n} lines' : 'Your best this week: {n} points', { n: data.mine }) : t("You haven't played this week yet.")}
       </p>
       {data.last?.length > 0 && (
         <p className="hs__last">

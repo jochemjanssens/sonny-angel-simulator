@@ -456,7 +456,8 @@ begin
 end $$;
 
 -- Endless Tetris: play until the blocks reach the top (or stop), paid per
--- cleared line. At most one line per second since the start counts.
+-- cleared line. At most one line per second since the start counts. The best
+-- of the week win free spins, like the times tables.
 create or replace function public.finish_tetris(p_session uuid, p_lines int) returns numeric
 language plpgsql security definer set search_path = public as $$
 declare u uuid := public._uid();
@@ -464,6 +465,7 @@ declare u uuid := public._uid();
   n int;
   pay numeric;
 begin
+  perform public._settle_tables_weeks();
   select * into s from public.puzzle_sessions where id = p_session and user_id = u for update;
   if not found or s.kind <> 'tetris' or s.size <> 'endless' then raise exception 'Puzzle not found'; end if;
   if s.finished_at is not null then raise exception 'This puzzle was already paid out'; end if;
@@ -477,9 +479,10 @@ begin
 end $$;
 
 -- The top 3 of every finished week and size, and the free wheel spins they got.
+-- (Times tables per size, and endless Tetris as size 'endless'.)
 create table if not exists public.tables_prizes (
   week date not null,
-  size text not null check (size in ('small', 'medium', 'large')),
+  size text not null,
   rank int not null check (rank between 1 and 3),
   user_id uuid not null references auth.users (id) on delete cascade,
   score int not null,
@@ -488,9 +491,12 @@ create table if not exists public.tables_prizes (
   primary key (week, size, rank)
 );
 alter table public.tables_prizes enable row level security;
+alter table public.tables_prizes drop constraint if exists tables_prizes_size_check;
+alter table public.tables_prizes add constraint tables_prizes_size_check check (size in ('small', 'medium', 'large', 'endless'));
+create index if not exists puzzle_sessions_endless_idx on public.puzzle_sessions (finished_at) where kind = 'tetris' and size = 'endless';
 
 -- Gives the top 3 of every finished week, per size, their free wheel spins
--- (3, 2 and 1). Called whenever someone plays or looks at the highscores, so
+-- (3, 2 and 1): times tables (points) and endless Tetris (lines). Called whenever someone plays or looks at the highscores, so
 -- no cron job is needed. Each player's best score counts; on a tie, whoever
 -- got the score first ranks higher.
 create or replace function public._settle_tables_weeks() returns void
@@ -507,7 +513,7 @@ begin
         from (
           select date_trunc('week', finished_at at time zone 'UTC')::date as wk, size, user_id, score, finished_at
           from public.puzzle_sessions
-          where kind = 'tables' and score > 0 and finished_at < date_trunc('week', now() at time zone 'UTC') at time zone 'UTC'
+          where (kind = 'tables' or (kind = 'tetris' and size = 'endless')) and score > 0 and finished_at < date_trunc('week', now() at time zone 'UTC') at time zone 'UTC'
         ) s
         order by wk, size, user_id, score desc, finished_at
       ) best
@@ -549,7 +555,7 @@ begin
 end $$;
 
 -- This week's top 10 for one size (each player's best score), your own best,
--- and last week's top 3 of that size.
+-- and last week's top 3 of that size. Size 'endless' is endless Tetris (lines).
 create or replace function public.tables_highscores(p_size text) returns jsonb
 language plpgsql security definer set search_path = public as $$
 declare u uuid := public._uid();
@@ -562,7 +568,7 @@ begin
   with best as (
     select distinct on (user_id) user_id, score, finished_at as at
     from public.puzzle_sessions
-    where kind = 'tables' and size = p_size and score > 0 and finished_at >= wk
+    where kind = (case p_size when 'endless' then 'tetris' else 'tables' end) and size = p_size and score > 0 and finished_at >= wk
     order by user_id, score desc, finished_at
   ), ranked as (
     select * from best order by score desc, at limit 10
@@ -571,7 +577,7 @@ begin
     into top
   from ranked r left join public.profiles pr on pr.id = r.user_id;
   select max(score) into mine from public.puzzle_sessions
-    where kind = 'tables' and size = p_size and user_id = u and finished_at >= wk;
+    where kind = (case p_size when 'endless' then 'tetris' else 'tables' end) and size = p_size and user_id = u and finished_at >= wk;
   select coalesce(jsonb_agg(jsonb_build_object('user_id', p.user_id, 'username', pr.username, 'score', p.score, 'spins', p.spins) order by p.rank), '[]')
     into last
   from public.tables_prizes p left join public.profiles pr on pr.id = p.user_id

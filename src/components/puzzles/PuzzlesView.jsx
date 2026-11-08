@@ -229,7 +229,7 @@ export default function PuzzlesView({ userId, notify, onEarned, onProfile }) {
               {session.size === 'endless' && !result.error && t(result.tally.lines === 1 ? '{n} line cleared. ' : '{n} lines cleared. ', { n: result.tally.lines })}
               {result.error || t('The money is in your budget. Up for another one?')}
             </p>
-            {session.kind === 'tables' && !result.error && <TablesHighscores userId={userId} size={session.size} refreshKey={session.id} onProfile={onProfile} />}
+            {(session.kind === 'tables' || session.size === 'endless') && !result.error && <TablesHighscores userId={userId} size={session.size} refreshKey={session.id} onProfile={onProfile} />}
             <div className="modal__actions">
               <button className="btn btn--ghost" onClick={() => setSession(null)}>
                 {t('Choose another')}
@@ -312,7 +312,7 @@ export default function PuzzlesView({ userId, notify, onEarned, onProfile }) {
         ))}
       </div>
 
-      {kind === 'tables' && <TablesHighscores userId={userId} size={size} refreshKey={today} onProfile={onProfile} />}
+      {(kind === 'tables' || (kind === 'tetris' && endless)) && <TablesHighscores userId={userId} size={size} refreshKey={today} onProfile={onProfile} />}
 
       <div className="puzzles__start">
         <button className="btn btn--primary btn--lg" onClick={start} disabled={busy}>

@@ -590,4 +590,6 @@ export default {
   "{n} line cleared. ": "{n} lijn weggespeeld. ",
   "{n} lines cleared. ": "{n} lijnen weggespeeld. ",
   "That many lines aren't possible in this time": "Zoveel lijnen kan niet in deze tijd",
+  "Endless Tetris": "Eindeloos Tetris",
+  "Your best this week: {n} lines": "Jouw beste deze week: {n} lijnen",
 }
