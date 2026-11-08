@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { COLS, ROWS, cellsOf, fits, lock, makeBag, rotate, startBoard } from '../../puzzles/tetris.js'
+import { COLS, ROWS, TETRIS_LINE_REWARD, cellsOf, fits, lock, makeBag, rotate, startBoard } from '../../puzzles/tetris.js'
+import { euro } from '../../data/collections'
 import { useT } from '../../i18n'
 
 // Tetris: clear the target number of lines. Arrow keys or WASD on a computer,
 // big buttons or swipes on a phone. Game over just starts a new round.
+// Endless mode has no target: you play until game over (or stop from the
+// pause screen) and collect money for every line, via onSolved({ lines }).
 const LOCK_MS = 450 // how long a landed piece can still slide
 const LOCK_MOVES = 12 // how many moves on the ground can extend that time
 const HOLD_MS = 170 // holding a move: the wait before it repeats
@@ -46,7 +49,8 @@ export default function TetrisGame({ puzzle, onSolved }) {
   const rootRef = useRef(null)
 
 
-  const { target, seed, level = 0 } = puzzle
+  const { seed, level = 0, endless = false } = puzzle
+  const target = endless ? Infinity : puzzle.target
   const game = useRef(null)
   const [, redraw] = useState(0)
   const width = useFitWidth(rootRef, !!game.current)
@@ -285,6 +289,13 @@ export default function TetrisGame({ puzzle, onSolved }) {
     onPointerCancel: () => (swipe.current = null),
   }
 
+  // endless: hand in the lines (once)
+  const collect = () => {
+    if (solvedSent.current) return
+    solvedSent.current = true
+    onSolved({ lines: game.current.lines })
+  }
+
   const g = game.current
   if (!g) return <div className="tet" ref={rootRef} />
   const active = new Map(cellsOf(g.piece).map(([x, y]) => [`${x},${y}`, g.piece.color]))
@@ -296,7 +307,8 @@ export default function TetrisGame({ puzzle, onSolved }) {
     <div className="tet" ref={rootRef} style={width ? { width } : undefined}>
       <div className="tet__stats">
         <span>
-          {t('Lines')} <strong>{Math.min(g.lines, target)}</strong>/{target}
+          {t('Lines')} <strong>{Math.min(g.lines, target)}</strong>
+          {!endless && `/${target}`}
         </span>
         <span className="tet__next" aria-label={t('Next piece')}>
           {t('Next')}
@@ -309,9 +321,15 @@ export default function TetrisGame({ puzzle, onSolved }) {
             )}
           </span>
         </span>
-        <span>
-          {t('Score')} <strong>{g.score}</strong>
-        </span>
+        {endless ? (
+          <span className="tet__earned">
+            <strong>{euro(g.lines * TETRIS_LINE_REWARD)}</strong>
+          </span>
+        ) : (
+          <span>
+            {t('Score')} <strong>{g.score}</strong>
+          </span>
+        )}
         <button className="tet__pause" onClick={() => setPaused(!g.paused)} aria-label={g.paused ? t('Resume') : t('Pause')} title={g.paused ? t('Resume') : t('Pause')} disabled={g.over || g.won}>
           {g.paused ? '▶' : '⏸'}
         </button>
@@ -336,12 +354,24 @@ export default function TetrisGame({ puzzle, onSolved }) {
             <button className="btn btn--primary btn--sm" onClick={() => setPaused(false)}>
               {t('Resume')}
             </button>
+            {endless && g.lines > 0 && (
+              <button className="btn btn--ghost btn--sm" onClick={collect}>
+                {t('Stop and collect {amount}', { amount: euro(g.lines * TETRIS_LINE_REWARD) })}
+              </button>
+            )}
           </div>
         )}
         {(g.over || g.won) && (
           <div className="tet__overlay">
             <strong>{g.won ? t('You did it! 🎉') : t('Game over')}</strong>
-            {!g.won && (
+            {endless && g.lines > 0 ? (
+              <>
+                <span className="tet__overlay-lines">{t(g.lines === 1 ? '{n} line' : '{n} lines', { n: g.lines })}</span>
+                <button className="btn btn--primary btn--sm" onClick={collect}>
+                  {t('Collect {amount}', { amount: euro(g.lines * TETRIS_LINE_REWARD) })}
+                </button>
+              </>
+            ) : !g.won && (
               <button className="btn btn--primary btn--sm" onClick={newGame}>
                 {t('Play again')}
               </button>

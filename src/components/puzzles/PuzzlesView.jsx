@@ -14,7 +14,7 @@ import { makeBinary, binarySize } from '../../puzzles/binary.js'
 import { makeSwedish } from '../../puzzles/swedish.js'
 import { makeMemory, MEMORY_SIZES } from '../../puzzles/memory.js'
 import { makeDifferences, DIFF_SIZES } from '../../puzzles/differences.js'
-import { TETRIS_TARGETS } from '../../puzzles/tetris.js'
+import { TETRIS_LINE_REWARD, TETRIS_TARGETS } from '../../puzzles/tetris.js'
 import { coloringName, makeColoringPage } from '../../puzzles/coloring.js'
 import { makeTables, TABLES_SECONDS, TABLES_SIZES, tablesScore } from '../../puzzles/tables.js'
 import { PUZZLE_REWARDS, euro } from '../../data/collections'
@@ -35,7 +35,9 @@ const ALL_KINDS = [
   { id: 'tables', name: 'Times table champion', icon: '✖️', text: 'Solve as many times tables as you can in one minute.', words: false },
 ]
 const KINDS = ALL_KINDS.filter((k) => !(BRAND !== 'sonny' && k.id === 'coloring'))
-const SIZE_LABEL = { small: 'Small', medium: 'Medium', large: 'Large' }
+const SIZE_LABEL = { small: 'Small', medium: 'Medium', large: 'Large', endless: 'Endless' }
+// Tetris also has an endless mode, paid per line
+const sizesOf = (kind) => (kind === 'tetris' ? [...Object.keys(PUZZLE_REWARDS), 'endless'] : Object.keys(PUZZLE_REWARDS))
 const STATIC_GRID = {
   wordsearch: { small: '8×8', medium: '11×11', large: '14×14' },
   swedish: { small: '7×7', medium: '9×9', large: '11×11' },
@@ -45,14 +47,18 @@ const gridLabel = (t, kind, size, level = 0) => {
   if (kind === 'tables') return t(TABLES_SIZES[size].label)
   if (kind === 'memory') return t('{n} pairs', { n: MEMORY_SIZES[size].pairs })
   if (kind === 'differences') return t('{n} differences', { n: DIFF_SIZES[size].diffs })
-  if (kind === 'tetris') return t('{n} lines', { n: TETRIS_TARGETS[size] })
+  if (kind === 'tetris') return size === 'endless' ? t('Until game over') : t('{n} lines', { n: TETRIS_TARGETS[size] })
   if (kind === 'coloring') return t(coloringName(size))
   return STATIC_GRID[kind][size]
 }
 
-// Times tables pay per point instead of a fixed amount.
+// Times tables pay per point and endless Tetris per line, instead of a fixed amount.
 const rewardLabel = (t, kind, size) =>
-  kind === 'tables' ? t('{amount} per sum', { amount: euro(TABLES_SIZES[size].reward) }) : euro(PUZZLE_REWARDS[size])
+  kind === 'tables'
+    ? t('{amount} per sum', { amount: euro(TABLES_SIZES[size].reward) })
+    : size === 'endless'
+      ? t('{amount} per line', { amount: euro(TETRIS_LINE_REWARD) })
+      : euro(PUZZLE_REWARDS[size])
 
 // level: puzzles of this kind and size solved today (0 = the first one). Each one makes the
 // next harder; the count resets at midnight UTC.
@@ -61,7 +67,7 @@ function build(kind, category, size, seed, level) {
   if (kind === 'swedish') return makeSwedish(SWEDISH_WORDS, size, seed, level)
   if (kind === 'memory') return makeMemory(size, seed, level)
   if (kind === 'differences') return makeDifferences(size, seed, level)
-  if (kind === 'tetris') return { target: TETRIS_TARGETS[size], seed, level }
+  if (kind === 'tetris') return size === 'endless' ? { endless: true, seed, level: 0 } : { target: TETRIS_TARGETS[size], seed, level }
   if (kind === 'coloring') return { page: makeColoringPage(size, seed, level), minColors: 4, byNumber: level > 0 }
   if (kind === 'tables') return makeTables(size, seed, level)
   return makeBinary(size, seed, level)
@@ -73,6 +79,7 @@ export default function PuzzlesView({ userId, notify, onEarned, onProfile }) {
   const catName = (c) => (lang === 'nl' ? c.name : c.en)
   const [category, setCategory] = useState(WORD_CATEGORIES[0].id)
   const [size, setSize] = useState('small')
+  const endless = size === 'endless'
   const [session, setSession] = useState(null) // { id, kind, category, size, puzzle, startedAt }
   const [result, setResult] = useState(null)
   const [busy, setBusy] = useState(false)
@@ -140,13 +147,21 @@ export default function PuzzlesView({ userId, notify, onEarned, onProfile }) {
       const pay =
         session.kind === 'tables'
           ? await rpc('finish_tables', { p_session: session.id, p_correct: tally.correct, p_wrong: tally.wrong })
-          : await rpc('finish_puzzle', { p_session: session.id })
+          : session.size === 'endless'
+            ? await rpc('finish_tetris', { p_session: session.id, p_lines: tally.lines })
+            : await rpc('finish_puzzle', { p_session: session.id })
       paid(Number(pay), tally)
     } catch (err) {
       if (/already paid/i.test(err.message)) {
         // an earlier try reached the server but its answer got lost: it was paid
         const { data } = await supabase.from('puzzle_sessions').select('reward').eq('id', session.id).maybeSingle()
-        return paid(Number(data?.reward ?? (session.kind === 'tables' ? tablesScore(tally.correct, tally.wrong) * TABLES_SIZES[session.size].reward : PUZZLE_REWARDS[session.size])), tally)
+        const expected =
+          session.kind === 'tables'
+            ? tablesScore(tally.correct, tally.wrong) * TABLES_SIZES[session.size].reward
+            : session.size === 'endless'
+              ? tally.lines * TETRIS_LINE_REWARD
+              : PUZZLE_REWARDS[session.size]
+        return paid(Number(data?.reward ?? expected), tally)
       }
       const network = /load failed|failed to fetch|networkerror|network request failed/i.test(err.message)
       if (network && attempt < 3) {
@@ -180,7 +195,7 @@ export default function PuzzlesView({ userId, notify, onEarned, onProfile }) {
               {t(SIZE_LABEL[session.size])} · {gridLabel(t, session.kind, session.size, session.level)}
             </span>
             <span className="puzzle__reward">{rewardLabel(t, session.kind, session.size)}</span>
-            <span className="puzzle__level">{t('Level {n}', { n: session.level + 1 })}</span>
+            {session.size !== 'endless' && <span className="puzzle__level">{t('Level {n}', { n: session.level + 1 })}</span>}
             {!result && session.kind !== 'tables' && (
               <span className="puzzle__time">
                 {Math.floor(secs / 60)}:{String(secs % 60).padStart(2, '0')}
@@ -211,6 +226,7 @@ export default function PuzzlesView({ userId, notify, onEarned, onProfile }) {
             <h2>{result.error ? t('No reward this time') : t('You earned {amount}!', { amount: euro(result.amount) })}</h2>
             <p>
               {session.kind === 'tables' && !result.error && t('{correct} right and {wrong} wrong in {s} seconds: {n} points. ', { correct: result.tally.correct, wrong: result.tally.wrong, n: tablesScore(result.tally.correct, result.tally.wrong), s: TABLES_SECONDS })}
+              {session.size === 'endless' && !result.error && t(result.tally.lines === 1 ? '{n} line cleared. ' : '{n} lines cleared. ', { n: result.tally.lines })}
               {result.error || t('The money is in your budget. Up for another one?')}
             </p>
             {session.kind === 'tables' && !result.error && <TablesHighscores userId={userId} size={session.size} refreshKey={session.id} onProfile={onProfile} />}
@@ -286,12 +302,12 @@ export default function PuzzlesView({ userId, notify, onEarned, onProfile }) {
 
       <h2 className="section-title">{current.words ? '3' : '2'}. {t('Pick a size')}</h2>
       <div className="choice-grid choice-grid--sizes">
-        {Object.keys(PUZZLE_REWARDS).map((s) => (
+        {sizesOf(kind).map((s) => (
           <button key={s} className={`choice ${size === s ? 'is-active' : ''}`} onClick={() => setSize(s)}>
             <strong>{t(SIZE_LABEL[s])}</strong>
             <span>{gridLabel(t, kind, s, levelOf(kind, s))}</span>
             <span className="choice__reward">{rewardLabel(t, kind, s)}</span>
-            <span className="choice__level">{t('Level {n}', { n: levelOf(kind, s) + 1 })}</span>
+            {s !== 'endless' && <span className="choice__level">{t('Level {n}', { n: levelOf(kind, s) + 1 })}</span>}
           </button>
         ))}
       </div>
@@ -302,7 +318,9 @@ export default function PuzzlesView({ userId, notify, onEarned, onProfile }) {
         <button className="btn btn--primary btn--lg" onClick={start} disabled={busy}>
           {kind === 'tables'
             ? t('Start · {amount} per sum', { amount: euro(TABLES_SIZES[size].reward) })
-            : t('Start puzzle · earn {amount}', { amount: euro(PUZZLE_REWARDS[size]) })}
+            : endless
+              ? t('Start · {amount} per line', { amount: euro(TETRIS_LINE_REWARD) })
+              : t('Start puzzle · earn {amount}', { amount: euro(PUZZLE_REWARDS[size]) })}
         </button>
       </div>
     </section>

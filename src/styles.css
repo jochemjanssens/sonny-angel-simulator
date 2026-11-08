@@ -2042,6 +2042,10 @@ h3 {
 .choice-grid--sizes {
   grid-template-columns: repeat(3, 1fr);
 }
+/* Tetris has a fourth: endless */
+.choice-grid--sizes:has(> :nth-child(4)) {
+  grid-template-columns: repeat(4, 1fr);
+}
 .choice {
   display: flex;
   flex-direction: column;
@@ -2386,7 +2390,8 @@ h3 {
 }
 
 @media (max-width: 560px) {
-  .choice-grid--sizes {
+  .choice-grid--sizes,
+  .choice-grid--sizes:has(> :nth-child(4)) {
     grid-template-columns: 1fr;
   }
   .sw__lists {
@@ -4432,4 +4437,13 @@ h3 {
 .garage__boost {
   color: #a06b00 !important;
   font-weight: 800;
+}
+
+/* endless Tetris: the money earned so far */
+.tet__earned strong {
+  color: #2f9e44;
+}
+.tet__overlay-lines {
+  font-size: 1rem;
+  color: var(--ink);
 }
