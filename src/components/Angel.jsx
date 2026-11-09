@@ -77,6 +77,14 @@ function BackFeature({ hat, c, a, sil, petal }) {
           <path d="M80 25 C84 12 82 1 77 -2 C72 1 70 12 71 25 Z" fill={p} />
         </g>
       )
+    case 'bunnyHood':
+      // tall, straight ears with rounded tips, all one colour
+      return (
+        <g fill={c} stroke={sil ? 'none' : shade(c, 0.12)} strokeWidth="1.2">
+          <path d="M37 32 C35 14 37 -6 45 -10 C53 -6 54 14 52 32 Z" />
+          <path d="M83 32 C85 14 83 -6 75 -10 C67 -6 66 14 68 32 Z" />
+        </g>
+      )
     case 'roundEars':
       return (
         <g>
@@ -696,6 +704,264 @@ function FaceExtras({ x, sil, c }) {
   )
 }
 
+// ---------------------------------------------------------------- outfits
+// Some figures wear clothes over the body (o = figure.outfit):
+//   { type: 'dress' | 'swimsuit' | 'coat' | 'pyjama' | 'onesie' | 'overalls' | 'tutu',
+//     color, collar, print: 'x' | 'buttons' | 'art' | 'stars' | 'stripes' | 'dots', printColor,
+//     hem (a scalloped trim), mittens, boots }
+// The body below is the same as the skin drawn in SonnyAngel, used as a clip.
+const TORSO = `M47 86 C44 90 40 95 35.5 100.5 C32.5 104 29.5 107 27.5 109.5 C25.5 112 26.5 115 29.5 114.4
+  C33.5 113.6 38.5 110.5 43 106.5 C42.6 113 43 120 46 126 C52 131 68 131 74 126
+  C77 120 77.4 113 77 106.5 C81.5 110.5 86.5 113.6 90.5 114.4 C93.5 115 94.5 112 92.5 109.5
+  C90.5 107 87.5 104 84.5 100.5 C80 95 76 90 73 86 Z`
+const LEGS = `M47 122 C46 132 46 142 47 149 C48 153 58 153 59 149 C59.5 141 59.6 131 60 124 Z
+  M73 122 C74 132 74 142 73 149 C72 153 62 153 61 149 C60.5 141 60.4 131 60 124 Z`
+
+const SKIRT = 'M44.5 106 C41 116 37.5 125 35.5 133 Q60 139.5 84.5 133 C82.5 125 79 116 75.5 106 Z'
+
+function OutfitPrint({ o }) {
+  const pc = o.printColor || '#2B2B2B'
+  switch (o.print) {
+    case 'x':
+      return <path d="M57.5 99 L62.5 104 M62.5 99 L57.5 104" stroke={pc} strokeWidth="1.6" strokeLinecap="round" />
+    case 'buttons':
+      return <g fill={pc}>{[97, 105, 113, 121].map((y) => <circle key={y} cx="60" cy={y} r="1.5" />)}</g>
+    case 'art':
+      return (
+        <g>
+          <rect x="47" y="98" width="5" height="5" fill="#E5343A" />
+          <path d="M66 96 L70 103 L62 103 Z" fill="#4D79B5" />
+          <circle cx="55" cy="114" r="2.6" fill="#FFD34D" />
+          <rect x="65" y="112" width="6" height="4" fill="#2E8B57" />
+          <ellipse cx="50" cy="126" rx="4" ry="2.5" fill="#7FD0EC" />
+          <rect x="66" y="124" width="5" height="5" fill="#A0663A" />
+          <path d="M57 125 L61 131 L53 131 Z" fill="#FF8FB1" />
+        </g>
+      )
+    case 'stars':
+      return <g fill={pc}>{[[50, 98], [69, 102], [56, 112], [72, 118], [48, 120], [64, 126], [36, 106], [86, 106], [52, 140], [68, 144]].map(([x, y]) => <path key={`${x},${y}`} d={starPath(x, y, 2.6, 1.1)} />)}</g>
+    case 'stripes':
+      return <g fill={pc}>{[94, 102, 110, 118, 126, 134].map((y) => <rect key={y} x="20" y={y} width="80" height="3" />)}</g>
+    case 'dots':
+      return <g fill={pc}>{[[50, 100], [66, 98], [58, 108], [46, 116], [70, 114], [54, 124], [68, 126], [40, 130], [80, 130]].map(([x, y]) => <circle key={`${x},${y}`} cx={x} cy={y} r="1.8" />)}</g>
+    default:
+      return null
+  }
+}
+
+function Outfit({ o, sil, uid }) {
+  const c = sil ? SIL_DARK : o.color
+  const t = o.type
+  const skirt = t === 'dress' || t === 'tutu'
+  // which part of the body the clothes cover (inside the body's own outline)
+  const torso = {
+    dress: <rect x="36" y="80" width="48" height="50" />,
+    tutu: <rect x="43" y="92" width="34" height="38" />,
+    swimsuit: <rect x="43" y="92" width="34" height="38" />,
+    overalls: <rect x="48" y="100" width="24" height="30" />,
+    coat: <rect x="0" y="80" width="120" height="52" />,
+    pyjama: <rect x="0" y="80" width="120" height="52" />,
+    onesie: <rect x="0" y="80" width="120" height="52" />,
+  }[t]
+  const legs = { pyjama: <rect x="40" y="118" width="40" height="28" />, onesie: <rect x="40" y="118" width="40" height="40" />, overalls: <rect x="40" y="118" width="40" height="16" /> }[t]
+  return (
+    <g>
+      <defs>
+        <clipPath id={`torso-${uid}`}>
+          <path d={TORSO} />
+        </clipPath>
+        <clipPath id={`legs-${uid}`}>
+          <path d={LEGS} />
+        </clipPath>
+        <clipPath id={`dress-${uid}`}>
+          <path d={TORSO} />
+          <path d={SKIRT} />
+        </clipPath>
+      </defs>
+      {legs && (
+        <g clipPath={`url(#legs-${uid})`} fill={c}>
+          {legs}
+          {!sil && o.print && o.type !== 'overalls' && <OutfitPrint o={o} />}
+        </g>
+      )}
+      {o.boots && <g clipPath={`url(#legs-${uid})`} fill={sil ? SIL_DARK : o.boots}><rect x="40" y="139" width="40" height="16" /></g>}
+      <g clipPath={`url(#torso-${uid})`} fill={c}>
+        {torso}
+        {/* bib straps of the overalls and the swimsuit */}
+        {(t === 'overalls' || t === 'swimsuit' || t === 'tutu') && (
+          <>
+            <rect x="48" y="84" width="5" height="18" />
+            <rect x="67" y="84" width="5" height="18" />
+          </>
+        )}
+        {!sil && o.print && !skirt && <OutfitPrint o={o} />}
+      </g>
+      {skirt && (
+        <g>
+          {t === 'dress' ? (
+            <path d={SKIRT} fill={c} />
+          ) : (
+            <g fill={sil ? SIL_DARK : o.color} opacity={sil ? 1 : 0.92}>
+              <ellipse cx="60" cy="125" rx="25" ry="6.5" />
+              <ellipse cx="60" cy="122" rx="21" ry="5.5" fill={sil ? SIL_DARK : shade(o.color, -0.25)} />
+            </g>
+          )}
+          {/* one print over the bodice and the skirt together */}
+          {!sil && o.print && (
+            <g clipPath={`url(#dress-${uid})`}>
+              <OutfitPrint o={o} />
+            </g>
+          )}
+          {o.hem && !sil && (
+            <g fill={o.hem}>
+              {Array.from({ length: 9 }, (_, i) => (
+                <circle key={i} cx={38 + i * 5.5} cy={133.6 + Math.sin((i / 8) * Math.PI) * 2.6} r="3" />
+              ))}
+            </g>
+          )}
+        </g>
+      )}
+      {o.collar && (
+        <g fill={sil ? SIL_DARK : o.collar}>
+          <ellipse cx="54" cy="88.5" rx="6.5" ry="3.4" transform="rotate(12 54 88.5)" />
+          <ellipse cx="66" cy="88.5" rx="6.5" ry="3.4" transform="rotate(-12 66 88.5)" />
+        </g>
+      )}
+      {o.mittens && (
+        <g fill={sil ? SIL_DARK : o.mittens}>
+          <circle cx="28.5" cy="112" r="4" />
+          <circle cx="91.5" cy="112" r="4" />
+        </g>
+      )}
+      {/* the puffy coat's quilting */}
+      {t === 'coat' && !sil && o.puffy && (
+        <path d="M44 104 Q60 108 76 104 M43.5 116 Q60 120 76.5 116" stroke={shade(o.color, 0.2)} strokeWidth="1.2" fill="none" />
+      )}
+    </g>
+  )
+}
+
+// Things a figure holds in its hands (left = the viewer's left), or carries.
+function Held({ x, sil }) {
+  const col = (v, d) => (sil ? SIL_DARK : typeof v === 'string' ? v : d)
+  return (
+    <>
+      {x.backpack && (
+        <g fill={col(x.backpack, '#FF8C2E')}>
+          <path d="M47 86 Q45 96 46 106 L50 106 Q49 96 51 87 Z" />
+          <path d="M73 86 Q75 96 74 106 L70 106 Q71 96 69 87 Z" />
+        </g>
+      )}
+      {x.bucket && (
+        <g>
+          <path d="M33 94 L37 108" stroke={sil ? SIL_DARK : '#7FD0EC'} strokeWidth="2.2" strokeLinecap="round" />
+          <path d="M30.5 88 Q33 85 35.5 88 L35 95 L31 95 Z" fill={sil ? SIL_DARK : '#7FD0EC'} />
+          <path d="M16 113 L32 113 L30 128 L18 128 Z" fill={col(x.bucket, '#4D79B5')} />
+          <path d="M17 114 Q24 104 31 114" stroke={sil ? SIL_DARK : '#FFD34D'} strokeWidth="1.6" fill="none" />
+          {!sil && <rect x="16" y="113" width="16" height="2.4" fill={shade(x.bucket === true ? '#4D79B5' : x.bucket, -0.25)} />}
+        </g>
+      )}
+      {x.book && (
+        <g>
+          <rect x="15" y="104" width="11" height="16" rx="1.5" fill={col(x.book, '#2E8B57')} transform="rotate(-8 20 112)" />
+          {!sil && <rect x="23.5" y="104.5" width="2" height="15" fill="#FFFFFF" opacity="0.8" transform="rotate(-8 20 112)" />}
+        </g>
+      )}
+      {x.frame && (
+        <g transform="rotate(-6 22 108)">
+          <rect x="10" y="94" width="22" height="26" rx="1.5" fill={col(x.frame, '#8A5A34')} />
+          <rect x="13" y="97" width="16" height="20" fill={sil ? SIL : '#BFE3F7'} />
+          {!sil && (
+            <g fill="#FFFFFF">
+              <ellipse cx="19" cy="103" rx="1.6" ry="4" />
+              <ellipse cx="23" cy="103" rx="1.6" ry="4" />
+              <circle cx="21" cy="109" r="4.2" />
+              <rect x="17" y="112" width="8" height="5" fill="#FF8C2E" />
+            </g>
+          )}
+        </g>
+      )}
+      {x.brush && (
+        <g>
+          <path d="M92 114 L99 92" stroke={sil ? SIL_DARK : '#C47A3A'} strokeWidth="2.4" strokeLinecap="round" />
+          <path d="M98 94 Q99 86 102 84 Q102.5 90 100.5 95 Z" fill={col(x.brush, '#E5343A')} />
+        </g>
+      )}
+      {x.tulip && (
+        <g>
+          <path d="M92 114 Q95 102 94 92" stroke={sil ? SIL_DARK : '#2E8B57'} strokeWidth="1.8" fill="none" />
+          <path d="M95 104 Q101 100 102 94 Q97 96 95 104 Z" fill={sil ? SIL_DARK : '#5DBB63'} />
+          <path d="M88.5 86 L90.5 92 Q94 96 97.5 92 L99.5 86 L96.5 89 L94 84 L91.5 89 Z" fill={col(x.tulip, '#E5343A')} />
+        </g>
+      )}
+      {x.carrot && (
+        <g transform="rotate(-20 26 112)">
+          <path d="M21 104 L31 104 L26 126 Z" fill={col(x.carrot, '#FF8C2E')} />
+          <path d="M26 104 L22 96 M26 104 L26 95 M26 104 L30 96" stroke={sil ? SIL_DARK : '#5DAA48'} strokeWidth="2" strokeLinecap="round" />
+        </g>
+      )}
+      {x.umbrella && (
+        <g>
+          <path d="M92 116 L99 74" stroke={sil ? SIL_DARK : '#5A4A3A'} strokeWidth="1.8" strokeLinecap="round" />
+          <path d="M90 118 Q90 121 92.5 120.5" stroke={sil ? SIL_DARK : '#5A4A3A'} strokeWidth="1.8" fill="none" strokeLinecap="round" />
+          <path d="M80 80 Q84 60 100 58 Q116 60 118 82 Q113 78 108.5 80 Q104 76 99 79 Q94 76 89.5 80 Q85 77 80 80 Z" fill={col(x.umbrella, '#E5343A')} transform="rotate(8 99 70)" />
+        </g>
+      )}
+      {x.cake && (
+        <g>
+          <ellipse cx="60" cy="121" rx="18" ry="4" fill={sil ? SIL_DARK : '#BFE3F7'} />
+          <rect x="47" y="106" width="26" height="14" rx="2" fill={sil ? SIL_DARK : '#FFF4E0'} />
+          <ellipse cx="60" cy="106" rx="13" ry="3.4" fill={sil ? SIL_DARK : '#FFE9F0'} />
+          {!sil && <rect x="47" y="112" width="26" height="3" fill={typeof x.cake === 'string' ? x.cake : '#FF8FB1'} />}
+          {!sil &&
+            [53, 60, 67].map((cx, i) => (
+              <g key={cx}>
+                <rect x={cx - 0.9} y="98" width="1.8" height="7" fill={['#7FD0EC', '#FF8FB1', '#FFD34D'][i]} />
+                <ellipse cx={cx} cy="96.4" rx="1.3" ry="2" fill="#FF9F2E" />
+              </g>
+            ))}
+        </g>
+      )}
+    </>
+  )
+}
+
+// Things worn on the hood (in head coordinates): earmuffs, a beret, a party hat.
+function HeadExtras({ x, sil }) {
+  const col = (v, d) => (sil ? SIL_DARK : typeof v === 'string' ? v : d)
+  return (
+    <>
+      {x.earmuffs && (
+        <g fill={col(x.earmuffs, '#7FD0EC')}>
+          <path d="M26 54 C25 9 95 9 94 54" stroke={col(x.earmuffs, '#4D79B5')} strokeWidth="4" fill="none" />
+          <ellipse cx="25" cy="58" rx="8" ry="10" />
+          <ellipse cx="95" cy="58" rx="8" ry="10" />
+          {!sil && <ellipse cx="23" cy="55" rx="3" ry="4" fill="#FFFFFF" opacity="0.5" />}
+        </g>
+      )}
+      {x.beret && (
+        <g fill={col(x.beret, '#8A4B2A')}>
+          <ellipse cx="60" cy="20" rx="30" ry="7.5" transform="rotate(-8 60 20)" />
+          <path d="M60 13 Q61 7 64 7" stroke={col(x.beret, '#8A4B2A')} strokeWidth="2.4" fill="none" strokeLinecap="round" />
+        </g>
+      )}
+      {x.partyHat && (
+        <g>
+          <path d="M50 20 L60 -6 L70 20 Q60 23 50 20 Z" fill={col(x.partyHat, '#FF6B4A')} />
+          {!sil && (
+            <g fill="#FFFFFF">
+              <circle cx="58" cy="12" r="1.4" />
+              <circle cx="63" cy="5" r="1.2" />
+              <circle cx="64" cy="16" r="1.3" />
+            </g>
+          )}
+          <circle cx="60" cy="-7" r="4" fill={sil ? SIL_DARK : '#FFD34D'} />
+        </g>
+      )}
+    </>
+  )
+}
+
 // Smiski figures and Turbo Minis cars have their own drawing; everything else is a Sonny Angel.
 export default function Angel(props) {
   if (props.figure?.brand === 'smiski') return <Smiski {...props} />
@@ -713,7 +979,8 @@ function SonnyAngel({ figure, silhouette = false, size = 120, className = '', sh
   const hoodBase = hat === 'petals' ? a : c
   const skin = sil ? SIL : `url(#skin-${uid})`
   const skinLine = sil ? SIL_DARK : SKIN_LINE
-  const hoodFill = sil ? SIL : secret ? `url(#gold-${uid})` : `url(#hoodshade-${uid})`
+  // a secret normally has a golden hood; plainSecret keeps its own colour
+  const hoodFill = sil ? SIL : secret && !figure.plainSecret ? `url(#gold-${uid})` : `url(#hoodshade-${uid})`
 
   return (
     <svg
@@ -750,6 +1017,8 @@ function SonnyAngel({ figure, silhouette = false, size = 120, className = '', sh
       {/* body: a chubby little toddler with short arms reaching outward,
           squashed a touch around the neck so the head looks bigger (cuter) */}
       <g transform="translate(60 88) scale(1.07 0.93) translate(-60 -88)">
+      {/* a backpack peeks out behind the body */}
+      {extras.backpack && <rect x="39" y="88" width="42" height="30" rx="7" fill={sil ? SIL_DARK : extras.backpack === true ? '#FF8C2E' : extras.backpack} />}
       <g fill={skin}>
         <path d="M47 122 C46 132 46 142 47 149 C48 153 58 153 59 149 C59.5 141 59.6 131 60 124 Z" />
         <path d="M73 122 C74 132 74 142 73 149 C72 153 62 153 61 149 C60.5 141 60.4 131 60 124 Z" />
@@ -766,7 +1035,9 @@ function SonnyAngel({ figure, silhouette = false, size = 120, className = '', sh
       <ellipse cx="60" cy="128.8" rx="2.7" ry="2.4" fill={skin} />
       {!sil && <ellipse cx="60" cy="130.3" rx="2.2" ry="0.9" fill={skinLine} opacity="0.3" />}
 
+      {figure.outfit && <Outfit o={figure.outfit} sil={sil} uid={uid} />}
       <NeckExtras x={extras} sil={sil} />
+      <Held x={extras} sil={sil} />
       </g>
 
       {/* halo for secrets */}
@@ -778,7 +1049,8 @@ function SonnyAngel({ figure, silhouette = false, size = 120, className = '', sh
       <g transform="translate(60 88) scale(1.06) translate(-60 -88)">
       {/* headgear: authored on a r=40 circle at (60,58), fitted to a rounded hood */}
       <g transform="translate(60 52) scale(0.875 0.9) translate(-60 -58)">
-        <BackFeature hat={hat} c={c} a={a} sil={sil} petal={figure.petal} />
+        {/* a beret sits over the ears */}
+        <BackFeature hat={extras.beret ? 'none' : hat} c={c} a={a} sil={sil} petal={figure.petal} />
         <circle cx="60" cy="58" r="40" fill={hoodFill} />
         {!sil && pattern && (
           <g clipPath={`url(#hood-${uid})`}>
@@ -795,6 +1067,15 @@ function SonnyAngel({ figure, silhouette = false, size = 120, className = '', sh
           <path d="M57.4 31.6 L62.6 31.6 L60 34.4 Z" />
         </g>
       )}
+      {/* the bunny hood's own little face: two dots and a cross for a mouth */}
+      {!sil && hat === 'bunnyHood' && (
+        <g fill="#2B2B2B" stroke="#2B2B2B" strokeLinecap="round" transform={extras.beret ? 'translate(0 3)' : undefined}>
+          <ellipse cx="54" cy="29" rx="1.4" ry="1.7" stroke="none" />
+          <ellipse cx="66" cy="29" rx="1.4" ry="1.7" stroke="none" />
+          <path d="M58.2 32.4 L61.8 35.8 M61.8 32.4 L58.2 35.8" strokeWidth="1.2" fill="none" />
+        </g>
+      )}
+      <HeadExtras x={extras} sil={sil} />
       {!sil && pattern === 'mask' && <ellipse cx="60" cy="62" rx="31" ry="28.5" fill={figure.patternColor || a} />}
       <FaceExtras x={extras} sil={sil} c={hoodBase} />
       {hat === 'santa' && <ellipse cx="60" cy="63" rx="29.5" ry="27.5" fill={sil ? SIL_DARK : '#FFFFFF'} />}

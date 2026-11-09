@@ -592,4 +592,5 @@ export default {
   "That many lines aren't possible in this time": "Zoveel lijnen kan niet in deze tijd",
   "Endless Tetris": "Eindeloos Tetris",
   "Your best this week: {n} lines": "Jouw beste deze week: {n} lijnen",
+  "Bunny hoods and little outfits for every day.": "Konijnenkapjes en kleine outfits voor elke dag.",
 }
