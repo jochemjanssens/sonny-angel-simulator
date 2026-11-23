@@ -4447,3 +4447,36 @@ h3 {
   font-size: 1rem;
   color: var(--ink);
 }
+
+/* several spins at once */
+.wheel__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+.wheel__multi {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  padding: 0;
+  margin: 4px 0 10px;
+}
+.wheel__multi li {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--cream);
+  border: 2px solid var(--line);
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+.wheel__multi li.is-secret {
+  border-color: var(--gold);
+}
+.wheel__secret {
+  color: #a06b00;
+  font-weight: 800;
+  margin: 0;
+}

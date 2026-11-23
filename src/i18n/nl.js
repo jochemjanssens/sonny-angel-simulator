@@ -593,4 +593,8 @@ export default {
   "Endless Tetris": "Eindeloos Tetris",
   "Your best this week: {n} lines": "Jouw beste deze week: {n} lijnen",
   "Bunny hoods and little outfits for every day.": "Konijnenkapjes en kleine outfits voor elke dag.",
+  "Spin {n}×": "{n}× draaien",
+  "{n} spins": "{n} draaien",
+  "{n} figures": "{n} figuren",
+  "{n} figure": "{n} figuur",
 }

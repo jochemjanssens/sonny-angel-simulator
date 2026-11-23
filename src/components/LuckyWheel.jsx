@@ -27,10 +27,16 @@ function untilMidnightUtc() {
   return `${Math.floor(s / 3600)}h ${String(Math.floor((s % 3600) / 60)).padStart(2, '0')}m`
 }
 
+const MULTI = 5 // spins at once, when you have more than one
+
 // Daily lucky wheel: the server picks the prize, the wheel spins to it. Bonus
-// spins (won with times tables) can be used after the free daily spin.
+// spins (won with times tables) can be used after the free daily spin. With
+// more than one spin you can use up to five in one go: the wheel turns once
+// and you see everything you won together.
 export default function LuckyWheel({ dailySpin, bonusSpins = 0, onSpin, onDone, onClose }) {
   const canSpin = dailySpin || bonusSpins > 0
+  const available = (dailySpin ? 1 : 0) + bonusSpins
+  const multi = Math.min(MULTI, available)
   const [rotation, setRotation] = useState(0)
   const { t } = useT()
   const [spinning, setSpinning] = useState(false)
@@ -44,10 +50,17 @@ export default function LuckyWheel({ dailySpin, bonusSpins = 0, onSpin, onDone, 
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose, spinning])
 
-  const spin = async () => {
+  const spin = async (times = 1) => {
     setSpinning(true)
-    const res = await onSpin()
-    if (!res) return setSpinning(false)
+    // one spin after the other on the server; stops early if one fails
+    const all = []
+    for (let n = 0; n < times; n++) {
+      const r = await onSpin()
+      if (!r) break
+      all.push(r)
+    }
+    if (!all.length) return setSpinning(false)
+    const res = times > 1 ? { ...all[all.length - 1], all } : all[0]
     pending.current = res
     const i = WHEEL_PRIZES.findIndex((p) => p.key === res.prize)
     const jitter = (Math.random() - 0.5) * SLICE * 0.6
@@ -65,12 +78,20 @@ export default function LuckyWheel({ dailySpin, bonusSpins = 0, onSpin, onDone, 
   }
 
   const prize = result && WHEEL_PRIZES.find((p) => p.key === result.prize)
+  // several spins at once: everything added up
+  const sum = result?.all && {
+    cash: result.all.reduce((s, r) => s + (WHEEL_PRIZES.find((p) => p.key === r.prize).kind === 'cash' ? Number(r.amount) : 0), 0),
+    figures: result.all.flatMap((r) => r.figures || []),
+    news: result.all.flatMap((r) => r.new || []),
+    secret: result.all.some((r) => WHEEL_PRIZES.find((p) => p.key === r.prize).kind === 'secret'),
+    big: result.all.some((r) => { const p = WHEEL_PRIZES.find((x) => x.key === r.prize); return p.kind !== 'cash' || p.amount >= 50 }),
+  }
   const total = WHEEL_PRIZES.reduce((s, p) => s + p.weight, 0)
 
   return (
     <div className="modal" role="dialog" aria-modal="true" aria-label={t('Lucky wheel')} onClick={() => !spinning && onClose()}>
       <div className="modal__card wheel" onClick={(e) => e.stopPropagation()}>
-        {result && (prize.kind !== 'cash' || prize.amount >= 50) && <Confetti gold={prize.kind === 'secret'} count={70} />}
+        {result && (sum ? sum.big : prize.kind !== 'cash' || prize.amount >= 50) && <Confetti gold={sum ? sum.secret : prize.kind === 'secret'} count={70} />}
         <button className="modal__close" onClick={onClose} disabled={spinning} aria-label={t('Close')}>
           ×
         </button>
@@ -113,7 +134,35 @@ export default function LuckyWheel({ dailySpin, bonusSpins = 0, onSpin, onDone, 
 
         {result ? (
           <div className="wheel__result">
-            {prize.kind === 'cash' ? (
+            {sum ? (
+              <>
+                <p className="wheel__win">
+                  {t('{n} spins', { n: result.all.length })}: {[sum.cash > 0 && `+${euro(sum.cash)}`, sum.figures.length > 0 && t(sum.figures.length > 1 ? '{n} figures' : '{n} figure', { n: sum.figures.length })].filter(Boolean).join(' + ')}
+                </p>
+                {sum.secret && <p className="wheel__secret">{t('★ A secret figure! ★')}</p>}
+                <ul className="wheel__multi">
+                  {result.all.map((r, i) => {
+                    const p = WHEEL_PRIZES.find((x) => x.key === r.prize)
+                    return (
+                      <li key={i} className={p.kind === 'secret' ? 'is-secret' : ''}>
+                        {icon(p)} {p.kind === 'cash' ? euro(r.amount) : p.kind === 'secret' ? t('Secret') : `×${r.figures.length}`}
+                      </li>
+                    )
+                  })}
+                </ul>
+                {sum.figures.length > 0 && (
+                  <div className="wheel__figures">
+                    {sum.figures.map((id, i) => (
+                      <div key={i} className="wheel__fig">
+                        {sum.news[i] && <span className="badge badge--new">{t('New!')}</span>}
+                        <Angel figure={FIGURE_BY_ID[id]} size={60} />
+                        <span>{FIGURE_BY_ID[id].name}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            ) : prize.kind === 'cash' ? (
               <p className="wheel__win">+{euro(result.amount)}</p>
             ) : (
               <>
@@ -139,9 +188,16 @@ export default function LuckyWheel({ dailySpin, bonusSpins = 0, onSpin, onDone, 
           </div>
         ) : canSpin ? (
           <>
-            <button className="btn btn--primary btn--lg wheel__spin" onClick={spin} disabled={spinning}>
-              {spinning ? t('Spinning…') : dailySpin ? t('Spin the wheel!') : t('Use a bonus spin!')}
-            </button>
+            <div className="wheel__buttons">
+              <button className="btn btn--primary btn--lg wheel__spin" onClick={() => spin(1)} disabled={spinning}>
+                {spinning ? t('Spinning…') : dailySpin ? t('Spin the wheel!') : t('Use a bonus spin!')}
+              </button>
+              {multi > 1 && !spinning && (
+                <button className="btn btn--ghost btn--lg wheel__spin" onClick={() => spin(multi)}>
+                  {t('Spin {n}×', { n: multi })}
+                </button>
+              )}
+            </div>
             {bonusSpins > 0 && <p className="wheel__note">{t(bonusSpins > 1 ? 'You have {n} bonus spins from Times table champion.' : 'You have {n} bonus spin from Times table champion.', { n: bonusSpins })}</p>}
           </>
         ) : (
