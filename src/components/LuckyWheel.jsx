@@ -179,9 +179,23 @@ export default function LuckyWheel({ dailySpin, bonusSpins = 0, onSpin, onDone, 
               </>
             )}
             {canSpin ? (
-              <button className="btn btn--primary wheel__spin" onClick={() => setResult(null)}>
-                {dailySpin ? t('Spin again') : t(bonusSpins > 1 ? 'Spin again ({n} bonus spins left)' : 'Spin again ({n} bonus spin left)', { n: bonusSpins })}
-              </button>
+              <div className="wheel__buttons">
+                <button className="btn btn--primary wheel__spin" onClick={() => setResult(null)}>
+                  {dailySpin ? t('Spin again') : t(bonusSpins > 1 ? 'Spin again ({n} bonus spins left)' : 'Spin again ({n} bonus spin left)', { n: bonusSpins })}
+                </button>
+                {/* straight on with several at once */}
+                {multi > 1 && (
+                  <button
+                    className="btn btn--ghost wheel__spin"
+                    onClick={() => {
+                      setResult(null)
+                      spin(multi)
+                    }}
+                  >
+                    {t('Spin {n}×', { n: multi })}
+                  </button>
+                )}
+              </div>
             ) : (
               <p className="wheel__note">{t('Come back tomorrow for another spin.')}</p>
             )}
