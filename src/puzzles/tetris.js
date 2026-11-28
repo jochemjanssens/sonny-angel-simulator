@@ -3,7 +3,7 @@ import { makeRandom } from './random.js'
 // Tetris: clear the target number of lines to finish.
 export const TETRIS_TARGETS = { small: 5, medium: 10, large: 20 }
 // endless mode: no target, you're paid for every line you clear
-export const TETRIS_LINE_REWARD = 0.25
+export const TETRIS_LINE_REWARD = 0.75
 export const COLS = 10
 export const ROWS = 18
 

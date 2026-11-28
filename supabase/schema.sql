@@ -422,7 +422,7 @@ create table if not exists public.puzzle_sessions (
 alter table public.puzzle_sessions drop constraint if exists puzzle_sessions_size_check;
 alter table public.puzzle_sessions add constraint puzzle_sessions_size_check
   check (size in ('small', 'medium', 'large') or (size = 'endless' and kind = 'tetris'));
-alter table public.game_config add column if not exists tetris_line numeric(10, 2) not null default 0.25;
+alter table public.game_config add column if not exists tetris_line numeric(10, 2) not null default 0.75;
 create index if not exists puzzle_sessions_user_idx on public.puzzle_sessions (user_id, finished_at);
 create index if not exists puzzle_sessions_tables_idx on public.puzzle_sessions (kind, finished_at) where kind = 'tables';
 alter table public.puzzle_sessions enable row level security;
