@@ -3,6 +3,7 @@ import Angel from '../Angel'
 import { rpc } from '../../lib/supabase'
 import { FIGURE_BY_ID } from '../../data/collections'
 import { TRACK_BY_ID } from '../../data/cars'
+import { RankingRules } from '../puzzles/TablesHighscores'
 import { useT } from '../../i18n'
 
 const MEDALS = ['🥇', '🥈', '🥉']
@@ -50,6 +51,7 @@ export default function TrialHighscores({ userId, track, refreshKey, onProfile }
         <span className="hs__prize">{t('Top 3 win 3, 2 or 1 free wheel spins')}</span>
       </div>
       <p className="hs__ends">{t('Ends in {time} (Monday 00:00 UTC)', { time: left })}</p>
+      <RankingRules race />
       {data.top.length === 0 ? (
         <p className="hs__empty">{t('No times yet this week. Be the first!')}</p>
       ) : (

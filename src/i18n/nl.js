@@ -597,4 +597,11 @@ export default {
   "{n} spins": "{n} draaien",
   "{n} figures": "{n} figuren",
   "{n} figure": "{n} figuur",
+  "How is the ranking counted?": "Hoe wordt de ranglijst geteld?",
+  "Every game counts, so you can be in the list more than once.": "Elk spel telt mee, dus je kunt meer dan één keer in de lijst staan.",
+  "First come everyone's best times, fastest first. Then everyone's second-best times, then the third, and so on.": "Eerst komen ieders beste tijden, de snelste bovenaan. Daarna ieders tweede beste tijd, dan de derde, enzovoort.",
+  "First come everyone's best scores, highest first. Then everyone's second-best scores, then the third, and so on.": "Eerst komen ieders beste scores, de hoogste bovenaan. Daarna ieders tweede beste score, dan de derde, enzovoort.",
+  "So someone else's best always ranks above your second best. With only two players, you can still be 1st and 3rd.": "De beste van een ander staat dus altijd boven jouw tweede beste. Met maar twee spelers kun je wel 1e én 3e worden.",
+  "A tie goes to whoever got it first.": "Bij een gelijke stand gaat wie het eerst haalde voor.",
+  "When the week ends (Monday 00:00 UTC), places 1, 2 and 3 win 3, 2 and 1 free wheel spins.": "Als de week eindigt (maandag 00:00 UTC), winnen plaats 1, 2 en 3 respectievelijk 3, 2 en 1 gratis draaien aan het rad.",
 }

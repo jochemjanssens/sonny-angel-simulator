@@ -11,6 +11,23 @@ const SIZE_LABEL = { small: 'Small', medium: 'Medium', large: 'Large', endless: 
 // most lines in endless Tetris. The top 3 of the week win free wheel spins
 // (3, 2, 1), given by the server once the week is over (Monday 00:00 UTC).
 export const PRIZE_SPINS = [3, 2, 1]
+
+// How the list is counted (shared with the race highscores).
+export function RankingRules({ race = false }) {
+  const { t } = useT()
+  return (
+    <details className="hs__rules">
+      <summary>{t('How is the ranking counted?')}</summary>
+      <ul>
+        <li>{t('Every game counts, so you can be in the list more than once.')}</li>
+        <li>{race ? t("First come everyone's best times, fastest first. Then everyone's second-best times, then the third, and so on.") : t("First come everyone's best scores, highest first. Then everyone's second-best scores, then the third, and so on.")}</li>
+        <li>{t("So someone else's best always ranks above your second best. With only two players, you can still be 1st and 3rd.")}</li>
+        <li>{t('A tie goes to whoever got it first.')}</li>
+        <li>{t('When the week ends (Monday 00:00 UTC), places 1, 2 and 3 win 3, 2 and 1 free wheel spins.')}</li>
+      </ul>
+    </details>
+  )
+}
 export default function TablesHighscores({ userId, size, refreshKey, onProfile }) {
   const { t } = useT()
   const [data, setData] = useState(null)
@@ -51,6 +68,7 @@ export default function TablesHighscores({ userId, size, refreshKey, onProfile }
         {size !== 'endless' && `${t(TABLES_SIZES[size].label)} · `}
         {t('Ends in {time} (Monday 00:00 UTC)', { time: left })}
       </p>
+      <RankingRules />
       {data.top.length === 0 ? (
         <p className="hs__empty">{t('No scores yet this week. Be the first!')}</p>
       ) : (

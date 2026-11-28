@@ -4480,3 +4480,22 @@ h3 {
   font-weight: 800;
   margin: 0;
 }
+
+/* how the highscores are counted */
+.hs__rules {
+  margin: 0 0 10px;
+  font-size: 0.86rem;
+  color: var(--muted);
+}
+.hs__rules summary {
+  cursor: pointer;
+  font-weight: 800;
+  color: var(--ink);
+}
+.hs__rules ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}
+.hs__rules li {
+  margin: 2px 0;
+}
