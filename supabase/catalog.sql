@@ -6,8 +6,8 @@ insert into public.game_config (id, starting_wallet, daily_allowance, welcome_bo
   on conflict (id) do update set starting_wallet = excluded.starting_wallet, daily_allowance = excluded.daily_allowance,
     welcome_bonus = excluded.welcome_bonus, bank_rate = excluded.bank_rate, puzzle_small = excluded.puzzle_small,
     puzzle_medium = excluded.puzzle_medium, puzzle_large = excluded.puzzle_large;
-insert into public.series (id, price, secret_odds, brand) values ('animal1', 12.95, 144, 'sonny')
-  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand;
+insert into public.series (id, price, secret_odds, brand, shop) values ('animal1', 12.95, 144, 'sonny', true)
+  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand, shop = excluded.shop;
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('animal1-0', 'animal1', 26, false, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
@@ -47,8 +47,8 @@ insert into public.figures (id, series_id, value, secret, speed, accel, grip, we
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('animal1-secret', 'animal1', 185, true, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
-insert into public.series (id, price, secret_odds, brand) values ('animal2', 12.95, 144, 'sonny')
-  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand;
+insert into public.series (id, price, secret_odds, brand, shop) values ('animal2', 12.95, 144, 'sonny', true)
+  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand, shop = excluded.shop;
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('animal2-0', 'animal2', 10, false, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
@@ -88,8 +88,8 @@ insert into public.figures (id, series_id, value, secret, speed, accel, grip, we
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('animal2-secret', 'animal2', 165, true, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
-insert into public.series (id, price, secret_odds, brand) values ('animal3', 12.95, 144, 'sonny')
-  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand;
+insert into public.series (id, price, secret_odds, brand, shop) values ('animal3', 12.95, 144, 'sonny', true)
+  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand, shop = excluded.shop;
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('animal3-0', 'animal3', 8, false, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
@@ -129,8 +129,8 @@ insert into public.figures (id, series_id, value, secret, speed, accel, grip, we
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('animal3-secret', 'animal3', 175, true, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
-insert into public.series (id, price, secret_odds, brand) values ('cat', 12.95, 144, 'sonny')
-  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand;
+insert into public.series (id, price, secret_odds, brand, shop) values ('cat', 12.95, 144, 'sonny', true)
+  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand, shop = excluded.shop;
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('cat-0', 'cat', 10, false, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
@@ -170,8 +170,8 @@ insert into public.figures (id, series_id, value, secret, speed, accel, grip, we
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('cat-secret', 'cat', 220, true, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
-insert into public.series (id, price, secret_odds, brand) values ('dog', 12.95, 144, 'sonny')
-  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand;
+insert into public.series (id, price, secret_odds, brand, shop) values ('dog', 12.95, 144, 'sonny', true)
+  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand, shop = excluded.shop;
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('dog-0', 'dog', 15, false, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
@@ -214,8 +214,8 @@ insert into public.figures (id, series_id, value, secret, speed, accel, grip, we
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('dog-secret', 'dog', 190, true, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
-insert into public.series (id, price, secret_odds, brand) values ('bugs', 12.95, 144, 'sonny')
-  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand;
+insert into public.series (id, price, secret_odds, brand, shop) values ('bugs', 12.95, 144, 'sonny', true)
+  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand, shop = excluded.shop;
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('bugs-0', 'bugs', 12, false, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
@@ -255,8 +255,8 @@ insert into public.figures (id, series_id, value, secret, speed, accel, grip, we
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('bugs-secret', 'bugs', 150, true, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
-insert into public.series (id, price, secret_odds, brand) values ('fruit', 12.95, 144, 'sonny')
-  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand;
+insert into public.series (id, price, secret_odds, brand, shop) values ('fruit', 12.95, 144, 'sonny', true)
+  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand, shop = excluded.shop;
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('fruit-0', 'fruit', 9, false, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
@@ -296,8 +296,8 @@ insert into public.figures (id, series_id, value, secret, speed, accel, grip, we
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('fruit-secret', 'fruit', 150, true, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
-insert into public.series (id, price, secret_odds, brand) values ('vegetable', 12.95, 144, 'sonny')
-  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand;
+insert into public.series (id, price, secret_odds, brand, shop) values ('vegetable', 12.95, 144, 'sonny', true)
+  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand, shop = excluded.shop;
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('vegetable-0', 'vegetable', 10, false, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
@@ -337,8 +337,8 @@ insert into public.figures (id, series_id, value, secret, speed, accel, grip, we
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('vegetable-secret', 'vegetable', 140, true, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
-insert into public.series (id, price, secret_odds, brand) values ('marine', 12.95, 144, 'sonny')
-  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand;
+insert into public.series (id, price, secret_odds, brand, shop) values ('marine', 12.95, 144, 'sonny', true)
+  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand, shop = excluded.shop;
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('marine-0', 'marine', 11, false, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
@@ -378,8 +378,8 @@ insert into public.figures (id, series_id, value, secret, speed, accel, grip, we
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('marine-secret', 'marine', 155, true, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
-insert into public.series (id, price, secret_odds, brand) values ('flower', 12.95, 144, 'sonny')
-  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand;
+insert into public.series (id, price, secret_odds, brand, shop) values ('flower', 12.95, 144, 'sonny', true)
+  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand, shop = excluded.shop;
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('flower-0', 'flower', 13, false, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
@@ -419,8 +419,8 @@ insert into public.figures (id, series_id, value, secret, speed, accel, grip, we
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('flower-secret', 'flower', 160, true, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
-insert into public.series (id, price, secret_odds, brand) values ('sweets', 12.95, 144, 'sonny')
-  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand;
+insert into public.series (id, price, secret_odds, brand, shop) values ('sweets', 12.95, 144, 'sonny', true)
+  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand, shop = excluded.shop;
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('sweets-0', 'sweets', 11, false, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
@@ -460,8 +460,8 @@ insert into public.figures (id, series_id, value, secret, speed, accel, grip, we
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('sweets-secret', 'sweets', 170, true, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
-insert into public.series (id, price, secret_odds, brand) values ('circus', 12.95, 144, 'sonny')
-  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand;
+insert into public.series (id, price, secret_odds, brand, shop) values ('circus', 12.95, 144, 'sonny', true)
+  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand, shop = excluded.shop;
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('circus-0', 'circus', 16, false, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
@@ -501,8 +501,8 @@ insert into public.figures (id, series_id, value, secret, speed, accel, grip, we
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('circus-secret', 'circus', 180, true, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
-insert into public.series (id, price, secret_odds, brand) values ('unicorn', 12.95, 144, 'sonny')
-  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand;
+insert into public.series (id, price, secret_odds, brand, shop) values ('unicorn', 12.95, 144, 'sonny', true)
+  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand, shop = excluded.shop;
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('unicorn-0', 'unicorn', 22, false, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
@@ -542,8 +542,8 @@ insert into public.figures (id, series_id, value, secret, speed, accel, grip, we
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('unicorn-secret', 'unicorn', 200, true, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
-insert into public.series (id, price, secret_odds, brand) values ('mermaid', 12.95, 144, 'sonny')
-  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand;
+insert into public.series (id, price, secret_odds, brand, shop) values ('mermaid', 12.95, 144, 'sonny', true)
+  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand, shop = excluded.shop;
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('mermaid-0', 'mermaid', 14, false, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
@@ -583,8 +583,8 @@ insert into public.figures (id, series_id, value, secret, speed, accel, grip, we
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('mermaid-secret', 'mermaid', 190, true, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
-insert into public.series (id, price, secret_odds, brand) values ('racing', 12.95, 144, 'sonny')
-  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand;
+insert into public.series (id, price, secret_odds, brand, shop) values ('racing', 12.95, 144, 'sonny', true)
+  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand, shop = excluded.shop;
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('racing-0', 'racing', 14, false, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
@@ -624,8 +624,8 @@ insert into public.figures (id, series_id, value, secret, speed, accel, grip, we
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('racing-secret', 'racing', 190, true, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
-insert into public.series (id, price, secret_odds, brand) values ('sports', 12.95, 144, 'sonny')
-  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand;
+insert into public.series (id, price, secret_odds, brand, shop) values ('sports', 12.95, 144, 'sonny', true)
+  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand, shop = excluded.shop;
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('sports-0', 'sports', 14, false, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
@@ -665,8 +665,8 @@ insert into public.figures (id, series_id, value, secret, speed, accel, grip, we
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('sports-secret', 'sports', 185, true, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
-insert into public.series (id, price, secret_odds, brand) values ('miffy', 12.95, 144, 'sonny')
-  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand;
+insert into public.series (id, price, secret_odds, brand, shop) values ('miffy', 12.95, 144, 'sonny', true)
+  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand, shop = excluded.shop;
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('miffy-0', 'miffy', 16, false, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
@@ -706,8 +706,82 @@ insert into public.figures (id, series_id, value, secret, speed, accel, grip, we
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('miffy-secret', 'miffy', 190, true, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
-insert into public.series (id, price, secret_odds, brand) values ('halloween', 14.95, 72, 'sonny')
-  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand;
+insert into public.series (id, price, secret_odds, brand, shop) values ('advent', 0, 72, 'sonny', false)
+  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand, shop = excluded.shop;
+insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('advent-0', 'advent', 10, false, null, null, null, null, null)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
+    speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
+insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('advent-1', 'advent', 11, false, null, null, null, null, null)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
+    speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
+insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('advent-2', 'advent', 12, false, null, null, null, null, null)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
+    speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
+insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('advent-3', 'advent', 13, false, null, null, null, null, null)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
+    speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
+insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('advent-4', 'advent', 14, false, null, null, null, null, null)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
+    speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
+insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('advent-5', 'advent', 11, false, null, null, null, null, null)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
+    speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
+insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('advent-6', 'advent', 10, false, null, null, null, null, null)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
+    speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
+insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('advent-7', 'advent', 9, false, null, null, null, null, null)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
+    speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
+insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('advent-8', 'advent', 9, false, null, null, null, null, null)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
+    speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
+insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('advent-9', 'advent', 11, false, null, null, null, null, null)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
+    speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
+insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('advent-10', 'advent', 9, false, null, null, null, null, null)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
+    speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
+insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('advent-11', 'advent', 10, false, null, null, null, null, null)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
+    speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
+insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('advent-12', 'advent', 10, false, null, null, null, null, null)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
+    speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
+insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('advent-13', 'advent', 13, false, null, null, null, null, null)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
+    speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
+insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('advent-14', 'advent', 12, false, null, null, null, null, null)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
+    speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
+insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('advent-15', 'advent', 12, false, null, null, null, null, null)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
+    speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
+insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('advent-16', 'advent', 10, false, null, null, null, null, null)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
+    speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
+insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('advent-17', 'advent', 9, false, null, null, null, null, null)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
+    speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
+insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('advent-18', 'advent', 10, false, null, null, null, null, null)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
+    speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
+insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('advent-19', 'advent', 12, false, null, null, null, null, null)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
+    speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
+insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('advent-20', 'advent', 11, false, null, null, null, null, null)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
+    speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
+insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('advent-21', 'advent', 10, false, null, null, null, null, null)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
+    speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
+insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('advent-22', 'advent', 10, false, null, null, null, null, null)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
+    speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
+insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('advent-secret', 'advent', 220, true, null, null, null, null, null)
+  on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
+    speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
+insert into public.series (id, price, secret_odds, brand, shop) values ('halloween', 14.95, 72, 'sonny', true)
+  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand, shop = excluded.shop;
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('halloween-0', 'halloween', 13, false, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
@@ -729,8 +803,8 @@ insert into public.figures (id, series_id, value, secret, speed, accel, grip, we
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('halloween-secret', 'halloween', 200, true, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
-insert into public.series (id, price, secret_odds, brand) values ('christmas', 14.95, 72, 'sonny')
-  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand;
+insert into public.series (id, price, secret_odds, brand, shop) values ('christmas', 14.95, 72, 'sonny', true)
+  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand, shop = excluded.shop;
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('christmas-0', 'christmas', 15, false, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
@@ -752,8 +826,8 @@ insert into public.figures (id, series_id, value, secret, speed, accel, grip, we
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('christmas-secret', 'christmas', 230, true, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
-insert into public.series (id, price, secret_odds, brand) values ('valentine', 14.95, 72, 'sonny')
-  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand;
+insert into public.series (id, price, secret_odds, brand, shop) values ('valentine', 14.95, 72, 'sonny', true)
+  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand, shop = excluded.shop;
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('valentine-0', 'valentine', 16, false, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
@@ -775,8 +849,8 @@ insert into public.figures (id, series_id, value, secret, speed, accel, grip, we
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('valentine-secret', 'valentine', 210, true, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
-insert into public.series (id, price, secret_odds, brand) values ('easter', 14.95, 72, 'sonny')
-  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand;
+insert into public.series (id, price, secret_odds, brand, shop) values ('easter', 14.95, 72, 'sonny', true)
+  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand, shop = excluded.shop;
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('easter-0', 'easter', 15, false, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
@@ -798,8 +872,8 @@ insert into public.figures (id, series_id, value, secret, speed, accel, grip, we
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('easter-secret', 'easter', 190, true, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
-insert into public.series (id, price, secret_odds, brand) values ('smiski-living', 11.95, 144, 'smiski')
-  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand;
+insert into public.series (id, price, secret_odds, brand, shop) values ('smiski-living', 11.95, 144, 'smiski', true)
+  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand, shop = excluded.shop;
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('smiski-living-0', 'smiski-living', 12, false, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
@@ -821,8 +895,8 @@ insert into public.figures (id, series_id, value, secret, speed, accel, grip, we
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('smiski-living-secret', 'smiski-living', 120, true, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
-insert into public.series (id, price, secret_odds, brand) values ('smiski-bath', 11.95, 144, 'smiski')
-  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand;
+insert into public.series (id, price, secret_odds, brand, shop) values ('smiski-bath', 11.95, 144, 'smiski', true)
+  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand, shop = excluded.shop;
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('smiski-bath-0', 'smiski-bath', 10, false, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
@@ -844,8 +918,8 @@ insert into public.figures (id, series_id, value, secret, speed, accel, grip, we
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('smiski-bath-secret', 'smiski-bath', 120, true, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
-insert into public.series (id, price, secret_odds, brand) values ('smiski-bed', 11.95, 144, 'smiski')
-  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand;
+insert into public.series (id, price, secret_odds, brand, shop) values ('smiski-bed', 11.95, 144, 'smiski', true)
+  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand, shop = excluded.shop;
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('smiski-bed-0', 'smiski-bed', 10, false, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
@@ -867,8 +941,8 @@ insert into public.figures (id, series_id, value, secret, speed, accel, grip, we
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('smiski-bed-secret', 'smiski-bed', 120, true, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
-insert into public.series (id, price, secret_odds, brand) values ('smiski-exercise', 11.95, 144, 'smiski')
-  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand;
+insert into public.series (id, price, secret_odds, brand, shop) values ('smiski-exercise', 11.95, 144, 'smiski', true)
+  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand, shop = excluded.shop;
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('smiski-exercise-0', 'smiski-exercise', 10, false, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
@@ -890,8 +964,8 @@ insert into public.figures (id, series_id, value, secret, speed, accel, grip, we
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('smiski-exercise-secret', 'smiski-exercise', 120, true, null, null, null, null, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
-insert into public.series (id, price, secret_odds, brand) values ('cars-street', 11.95, 144, 'cars')
-  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand;
+insert into public.series (id, price, secret_odds, brand, shop) values ('cars-street', 11.95, 144, 'cars', true)
+  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand, shop = excluded.shop;
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('cars-street-0', 'cars-street', 13, false, 8, 7, 6, 4, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
@@ -919,8 +993,8 @@ insert into public.figures (id, series_id, value, secret, speed, accel, grip, we
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('cars-street-secret', 'cars-street', 150, true, 10, 9, 8, 4, 'speed')
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
-insert into public.series (id, price, secret_odds, brand) values ('cars-offroad', 11.95, 144, 'cars')
-  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand;
+insert into public.series (id, price, secret_odds, brand, shop) values ('cars-offroad', 11.95, 144, 'cars', true)
+  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand, shop = excluded.shop;
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('cars-offroad-0', 'cars-offroad', 11, false, 5, 6, 9, 9, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
@@ -948,8 +1022,8 @@ insert into public.figures (id, series_id, value, secret, speed, accel, grip, we
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('cars-offroad-secret', 'cars-offroad', 150, true, 7, 7, 10, 10, 'grip')
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
-insert into public.series (id, price, secret_odds, brand) values ('cars-raceday', 11.95, 144, 'cars')
-  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand;
+insert into public.series (id, price, secret_odds, brand, shop) values ('cars-raceday', 11.95, 144, 'cars', true)
+  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand, shop = excluded.shop;
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('cars-raceday-0', 'cars-raceday', 14, false, 10, 9, 8, 2, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
@@ -977,8 +1051,8 @@ insert into public.figures (id, series_id, value, secret, speed, accel, grip, we
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('cars-raceday-secret', 'cars-raceday', 160, true, 10, 10, 6, 3, 'accel')
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;
-insert into public.series (id, price, secret_odds, brand) values ('cars-city', 11.95, 144, 'cars')
-  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand;
+insert into public.series (id, price, secret_odds, brand, shop) values ('cars-city', 11.95, 144, 'cars', true)
+  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand, shop = excluded.shop;
 insert into public.figures (id, series_id, value, secret, speed, accel, grip, weight, boost_stat) values ('cars-city-0', 'cars-city', 10, false, 5, 5, 6, 9, null)
   on conflict (id) do update set series_id = excluded.series_id, value = excluded.value, secret = excluded.secret,
     speed = excluded.speed, accel = excluded.accel, grip = excluded.grip, weight = excluded.weight, boost_stat = excluded.boost_stat;

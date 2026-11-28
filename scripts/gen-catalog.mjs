@@ -18,8 +18,8 @@ const lines = [
 ]
 for (const s of SERIES) {
   lines.push(
-    `insert into public.series (id, price, secret_odds, brand) values (${q(s.id)}, ${s.price}, ${s.odds}, ${q(s.brand)})`,
-    '  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand;',
+    `insert into public.series (id, price, secret_odds, brand, shop) values (${q(s.id)}, ${s.price}, ${s.odds}, ${q(s.brand)}, ${!s.advent})`,
+    '  on conflict (id) do update set price = excluded.price, secret_odds = excluded.secret_odds, brand = excluded.brand, shop = excluded.shop;',
   )
   for (const f of [...s.figures, s.secret]) {
     // cars also carry their race stats

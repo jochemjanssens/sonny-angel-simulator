@@ -36,7 +36,7 @@ export function SeriesGrid({ inventory, onSelect }) {
                   <span>
                     {t('{owned}/{total} collected', { owned, total: s.figures.length })} {secret && <span className="star">★</span>}
                   </span>
-                  <span className="price">{euro(s.price)}</span>
+                  <span className="price">{s.advent ? `🎄 ${t('Advent calendar')}` : euro(s.price)}</span>
                 </div>
               </div>
             </button>
@@ -47,7 +47,7 @@ export function SeriesGrid({ inventory, onSelect }) {
   )
 }
 
-export function SeriesDetail({ series, inventory, seen = {}, listed = new Set(), wallet, onBack, onBuy, onBuyMany, onFigure }) {
+export function SeriesDetail({ series, inventory, seen = {}, listed = new Set(), wallet, onBack, onBuy, onBuyMany, onFigure, onAdvent }) {
   const owned = series.figures.filter((f) => inventory[f.id]).length
   const canAfford = wallet >= series.price
   // Values stay a mystery until you've pulled that figure at least once.
@@ -72,7 +72,7 @@ export function SeriesDetail({ series, inventory, seen = {}, listed = new Set(),
           <dl className="facts">
             <div>
               <dt>{t('Box price')}</dt>
-              <dd>{euro(series.price)}</dd>
+              <dd>{series.advent ? t('Free') : euro(series.price)}</dd>
             </div>
             <div>
               <dt>{t('Collected')}</dt>
@@ -82,9 +82,19 @@ export function SeriesDetail({ series, inventory, seen = {}, listed = new Set(),
             </div>
             <div>
               <dt>{t('Secret odds')}</dt>
-              <dd>{t('1 in {n}', { n: series.odds })}</dd>
+              <dd>{series.advent ? t('Door 24') : t('1 in {n}', { n: series.odds })}</dd>
             </div>
           </dl>
+          {series.advent ? (
+            <div className="detail__buy">
+              <p className="detail__note">{t('These angels are not sold in the shop: you only get them from the advent calendar, one door a day in December.')}</p>
+              {onAdvent && (
+                <button className="btn btn--primary btn--lg" onClick={onAdvent}>
+                  🎄 {t('To the advent calendar')}
+                </button>
+              )}
+            </div>
+          ) : (
           <div className="detail__buy">
             <button className="btn btn--primary btn--lg" onClick={onBuy} disabled={!canAfford}>
               {t('Buy a blind box · {price}', { price: euro(series.price) })}
@@ -93,7 +103,8 @@ export function SeriesDetail({ series, inventory, seen = {}, listed = new Set(),
               {t('Buy 10 boxes · {price}', { price: euro(series.price * 10) })}
             </button>
           </div>
-          {!canAfford && (
+          )}
+          {!canAfford && !series.advent && (
             <p className="detail__warn">{t('Not enough budget — come back tomorrow or sell some duplicates.')}</p>
           )}
         </div>

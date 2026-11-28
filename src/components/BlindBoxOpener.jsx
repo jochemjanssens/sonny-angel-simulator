@@ -106,9 +106,12 @@ export default function BlindBoxOpener({ series, figure, isNew, canAffordAnother
               <button className="btn btn--ghost" onClick={onClose}>
                 {t('Put on my shelf')}
               </button>
-              <button className="btn btn--primary" onClick={onAgain} disabled={!canAffordAnother}>
-                {t('Open another · {price}', { price: euro(series.price) })}
-              </button>
+              {/* not for the advent calendar: those boxes aren't sold */}
+              {onAgain && (
+                <button className="btn btn--primary" onClick={onAgain} disabled={!canAffordAnother}>
+                  {t('Open another · {price}', { price: euro(series.price) })}
+                </button>
+              )}
             </div>
           </div>
         )}

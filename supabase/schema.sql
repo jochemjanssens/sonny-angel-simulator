@@ -28,6 +28,8 @@ create table if not exists public.series (
 );
 -- which simulator a series belongs to: the Sonny Angel or the Smiski one
 alter table public.series add column if not exists brand text not null default 'sonny' check (brand in ('sonny', 'smiski', 'cars'));
+-- series that are not sold in the shop (the advent calendar series)
+alter table public.series add column if not exists shop boolean not null default true;
 
 create table if not exists public.figures (
   id text primary key,
@@ -275,6 +277,7 @@ declare u uuid := public._uid();
 begin
   select * into s from public.series where id = p_series;
   if not found then raise exception 'Unknown series'; end if;
+  if not s.shop then raise exception 'This series is not sold in the shop'; end if;
 
   update public.players set wallet = wallet - s.price, opened = opened + 1, spent = spent + s.price
     where id = u and wallet >= s.price;
@@ -674,7 +677,7 @@ begin
     for i in 1 .. coalesce(p_count, 1) loop
       -- a figure from the simulator the player is spinning in
       select f2.id into f from public.figures f2 join public.series s2 on s2.id = f2.series_id
-        where f2.secret = (p_kind = 'secret') and s2.brand = p_brand order by random() limit 1;
+        where f2.secret = (p_kind = 'secret') and s2.brand = p_brand and s2.shop order by random() limit 1;
       figs := figs || f;
       news := news || public._give(u, f);
     end loop;
@@ -1296,6 +1299,65 @@ begin
   return jsonb_build_object('speed', s, 'accel', a, 'grip', g, 'weight', w);
 end $$;
 
+-- ---------------------------------------------------------------- advent calendar
+
+-- From 1 December one door a day (UTC); missed doors can still be opened until
+-- 31 December. Each door holds a blind box of the advent series: a figure you
+-- don't have yet, so opening every door completes the set. Door 24 holds the
+-- secret.
+create table if not exists public.advent_doors (
+  user_id uuid not null references auth.users (id) on delete cascade,
+  year int not null,
+  day int not null check (day between 1 and 24),
+  figure_id text not null references public.figures (id),
+  opened_at timestamptz not null default now(),
+  primary key (user_id, year, day)
+);
+alter table public.advent_doors enable row level security;
+drop policy if exists "own doors" on public.advent_doors;
+create policy "own doors" on public.advent_doors for select to authenticated using (user_id = auth.uid());
+
+-- today's date for the calendar (a function, so tests can pretend it's December)
+create or replace function public._advent_today() returns date
+language sql stable as $$ select (now() at time zone 'utc')::date $$;
+
+create or replace function public.open_advent_door(p_day int) returns jsonb
+language plpgsql security definer set search_path = public as $$
+declare u uuid := public._uid();
+  today date := public._advent_today();
+  yr int := extract(year from today)::int;
+  fig text;
+  fresh boolean;
+begin
+  if p_day is null or p_day < 1 or p_day > 24 then raise exception 'Unknown door'; end if;
+  if extract(month from today) <> 12 or extract(day from today) < p_day then
+    raise exception 'This door can''t be opened yet';
+  end if;
+  if exists (select 1 from public.advent_doors where user_id = u and year = yr and day = p_day) then
+    raise exception 'You already opened this door';
+  end if;
+
+  if p_day = 24 then
+    select id into fig from public.figures where series_id = 'advent' and secret;
+    update public.players set secrets = secrets + 1 where id = u;
+  else
+    -- a figure you don't have yet (on your shelf or behind an earlier door)
+    select f.id into fig from public.figures f
+      where f.series_id = 'advent' and not f.secret
+        and not exists (select 1 from public.inventory i where i.user_id = u and i.figure_id = f.id and i.count > 0)
+        and not exists (select 1 from public.advent_doors d where d.user_id = u and d.year = yr and d.figure_id = f.id)
+      order by random() limit 1;
+    if fig is null then
+      select id into fig from public.figures where series_id = 'advent' and not secret order by random() limit 1;
+    end if;
+  end if;
+  if fig is null then raise exception 'The advent calendar isn''t ready yet'; end if;
+
+  insert into public.advent_doors (user_id, year, day, figure_id) values (u, yr, p_day, fig);
+  fresh := public._give(u, fig);
+  return jsonb_build_object('fig_id', fig, 'is_new', fresh);
+end $$;
+
 -- ---------------------------------------------------------------- permissions
 
 -- Supabase grants table access to its roles by default; RLS above limits reads,
@@ -1333,7 +1395,8 @@ grant execute on function
   public.public_shelf(uuid),
   public.accept_offer(uuid),
   public.reject_offer(uuid),
-  public.withdraw_offer(uuid)
+  public.withdraw_offer(uuid),
+  public.open_advent_door(int)
 to authenticated;
 -- RLS policies call auth.uid(); _uid is used inside the functions above.
 grant execute on function public._uid() to authenticated;

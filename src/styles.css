@@ -4499,3 +4499,125 @@ h3 {
 .hs__rules li {
   margin: 2px 0;
 }
+
+/* ---------------------------------------------------------------- advent calendar */
+.advent__status {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  margin: 0 0 14px;
+}
+.advent__count {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.advent__grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+  padding: 14px;
+  border-radius: 22px;
+  background: linear-gradient(160deg, #1f6b45, #2e8b57 55%, #1f6b45);
+  box-shadow: inset 0 0 0 4px rgba(255, 255, 255, 0.15);
+}
+.advent__door {
+  position: relative;
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border: 2px dashed rgba(255, 255, 255, 0.55);
+  border-radius: 14px;
+  background: #d7263d;
+  color: #fff;
+  font-family: var(--font-display);
+  overflow: hidden;
+  padding: 0;
+}
+.advent__door:nth-child(3n + 2) {
+  background: #c9a227;
+}
+.advent__door:nth-child(4n + 1) {
+  background: #b81f33;
+}
+.advent__door.is-big {
+  background: #8c1c2b;
+}
+.advent__day {
+  font-size: 1.7rem;
+  line-height: 1;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.15);
+}
+.advent__day--small {
+  position: absolute;
+  top: 4px;
+  left: 7px;
+  font-size: 0.85rem;
+}
+.advent__hint {
+  font-size: 0.8rem;
+  background: #fff;
+  color: #d7263d;
+  border-radius: 999px;
+  padding: 1px 8px;
+}
+.advent__lock {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+.advent__door.is-locked {
+  filter: brightness(0.9);
+  cursor: default;
+}
+.advent__door.is-ready {
+  cursor: pointer;
+  border-style: solid;
+  border-color: #ffe08a;
+  animation: advent-glow 1.6s ease-in-out infinite;
+}
+.advent__door.is-ready:hover {
+  transform: translateY(-2px) rotate(-1deg);
+}
+.advent__door.is-today {
+  box-shadow: 0 0 0 3px #ffe08a;
+}
+.advent__door.is-open {
+  background: #fff8ef;
+  color: #2e8b57;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  cursor: default;
+}
+.advent__door.is-open .angel {
+  width: 72%;
+  height: auto;
+  margin-top: 6px;
+}
+@keyframes advent-glow {
+  50% {
+    box-shadow: 0 0 0 4px rgba(255, 224, 138, 0.55), 0 0 18px rgba(255, 224, 138, 0.8);
+  }
+}
+.detail__note {
+  margin: 0 0 10px;
+  color: var(--muted);
+}
+@media (max-width: 560px) {
+  .advent__grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 7px;
+    padding: 10px;
+  }
+  .advent__day {
+    font-size: 1.3rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .advent__door.is-ready {
+    animation: none;
+  }
+}

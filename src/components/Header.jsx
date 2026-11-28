@@ -15,7 +15,7 @@ function untilMidnight() {
   return `${h}h ${String(m).padStart(2, '0')}m`
 }
 
-export default function Header({ tab, setTab, wallet, canClaim, onClaim, canSpin, bonusSpins = 0, onWheel, ownedUnique, totalUnique, marketBadge, username, onLogout, onProfile }) {
+export default function Header({ tab, setTab, wallet, canClaim, onClaim, canSpin, bonusSpins = 0, onWheel, ownedUnique, totalUnique, marketBadge, showAdvent = false, adventReady = 0, username, onLogout, onProfile }) {
   const [countdown, setCountdown] = useState(untilMidnight)
   const { t } = useT()
 
@@ -46,6 +46,11 @@ export default function Header({ tab, setTab, wallet, canClaim, onClaim, canSpin
           <button className={`tabs__tab ${tab === 'puzzles' ? 'is-active' : ''}`} onClick={() => setTab('puzzles')}>
             {t('Puzzles')}
           </button>
+          {showAdvent && (
+            <button className={`tabs__tab ${tab === 'advent' ? 'is-active' : ''}`} onClick={() => setTab('advent')}>
+              🎄 {t('Advent')} {adventReady > 0 && <span className="dot-badge">{adventReady}</span>}
+            </button>
+          )}
           {isCars && (
             <button className={`tabs__tab ${tab === 'race' ? 'is-active' : ''}`} onClick={() => setTab('race')}>
               {t('Race')}

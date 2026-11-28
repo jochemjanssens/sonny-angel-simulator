@@ -19,6 +19,7 @@ const BRAND_ARGS = BRAND === 'sonny' ? {} : { p_brand: BRAND }
 import { rpc, supabase } from './lib/supabase'
 import { readLocalSave } from './lib/localSave'
 import { useOnlineGame, utcTodayKey } from './hooks/useOnlineGame'
+import AdventView, { adventVisible, readyDoors, useAdventDoors } from './components/AdventView'
 import { useMarket } from './hooks/useMarket'
 import { useT } from './i18n'
 
@@ -57,6 +58,7 @@ function Game({ userId }) {
   // the new figure can't be spotted before its reveal.
   const [frozen, setFrozen] = useState(null)
   const revealed = useCallback(() => setFrozen(null), [])
+  const advent = useAdventDoors(userId)
   const [figureId, setFigureId] = useState(null)
   const [toast, setToast] = useState(null)
   const [localSave] = useState(readLocalSave)
@@ -113,6 +115,20 @@ function Game({ userId }) {
       const row = Array.isArray(data) ? data[0] : data
       setOpening({ seriesId: series.id, figureId: row.fig_id, isNew: row.is_new, key: Date.now() })
       game.refresh()
+    } catch (err) {
+      setFrozen(null)
+      notify(t(err.message))
+    }
+  }
+
+  // a door of the advent calendar: a free blind box of the advent series
+  const openDoor = async (day) => {
+    setFrozen({ inventory: state.inventory, firstSeen: state.firstSeen })
+    try {
+      const row = await rpc('open_advent_door', { p_day: day })
+      setOpening({ seriesId: 'advent', figureId: row.fig_id, isNew: row.is_new, key: Date.now() })
+      game.refresh()
+      advent.reload()
     } catch (err) {
       setFrozen(null)
       notify(t(err.message))
@@ -182,6 +198,8 @@ function Game({ userId }) {
         ownedUnique={ownedUnique}
         totalUnique={totalUnique}
         marketBadge={market.actionCount}
+        showAdvent={adventVisible()}
+        adventReady={readyDoors(advent.doors)}
         username={state.username}
         onLogout={() => supabase.auth.signOut()}
         onProfile={() => openProfile(userId)}
@@ -200,6 +218,7 @@ function Game({ userId }) {
               onBuy={() => buy(series)}
               onBuyMany={() => buyMany(series)}
               onFigure={setFigureId}
+              onAdvent={adventVisible() ? () => { setSeriesId(null); setTab('advent') } : undefined}
             />
           ) : (
             <SeriesGrid inventory={inventory} onSelect={setSeriesId} />
@@ -227,6 +246,7 @@ function Game({ userId }) {
             onSellDupes={sellDuplicates}
           />
         )}
+        {tab === 'advent' && <AdventView doors={advent.doors} inventory={inventory} onOpen={openDoor} />}
         {tab === 'puzzles' && <PuzzlesView userId={userId} notify={notify} onEarned={game.refresh} onProfile={openProfile} />}
         {tab === 'race' && (
           <RaceView userId={userId} inventory={inventory} wallet={state.wallet} notify={notify} onChanged={game.refresh} onProfile={openProfile} />
@@ -259,7 +279,7 @@ function Game({ userId }) {
           figure={FIGURE_BY_ID[opening.figureId]}
           isNew={opening.isNew}
           canAffordAnother={state.wallet >= SERIES_BY_ID[opening.seriesId].price}
-          onAgain={() => buy(SERIES_BY_ID[opening.seriesId])}
+          onAgain={SERIES_BY_ID[opening.seriesId].advent ? undefined : () => buy(SERIES_BY_ID[opening.seriesId])}
           onReveal={() => setFrozen(null)}
           onClose={() => {
             setOpening(null)
