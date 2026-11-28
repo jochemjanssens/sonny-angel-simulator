@@ -56,7 +56,7 @@ export default function TablesHighscores({ userId, size, refreshKey, onProfile }
       ) : (
         <ol className="hs__list">
           {data.top.map((row, i) => (
-            <li key={row.user_id} className={row.user_id === userId ? 'is-me' : ''}>
+            <li key={i} className={row.user_id === userId ? 'is-me' : ''}>
               <span className="hs__rank">{MEDALS[i] ?? i + 1}</span>
               {row.username && onProfile ? (
                 <button className="hs__name user-link" onClick={() => onProfile(row.user_id)}>
@@ -78,7 +78,7 @@ export default function TablesHighscores({ userId, size, refreshKey, onProfile }
         <p className="hs__last">
           {t('Last week:')}{' '}
           {data.last.map((row, i) => (
-            <span key={row.user_id}>
+            <span key={i}>
               {i > 0 && ' · '}
               {MEDALS[i]} {row.user_id === userId ? t('you') : name(row)} ({row.score})
             </span>
