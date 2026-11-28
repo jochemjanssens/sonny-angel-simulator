@@ -4621,3 +4621,13 @@ h3 {
     animation: none;
   }
 }
+
+/* a door whose day has passed without opening it */
+.advent__door.is-missed {
+  filter: grayscale(0.85) brightness(0.85);
+  cursor: default;
+}
+.advent__missed {
+  font-size: 0.75rem;
+  opacity: 0.9;
+}

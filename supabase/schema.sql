@@ -1301,8 +1301,8 @@ end $$;
 
 -- ---------------------------------------------------------------- advent calendar
 
--- From 1 December one door a day (UTC); missed doors can still be opened until
--- 31 December. Each door holds a blind box of the advent series: a figure you
+-- From 1 to 24 December one door a day (UTC), only on its own day: a missed
+-- door stays closed. Each door holds a blind box of the advent series: a figure you
 -- don't have yet, so opening every door completes the set. Door 24 holds the
 -- secret.
 create table if not exists public.advent_doors (
@@ -1333,6 +1333,7 @@ begin
   if extract(month from today) <> 12 or extract(day from today) < p_day then
     raise exception 'This door can''t be opened yet';
   end if;
+  if extract(day from today) > p_day then raise exception 'This door could only be opened on its own day'; end if;
   if exists (select 1 from public.advent_doors where user_id = u and year = yr and day = p_day) then
     raise exception 'You already opened this door';
   end if;
