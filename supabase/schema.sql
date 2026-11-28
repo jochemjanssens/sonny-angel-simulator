@@ -498,9 +498,9 @@ create index if not exists puzzle_sessions_endless_idx on public.puzzle_sessions
 -- Gives the top 3 of every finished week, per size, their free wheel spins
 -- (3, 2 and 1): times tables (points) and endless Tetris (lines). Called
 -- whenever someone plays or looks at the highscores, so no cron job is needed.
--- Every score counts, but everyone's best comes first, then everyone's second
--- best, and so on: with only two players, one of them can be 1st and 3rd. On a
--- tie, whoever got the score first ranks higher.
+-- Every score counts, but everyone's best comes first; all other scores follow
+-- after those, highest first. With only two players, one of them can be 1st
+-- and 3rd. On a tie, whoever got the score first ranks higher.
 create or replace function public._settle_tables_weeks() returns void
 language plpgsql security definer set search_path = public as $$
 declare w record;
@@ -509,7 +509,7 @@ begin
     select wk, size, user_id, score, rank
     from (
       select wk, size, user_id, score,
-        row_number() over (partition by wk, size order by n, score desc, finished_at) as rank
+        row_number() over (partition by wk, size order by n > 1, score desc, finished_at) as rank
       from (
         -- n: 1 for a player's best score of the week, 2 for the next one, ...
         select wk, size, user_id, score, finished_at,
@@ -559,7 +559,7 @@ end $$;
 
 -- This week's top 10 for one size, your own best, and last week's top 3 of
 -- that size. Size 'endless' is endless Tetris (lines). Ranked like the prizes:
--- everyone's best first, then everyone's second best, and so on.
+-- everyone's best first, then all other scores, highest first.
 create or replace function public.tables_highscores(p_size text) returns jsonb
 language plpgsql security definer set search_path = public as $$
 declare u uuid := public._uid();
@@ -575,9 +575,9 @@ begin
     from public.puzzle_sessions
     where kind = (case p_size when 'endless' then 'tetris' else 'tables' end) and size = p_size and score > 0 and finished_at >= wk
   ), ranked as (
-    select * from runs order by n, score desc, at limit 10
+    select * from runs order by n > 1, score desc, at limit 10
   )
-  select coalesce(jsonb_agg(jsonb_build_object('user_id', r.user_id, 'username', pr.username, 'score', r.score) order by r.n, r.score desc, r.at), '[]')
+  select coalesce(jsonb_agg(jsonb_build_object('user_id', r.user_id, 'username', pr.username, 'score', r.score) order by r.n > 1, r.score desc, r.at), '[]')
     into top
   from ranked r left join public.profiles pr on pr.id = r.user_id;
   select max(score) into mine from public.puzzle_sessions
@@ -1065,9 +1065,9 @@ alter table public.trial_prizes enable row level security;
 
 -- Gives the top 3 of every finished week, per track, their free wheel spins
 -- (3, 2 and 1). Called whenever someone races or looks at the highscores, so no
--- cron job is needed. Every time counts, but everyone's best comes first, then
--- everyone's second best, and so on: with only two players, one of them can be
--- 1st and 3rd. On a tie, whoever drove it first ranks higher.
+-- cron job is needed. Every time counts, but everyone's best comes first; all
+-- other times follow after those, fastest first. With only two players, one of
+-- them can be 1st and 3rd. On a tie, whoever drove it first ranks higher.
 create or replace function public._settle_trial_weeks() returns void
 language plpgsql security definer set search_path = public as $$
 declare w record;
@@ -1076,7 +1076,7 @@ begin
     select wk, track_id, user_id, time_ms, rank
     from (
       select wk, track_id, user_id, time_ms,
-        row_number() over (partition by wk, track_id order by n, time_ms, finished_at) as rank
+        row_number() over (partition by wk, track_id order by n > 1, time_ms, finished_at) as rank
       from (
         -- n: 1 for a player's best time of the week, 2 for the next one, ...
         select wk, track_id, user_id, time_ms, finished_at,
@@ -1171,7 +1171,7 @@ begin
     'medal', medal, 'reward', pay, 'paid_left', greatest(0, 10 - paid - (pay > 0)::int));
 end $$;
 
--- This week's top 10 for one track (everyone's best first, then second bests), your own best,
+-- This week's top 10 for one track (everyone's best first, then all other times), your own best,
 -- and last week's top 3 of that track.
 create or replace function public.trial_highscores(p_track text) returns jsonb
 language plpgsql security definer set search_path = public as $$
@@ -1182,16 +1182,16 @@ declare u uuid := public._uid();
   last jsonb;
 begin
   perform public._settle_trial_weeks();
-  -- everyone's best time first, then everyone's second best, and so on
+  -- everyone's best time first, then all other times, fastest first
   with runs as (
     select user_id, time_ms, car, laps, finished_at as at,
       row_number() over (partition by user_id order by time_ms, finished_at) as n
     from public.time_trials
     where track_id = p_track and time_ms is not null and finished_at >= wk
   ), ranked as (
-    select * from runs order by n, time_ms, at limit 10
+    select * from runs order by n > 1, time_ms, at limit 10
   )
-  select coalesce(jsonb_agg(jsonb_build_object('user_id', r.user_id, 'username', pr.username, 'time_ms', r.time_ms, 'car', r.car, 'laps', r.laps) order by r.n, r.time_ms, r.at), '[]')
+  select coalesce(jsonb_agg(jsonb_build_object('user_id', r.user_id, 'username', pr.username, 'time_ms', r.time_ms, 'car', r.car, 'laps', r.laps) order by r.n > 1, r.time_ms, r.at), '[]')
     into top
   from ranked r left join public.profiles pr on pr.id = r.user_id;
   select min(time_ms) into mine from public.time_trials

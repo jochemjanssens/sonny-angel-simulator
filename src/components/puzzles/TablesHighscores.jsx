@@ -20,7 +20,7 @@ export function RankingRules({ race = false }) {
       <summary>{t('How is the ranking counted?')}</summary>
       <ul>
         <li>{t('Every game counts, so you can be in the list more than once.')}</li>
-        <li>{race ? t("First come everyone's best times, fastest first. Then everyone's second-best times, then the third, and so on.") : t("First come everyone's best scores, highest first. Then everyone's second-best scores, then the third, and so on.")}</li>
+        <li>{race ? t("First come everyone's best times, fastest first. Only after those come all other times, again fastest first.") : t("First come everyone's best scores, highest first. Only after those come all other scores, again highest first.")}</li>
         <li>{t("So someone else's best always ranks above your second best. With only two players, you can still be 1st and 3rd.")}</li>
         <li>{t('A tie goes to whoever got it first.')}</li>
         <li>{t('When the week ends (Monday 00:00 UTC), places 1, 2 and 3 win 3, 2 and 1 free wheel spins.')}</li>
